@@ -1,0 +1,12 @@
+{
+    "[php]": {
+        "editor.defaultFormatter": "DEVSENSE.phptools-vscode",
+        "editor.formatOnSave": true
+    },
+    "[blade]": {
+        "editor.defaultFormatter": "DEVSENSE.phptools-vscode",
+        "editor.formatOnSave": true
+    },
+    "window.zoomLevel": 0,
+    "editor.fontSize": 14
+}
