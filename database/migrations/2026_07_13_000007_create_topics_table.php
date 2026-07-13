@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('topic_type');
             $table->string('category');
             $table->string('trainer')->nullable();
-            $table->string('status')->default('draft');
+            $table->string('status');
             $table->string('file_link')->nullable();
             $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete();

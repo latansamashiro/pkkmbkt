@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('section');
             $table->text('content')->nullable();
-            $table->string('status')->default('draft');
+            $table->string('status');
             $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

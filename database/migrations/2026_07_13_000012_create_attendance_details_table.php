@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('attendance_id')->nullable()->constrained('attendances')->nullOnDelete();
             $table->foreignId('student_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('status_presence')->default('absent');
+            $table->string('status_presence');
             $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

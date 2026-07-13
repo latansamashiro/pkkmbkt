@@ -14,7 +14,7 @@ return new class extends Migration
             $table->date('schedule_date');
             $table->time('schedule_begin_time');
             $table->time('schedule_end_time');
-            $table->string('status')->default('draft');
+            $table->string('status');
             $table->string('pic')->nullable();
             $table->boolean('important_flag')->default(false);
             $table->text('description')->nullable();

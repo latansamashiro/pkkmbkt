@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('category');
-            $table->string('status')->default('draft');
+            $table->string('status');
             $table->boolean('important_flag')->default(false);
             $table->text('description')->nullable();
             $table->foreignId('created_by_id')->nullable()->constrained('users')->nullOnDelete();
