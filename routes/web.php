@@ -1,5 +1,14 @@
 <?php
 
+/* -------------------------------------
+Terdapat 5 Roles:
+- super-admin
+- advisor (pembimbing)
+- mentor
+- student (mahasiswa)
+- committee (panitia)
+---------------------------------------*/
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
