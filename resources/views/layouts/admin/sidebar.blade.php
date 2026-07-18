@@ -1,0 +1,54 @@
+<aside class="sidebar">
+    <a href="{{ route('dashboard') }}" class="sidebar-brand">
+        <img src="{{ asset('assets/unilam.png') }}" alt="Logo UNILAM" class="brand-badge" />
+        <div class="brand-text"><strong>PKKMB-KT</strong><span>Panel Super Admin</span></div>
+    </a>
+    <nav class="sidebar-nav" aria-label="Navigasi super admin">
+        <p class="sidebar-group-label">Utama</p>
+        <a href="{{ route('dashboard') }}" class="active">
+            <span class="ic"><i data-lucide="layout-dashboard"></i></span>
+            <span class="label">Dashboard</span>
+        </a>
+        <p class="sidebar-group-label">Administrasi</p>
+        <a href="{{ route('admin.user.index') }}">
+            <span class="ic"><i data-lucide="users"></i></span>
+            <span class="label">Kelola Pengguna</span>
+        </a>
+        <a href="#">
+            <span class="ic"><i data-lucide="shield-check"></i></span>
+            <span class="label">Kelola Role & Hak Akses</span>
+        </a>
+        <a href="#">
+            <span class="ic"><i data-lucide="database"></i></span>
+            <span class="label">Kelola Data Master</span>
+        </a>
+        <p class="sidebar-group-label">Monitoring</p>
+        <a href="#">
+            <span class="ic"><i data-lucide="bar-chart-3"></i></span>
+            <span class="label">Monitoring PKKMB</span>
+        </a>
+        <a href="#">
+            <span class="ic"><i data-lucide="file-bar-chart-2"></i></span>
+            <span class="label">Monitoring Laporan</span>
+        </a>
+        <p class="sidebar-group-label">Lainnya</p>
+        <a href="#">
+            <span class="ic"><i data-lucide="settings"></i></span>
+            <span class="label">Pengaturan Sistem</span>
+        </a>
+        <a href="#">
+            <span class="ic"><i data-lucide="user-circle"></i></span>
+            <span class="label">Profil</span>
+        </a>
+    </nav>
+
+    <form method="POST" action="{{ route('logout') }}" class="sidebar-logout"
+        style="border:none; padding:0; margin:10px 10px 0;">
+        @csrf
+        <button type="submit"
+            style="all:unset; display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px 10px; border-radius:var(--radius-sm); background:rgba(224,102,90,0.14); color:#f3a49c; font-weight:800; font-size:12.5px; cursor:pointer;">
+            <span class="ic"><i data-lucide="log-out"></i></span>
+            <span class="label">Keluar</span>
+        </button>
+    </form>
+</aside>
