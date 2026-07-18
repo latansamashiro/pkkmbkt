@@ -40,9 +40,9 @@
             <div class="absolute -bottom-20 -right-20 w-60 h-60 bg-indigo-500/20 rounded-full blur-2xl"></div>
 
             <!-- Header Instansi -->
-            <div class="flex items-center space-x-6 z-10">
+            <div class="flex items-center space-x-5 z-10">
                 <img src="{{ asset('assets/unilam.png') }}" alt="Logo UNILAM"
-                    class="w-28 h-28 object-contain filter drop-shadow-lg" />
+                    class="w-26 h-25 object-contain filter drop-shadow-lg" />
                 <div class="flex flex-col justify-center">
                     <span
                         class="font-black tracking-widest text-4xl uppercase leading-none drop-shadow-md">UNILAM</span>
