@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>Dashboard Super Admin &mdash; PKKMB-KT UNILAM 2026</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -33,19 +34,19 @@
             <span class="ic"><i data-lucide="layout-dashboard"></i></span>
             <span>Home</span>
         </a>
-        <a href="#">
+        <a href="{{ route('admin.user.index') }}">
             <span class="ic"><i data-lucide="users"></i></span>
             <span>Pengguna</span>
         </a>
-        <a href="#" class="home">
+        <a href="{{ route('admin.data-master.index') }}" class="home">
             <span class="ic"><i data-lucide="database"></i></span>
             <span>Master</span>
         </a>
-        <a href="#">
+        <a href="{{ route('admin.monitoring.pkkmb') }}">
             <span class="ic"><i data-lucide="bar-chart-3"></i></span>
             <span>Monitor</span>
         </a>
-        <a href="#">
+        <a href="{{ route('admin.profil.index') }}">
             <span class="ic"><i data-lucide="user-circle"></i></span>
             <span>Profil</span>
         </a>
@@ -61,6 +62,18 @@
     <script>
         lucide.createIcons();
 
+        function tampilkanToast(pesan) {
+            const el = document.getElementById("toastEl");
+            el.textContent = pesan;
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => {
+                el.style.opacity = "0";
+                el.style.transform = "translateY(20px)";
+            }, 2600);
+        }
+
         // ===== Menu hamburger (drawer navigasi untuk HP) =====
         (function () {
             const ham = document.getElementById("hamburgerBtn");
@@ -75,6 +88,8 @@
             }
         })();
     </script>
+
+    @stack('scripts')
 </body>
 
 </html>

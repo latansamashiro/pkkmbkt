@@ -253,6 +253,34 @@
       }
       select.filter-select:focus { outline: none; border-color: var(--teal-600); }
 
+      /* ============ DATE INPUT & DATE NAV ============ */
+      input[type="date"].filter-select {
+        font-family: inherit; font-weight: 600; color: var(--ink-900); background: var(--bg);
+        border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px;
+        cursor: pointer; min-width: 150px; position: relative;
+      }
+      input[type="date"].filter-select:focus { outline: none; border-color: var(--teal-600); }
+      input[type="date"].filter-select::-webkit-calendar-picker-indicator {
+        filter: invert(38%) sepia(15%) saturate(600%); cursor: pointer; opacity: 0.7;
+      }
+      input[type="date"].filter-select::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+      input[type="date"].filter-select:not([value]):not(:focus)::-webkit-datetime-edit,
+      input[type="date"].filter-select:invalid:not(:focus)::-webkit-datetime-edit { color: var(--ink-400); }
+
+      .date-nav {
+        display: flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border);
+        border-radius: var(--radius-sm); padding: 3px;
+      }
+      .date-nav .filter-select { border: none; background: transparent; padding: 7px 8px; min-width: 130px; }
+      .date-nav .filter-select:focus { border: none; }
+      .date-nav-btn {
+        display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex-shrink: 0;
+        border: none; background: var(--surface); border-radius: calc(var(--radius-sm) - 2px); cursor: pointer;
+        color: var(--ink-400); transition: background 0.15s, color 0.15s;
+      }
+      .date-nav-btn:hover { background: var(--teal-tint); color: var(--teal-600); }
+      .date-nav-btn .ic { width: 15px; height: 15px; }
+
       .table-scroll { overflow-x: auto; }
       thead th {
         text-align: left; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
