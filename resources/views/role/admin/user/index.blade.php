@@ -1,209 +1,156 @@
 @extends('layouts.admin.main')
 @section('content')
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Administrasi</p>
-      <h2 class="font-serif text-xl font-bold text-[var(--navy-900)] md:text-2xl">Kelola Pengguna</h2>
-    </div>
-    <div>
-      <button id="btnTambah" type="button"
-        class="inline-flex items-center gap-2 rounded-lg bg-[var(--navy-900)] px-4 py-2.5 text-sm font-bold text-white hover:opacity-90">
-        <i data-lucide="user-plus" class="h-4 w-4"></i>
-        Tambah Pengguna
-      </button>
-    </div>
-  </div>
-
-  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-    <div class="flex flex-col gap-3 border-b border-slate-200 p-4 md:flex-row md:items-center md:justify-between">
-      <div class="flex flex-col gap-2 sm:flex-row">
-        <select id="filterRole"
-          class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--teal-500,#0d9488)]">
-          <option value="">Semua Role</option>
-          @foreach ($roles as $value => $label)
-            <option value="{{ $value }}">{{ $label }}</option>
-          @endforeach
-        </select>
-        <select id="filterStatus"
-          class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--teal-500,#0d9488)]">
-          <option value="">Semua Status</option>
-          <option value="aktif">Aktif</option>
-          <option value="nonaktif">Nonaktif</option>
-        </select>
-      </div>
-      <div class="relative">
-        <i data-lucide="search"
-          class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
-        <input type="text" id="searchPengguna" placeholder="Cari nama atau email..."
-          class="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-[var(--teal-500,#0d9488)] md:w-64" />
-      </div>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm">
-        <thead class="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
-          <tr>
-            <th class="px-4 py-3">No</th>
-            <th class="px-4 py-3">Nama</th>
-            <th class="px-4 py-3">Email</th>
-            <th class="px-4 py-3">Role</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3 text-right">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="tabelPengguna" class="divide-y divide-slate-100"></tbody>
-      </table>
-    </div>
-
-    <div class="flex flex-col items-center justify-between gap-3 border-t border-slate-200 p-4 sm:flex-row">
-      <p id="paginationInfo" class="text-xs font-medium text-slate-400">Showing 0 of 0</p>
-      <div id="paginationBtns" class="flex items-center gap-1"></div>
-    </div>
-  </div>
-
-  <!-- ===== MODAL TAMBAH / EDIT PENGGUNA ===== -->
-  <div id="modalForm" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl">
-      <div class="mb-4 flex items-start justify-between">
-        <div>
-          <h3 id="modalFormTitle" class="font-serif text-lg font-bold text-[var(--navy-900)]">Tambah Pengguna</h3>
-          <p class="text-xs text-slate-400">Buat akun pengguna baru untuk sistem PKKMB-KT.</p>
-        </div>
-        <button id="btnCloseForm" type="button" aria-label="Tutup"
-          class="grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100">
-          <i data-lucide="x" class="h-4 w-4"></i>
-        </button>
-      </div>
-      <form id="formPengguna">
-        <p id="formError" class="mb-3 hidden rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600"></p>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div class="sm:col-span-2">
-            <label for="inputNama" class="mb-1 block text-xs font-semibold text-slate-500">Nama Lengkap</label>
-            <input type="text" id="inputNama" placeholder="Contoh: Deni Saputra" required
-              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[var(--teal-500,#0d9488)]" />
-          </div>
-          <div class="sm:col-span-2">
-            <label for="inputEmail" class="mb-1 block text-xs font-semibold text-slate-500">Email</label>
-            <input type="email" id="inputEmail" placeholder="nama@pkkmb.ac.id" required
-              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[var(--teal-500,#0d9488)]" />
-          </div>
-          <div id="fieldPassword" class="sm:col-span-2">
-            <label for="inputPassword" class="mb-1 block text-xs font-semibold text-slate-500">Password</label>
-            <div class="relative">
-              <input type="password" id="inputPassword" placeholder="Minimal 8 karakter"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2.5 pr-10 text-sm outline-none focus:border-[var(--teal-500,#0d9488)]" />
-              <button type="button" id="btnTogglePw"
-                class="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-slate-400 hover:bg-slate-100">
-                <i data-lucide="eye" class="h-4 w-4"></i>
+          <div class="page-head">
+            <div>
+              <p class="page-eyebrow">Administrasi</p>
+              <h2 class="page-title">Kelola Pengguna</h2>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-solid" id="btnTambah">
+                <span class="ic"><i data-lucide="user-plus"></i></span>
+                Tambah Pengguna
               </button>
             </div>
-            <p id="hintPassword" class="mt-1 text-xs text-slate-400">Kosongkan saat edit jika tidak ingin mengubah
-              password.</p>
           </div>
-          <div>
-            <label for="inputRole" class="mb-1 block text-xs font-semibold text-slate-500">Role</label>
-            <select id="inputRole" required
-              class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[var(--teal-500,#0d9488)]">
-              @foreach ($roles as $value => $label)
-                <option value="{{ $value }}">{{ $label }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div>
-            <label class="mb-1 block text-xs font-semibold text-slate-500">Status</label>
-            <div class="flex items-center gap-4 pt-2">
-              <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-600">
-                <input type="radio" name="statusPengguna" value="aktif" checked
-                  class="h-4 w-4 accent-[var(--teal-500,#0d9488)]" />
-                Aktif
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-600">
-                <input type="radio" name="statusPengguna" value="nonaktif"
-                  class="h-4 w-4 accent-[var(--coral-500,#e0665a)]" />
-                Nonaktif
-              </label>
+
+          <div class="table-card">
+            <div class="toolbar">
+              <select class="filter-select" id="filterRole">
+                <option value="">Semua Role</option>
+                @foreach ($roles as $value => $label)
+                    <option value="{{ $value }}">{{ $label }}</option>
+                @endforeach
+              </select>
+              <select class="filter-select" id="filterStatus">
+                <option value="">Semua Status</option>
+                <option value="aktif">Aktif</option>
+                <option value="nonaktif">Nonaktif</option>
+              </select>
+              <div class="toolbar-search">
+                <span class="ic"><i data-lucide="search"></i></span>
+                <input type="text" id="searchPengguna" placeholder="Cari nama atau email..." />
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>No</th><th>Nama</th><th>Email</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
+                <tbody id="tabelPengguna"></tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <p class="pagination-info" id="paginationInfo">Showing 0 of 0</p>
+              <div class="pagination-btns" id="paginationBtns"></div>
             </div>
           </div>
-        </div>
-        <div class="mt-5 flex items-center justify-end gap-2">
-          <button type="button" id="btnBatalForm"
-            class="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">Batal</button>
-          <button type="submit" id="btnSimpanForm"
-            class="rounded-lg bg-[var(--navy-900)] px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50">Simpan</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <!-- ===== MODAL DETAIL PENGGUNA ===== -->
-  <div id="modalDetail" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
-      <div class="mb-4 flex items-start justify-between">
-        <h3 class="font-serif text-lg font-bold text-[var(--navy-900)]">Detail Pengguna</h3>
-        <button id="btnCloseDetail" type="button" aria-label="Tutup"
-          class="grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100">
-          <i data-lucide="x" class="h-4 w-4"></i>
-        </button>
-      </div>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2 text-sm">
-          <span class="font-semibold text-slate-400">Nama</span>
-          <span id="detailNama" class="font-semibold text-[var(--navy-900)]">-</span>
+    <!-- ===== MODAL TAMBAH / EDIT PENGGUNA ===== -->
+    <div class="modal-overlay" id="modalForm">
+      <div class="modal-card">
+        <div class="modal-head">
+          <div>
+            <h3 id="modalFormTitle">Tambah Pengguna</h3>
+            <p>Buat akun pengguna baru untuk sistem PKKMB-KT.</p>
+          </div>
+          <button class="modal-close" id="btnCloseForm" aria-label="Tutup"><span class="ic"><i data-lucide="x"></i></span></button>
         </div>
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2 text-sm">
-          <span class="font-semibold text-slate-400">Email</span>
-          <span id="detailEmail" class="font-semibold text-[var(--navy-900)]">-</span>
-        </div>
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2 text-sm">
-          <span class="font-semibold text-slate-400">Role</span>
-          <span id="detailRole" class="font-semibold text-[var(--navy-900)]">-</span>
-        </div>
-        <div class="flex items-center justify-between pb-2 text-sm">
-          <span class="font-semibold text-slate-400">Status</span>
-          <span id="detailStatus" class="font-semibold text-[var(--navy-900)]">-</span>
-        </div>
-      </div>
-      <div class="mt-5 flex justify-end">
-        <button type="button" id="btnEditDariDetail"
-          class="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50">Edit</button>
+        <form id="formPengguna">
+          <p class="field-hint" id="formError" style="display:none; color:#c0392b; margin:0 0 12px;"></p>
+          <div class="form-grid">
+            <div class="field" style="grid-column:1/-1">
+              <label for="inputNama">Nama Lengkap</label>
+              <input type="text" id="inputNama" placeholder="Contoh: Deni Saputra" required />
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <label for="inputEmail">Email</label>
+              <input type="email" id="inputEmail" placeholder="nama@pkkmb.ac.id" required />
+            </div>
+            <div class="field" id="fieldPassword" style="grid-column:1/-1">
+              <label for="inputPassword">Password</label>
+              <div class="field-with-icon">
+                <input type="password" id="inputPassword" placeholder="Minimal 8 karakter" />
+                <button type="button" class="field-icon-btn" id="btnTogglePw"><span class="ic"><i data-lucide="eye"></i></span></button>
+              </div>
+              <p class="field-hint" id="hintPassword">Kosongkan saat edit jika tidak ingin mengubah password.</p>
+            </div>
+            <div class="field">
+              <label for="inputRole">Role</label>
+              <select id="inputRole" required>
+                @foreach ($roles as $value => $label)
+                    <option value="{{ $value }}">{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="field">
+              <label>Status</label>
+              <div class="status-toggle-group">
+                <label class="status-toggle">
+                  <input type="radio" name="statusPengguna" value="aktif" checked />
+                  <span class="dot"></span> Aktif
+                </label>
+                <label class="status-toggle">
+                  <input type="radio" name="statusPengguna" value="nonaktif" />
+                  <span class="dot"></span> Nonaktif
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" id="btnBatalForm">Batal</button>
+            <button type="submit" class="btn btn-solid" id="btnSimpanForm">Simpan</button>
+          </div>
+        </form>
       </div>
     </div>
-  </div>
+
+    <!-- ===== MODAL DETAIL PENGGUNA ===== -->
+    <div class="modal-overlay" id="modalDetail">
+      <div class="modal-card">
+        <div class="modal-head">
+          <div><h3>Detail Pengguna</h3></div>
+          <button class="modal-close" id="btnCloseDetail" aria-label="Tutup"><span class="ic"><i data-lucide="x"></i></span></button>
+        </div>
+        <div class="detail-list">
+          <div class="detail-row"><span class="dt-label">Nama</span><span class="dt-value" id="detailNama">-</span></div>
+          <div class="detail-row"><span class="dt-label">Email</span><span class="dt-value" id="detailEmail">-</span></div>
+          <div class="detail-row"><span class="dt-label">Role</span><span class="dt-value" id="detailRole">-</span></div>
+          <div class="detail-row"><span class="dt-label">Status</span><span class="dt-value" id="detailStatus">-</span></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="btnEditDariDetail">Edit</button>
+        </div>
+      </div>
+    </div>
 @endsection
 
 @php
-  $penggunaListJson = $users->map(fn($u) => [
-    'id' => $u->id,
-    'nama' => $u->name,
-    'email' => $u->email,
-    'role' => $u->role_name,
-    'status' => $u->status,
-  ]);
+    $penggunaListJson = $users->map(fn ($u) => [
+        'id' => $u->id,
+        'nama' => $u->name,
+        'email' => $u->email,
+        'role' => $u->role_name,
+        'status' => $u->status,
+    ]);
 @endphp
 
 @push('scripts')
-  <script>
-    $(function () {
+<script>
       // ===== Data asli dari database (dikirim server saat halaman dimuat) =====
       let penggunaList = @json($penggunaListJson);
       const ROLE_LABEL = @json($roles);
-      const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+      const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
       const URL_STORE = "{{ route('admin.user.store') }}";
       const URL_UPDATE_BASE = "{{ url('admin/user') }}"; // + /{id}
 
       const PER_PAGE = 5;
       let currentPage = 1;
       let editingId = null;
-      let detailActiveId = null;
 
-      const $modalForm = $('#modalForm');
-      const $modalDetail = $('#modalDetail');
-      const $formError = $('#formError');
+      function initials(nama) { return nama.split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase(); }
 
       function filteredData() {
-        const role = $('#filterRole').val();
-        const status = $('#filterStatus').val();
-        const q = $('#searchPengguna').val().trim().toLowerCase();
+        const role = document.getElementById("filterRole").value;
+        const status = document.getElementById("filterStatus").value;
+        const q = document.getElementById("searchPengguna").value.trim().toLowerCase();
         return penggunaList.filter((p) =>
           (!role || p.role === role) &&
           (!status || p.status === status) &&
@@ -219,128 +166,123 @@
         const start = (currentPage - 1) * PER_PAGE;
         const pageData = data.slice(start, start + PER_PAGE);
 
-        const $tbody = $('#tabelPengguna');
+        const tbody = document.getElementById("tabelPengguna");
         if (pageData.length === 0) {
-          $tbody.html(`<tr><td colspan="6" class="px-4 py-8 text-center text-sm text-slate-400">Tidak ada pengguna ditemukan.</td></tr>`);
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--ink-400);">Tidak ada pengguna ditemukan.</td></tr>`;
         } else {
-          $tbody.html(pageData.map((p, idx) => `
-                  <tr class="hover:bg-slate-50">
-                      <td class="px-4 py-3 text-slate-500">${start + idx + 1}</td>
-                      <td class="px-4 py-3 font-semibold text-[var(--navy-900)]">${p.nama}</td>
-                      <td class="px-4 py-3 text-slate-600">${p.email}</td>
-                      <td class="px-4 py-3">
-                          <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">${ROLE_LABEL[p.role] ?? p.role}</span>
-                      </td>
-                      <td class="px-4 py-3">
-                          <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${p.status === 'aktif' ? 'bg-[var(--teal-500,#0d9488)]/10 text-[var(--teal-600,#0f766e)]' : 'bg-slate-100 text-slate-500'}">
-                              <span class="h-1.5 w-1.5 rounded-full ${p.status === 'aktif' ? 'bg-[var(--teal-500,#0d9488)]' : 'bg-slate-400'}"></span>
-                              ${p.status === 'aktif' ? 'Aktif' : 'Nonaktif'}
-                          </span>
-                      </td>
-                      <td class="px-4 py-3">
-                          <div class="flex items-center justify-end gap-1">
-                              <button class="row-btn grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100" data-aksi="lihat" data-id="${p.id}" aria-label="Detail"><i data-lucide="eye" class="h-4 w-4"></i></button>
-                              <button class="row-btn grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100" data-aksi="edit" data-id="${p.id}" aria-label="Edit"><i data-lucide="pencil" class="h-4 w-4"></i></button>
-                              <button class="row-btn grid h-8 w-8 place-items-center rounded-lg text-[var(--coral-500,#e0665a)] hover:bg-red-50" data-aksi="hapus" data-id="${p.id}" aria-label="Hapus"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
-                          </div>
-                      </td>
-                  </tr>`).join(''));
+          tbody.innerHTML = pageData.map((p, idx) => `
+            <tr>
+              <td>${start + idx + 1}</td>
+              <td class="cell-name"><strong>${p.nama}</strong></td>
+              <td>${p.email}</td>
+              <td><span class="role-chip">${ROLE_LABEL[p.role] ?? p.role}</span></td>
+              <td><span class="badge ${p.status === "aktif" ? "badge-active" : "badge-inactive"}"><span class="dot"></span>${p.status === "aktif" ? "Aktif" : "Nonaktif"}</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="row-btn" data-aksi="lihat" data-id="${p.id}" aria-label="Detail"><span class="ic"><i data-lucide="eye"></i></span></button>
+                  <button class="row-btn" data-aksi="edit" data-id="${p.id}" aria-label="Edit"><span class="ic"><i data-lucide="pencil"></i></span></button>
+                  <button class="row-btn danger" data-aksi="hapus" data-id="${p.id}" aria-label="Hapus"><span class="ic"><i data-lucide="trash-2"></i></span></button>
+                </div>
+              </td>
+            </tr>`).join("");
         }
-
-        $('#paginationInfo').text(
-          totalData === 0 ? 'Showing 0 of 0' : `Showing ${start + 1}-${Math.min(start + PER_PAGE, totalData)} of ${totalData}`
-        );
+        document.getElementById("paginationInfo").innerText =
+          totalData === 0 ? "Showing 0 of 0" : `Showing ${start + 1}-${Math.min(start + PER_PAGE, totalData)} of ${totalData}`;
         renderPaginationBtns(totalPage);
         lucide.createIcons();
+        pasangEventAksiBaris();
       }
 
       function renderPaginationBtns(totalPage) {
-        const $wrap = $('#paginationBtns');
-        let html = `<button id="pgPrev" aria-label="Sebelumnya" class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="chevron-left" class="h-4 w-4"></i></button>`;
-        for (let p = 1; p <= totalPage; p++) {
-          html += `<button data-page="${p}" class="h-8 min-w-[2rem] rounded-lg px-2 text-sm font-semibold ${p === currentPage ? 'bg-[var(--navy-900)] text-white' : 'text-slate-500 hover:bg-slate-100'}">${p}</button>`;
-        }
-        html += `<button id="pgNext" aria-label="Berikutnya" class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="chevron-right" class="h-4 w-4"></i></button>`;
-        $wrap.html(html);
+        const wrap = document.getElementById("paginationBtns");
+        let html = `<button class="page-btn" id="pgPrev" aria-label="Sebelumnya"><span class="ic"><i data-lucide="chevron-left"></i></span></button>`;
+        for (let p = 1; p <= totalPage; p++) html += `<button class="page-btn ${p === currentPage ? "active" : ""}" data-page="${p}">${p}</button>`;
+        html += `<button class="page-btn" id="pgNext" aria-label="Berikutnya"><span class="ic"><i data-lucide="chevron-right"></i></span></button>`;
+        wrap.innerHTML = html;
+        wrap.querySelectorAll("[data-page]").forEach((b) => b.addEventListener("click", () => { currentPage = Number(b.dataset.page); renderTabel(); }));
+        document.getElementById("pgPrev").addEventListener("click", () => { if (currentPage > 1) { currentPage--; renderTabel(); } });
+        document.getElementById("pgNext").addEventListener("click", () => { if (currentPage < totalPage) { currentPage++; renderTabel(); } });
       }
 
-      // ===== Event delegation (aman dipakai walau tabel/pagination re-render) =====
-      $('#tabelPengguna').on('click', '[data-aksi="lihat"]', function () { bukaDetail(Number($(this).data('id'))); });
-      $('#tabelPengguna').on('click', '[data-aksi="edit"]', function () { bukaForm(Number($(this).data('id'))); });
-      $('#tabelPengguna').on('click', '[data-aksi="hapus"]', function () { hapusPengguna(Number($(this).data('id'))); });
+      function pasangEventAksiBaris() {
+        document.querySelectorAll('[data-aksi="lihat"]').forEach((b) => b.addEventListener("click", () => bukaDetail(Number(b.dataset.id))));
+        document.querySelectorAll('[data-aksi="edit"]').forEach((b) => b.addEventListener("click", () => bukaForm(Number(b.dataset.id))));
+        document.querySelectorAll('[data-aksi="hapus"]').forEach((b) => b.addEventListener("click", () => hapusPengguna(Number(b.dataset.id))));
+      }
 
-      $('#paginationBtns').on('click', '[data-page]', function () {
-        currentPage = Number($(this).data('page'));
-        renderTabel();
-      });
-      $('#paginationBtns').on('click', '#pgPrev', function () {
-        if (currentPage > 1) { currentPage--; renderTabel(); }
-      });
-      $('#paginationBtns').on('click', '#pgNext', function () {
-        renderTabel(); // totalPage dicek ulang di dalam renderTabel via currentPage clamp
-      });
+      ["filterRole", "filterStatus"].forEach((id) => document.getElementById(id).addEventListener("change", () => { currentPage = 1; renderTabel(); }));
+      document.getElementById("searchPengguna").addEventListener("keyup", () => { currentPage = 1; renderTabel(); });
 
-      $('#filterRole, #filterStatus').on('change', function () { currentPage = 1; renderTabel(); });
-      $('#searchPengguna').on('keyup', function () { currentPage = 1; renderTabel(); });
+      const modalForm = document.getElementById("modalForm");
+      const modalDetail = document.getElementById("modalDetail");
+      const formError = document.getElementById("formError");
 
       function bukaForm(id) {
         editingId = id || null;
-        $formError.hide();
+        formError.style.display = "none";
         const data = id ? penggunaList.find((p) => p.id === id) : null;
-
-        $('#modalFormTitle').text(id ? 'Edit Pengguna' : 'Tambah Pengguna');
-        $('#inputNama').val(data ? data.nama : '');
-        $('#inputEmail').val(data ? data.email : '');
-        $('#inputPassword').val('').prop('required', !id);
-        $('#hintPassword').toggle(!!id);
-        $('#inputRole').val(data ? data.role : 'student');
-        $('input[name="statusPengguna"]').each(function () {
-          $(this).prop('checked', $(this).val() === (data ? data.status : 'aktif'));
-        });
-
-        $modalForm.removeClass('hidden').addClass('flex');
+        document.getElementById("modalFormTitle").innerText = id ? "Edit Pengguna" : "Tambah Pengguna";
+        document.getElementById("inputNama").value = data ? data.nama : "";
+        document.getElementById("inputEmail").value = data ? data.email : "";
+        document.getElementById("inputPassword").value = "";
+        document.getElementById("inputPassword").required = !id;
+        document.getElementById("hintPassword").style.display = id ? "block" : "none";
+        document.getElementById("inputRole").value = data ? data.role : "student";
+        document.querySelectorAll('input[name="statusPengguna"]').forEach((r) => { r.checked = r.value === (data ? data.status : "aktif"); });
+        modalForm.classList.add("show");
       }
+      function tutupForm() { modalForm.classList.remove("show"); editingId = null; document.getElementById("formPengguna").reset(); }
 
-      function tutupForm() {
-        $modalForm.removeClass('flex').addClass('hidden');
-        editingId = null;
-        $('#formPengguna')[0].reset();
-      }
-
-      $('#btnTambah').on('click', () => bukaForm(null));
-      $('#btnCloseForm, #btnBatalForm').on('click', tutupForm);
-      $modalForm.on('click', function (e) { if (e.target === this) tutupForm(); });
-
-      $('#btnTogglePw').on('click', function () {
-        const $inp = $('#inputPassword');
-        $inp.attr('type', $inp.attr('type') === 'password' ? 'text' : 'password');
+      document.getElementById("btnTambah").addEventListener("click", () => bukaForm(null));
+      document.getElementById("btnCloseForm").addEventListener("click", tutupForm);
+      document.getElementById("btnBatalForm").addEventListener("click", tutupForm);
+      modalForm.addEventListener("click", (e) => { if (e.target === modalForm) tutupForm(); });
+      document.getElementById("btnTogglePw").addEventListener("click", () => {
+        const inp = document.getElementById("inputPassword");
+        inp.type = inp.type === "password" ? "text" : "password";
       });
 
-      $('#formPengguna').on('submit', function (e) {
+      document.getElementById("formPengguna").addEventListener("submit", async (e) => {
         e.preventDefault();
-        $formError.hide();
+        formError.style.display = "none";
 
+        const statusInput = document.querySelector('input[name="statusPengguna"]:checked');
         const payload = {
-          name: $('#inputNama').val().trim(),
-          email: $('#inputEmail').val().trim(),
-          password: $('#inputPassword').val(),
-          role_name: $('#inputRole').val(),
-          status: $('input[name="statusPengguna"]:checked').val() || 'aktif',
+          name: document.getElementById("inputNama").value.trim(),
+          email: document.getElementById("inputEmail").value.trim(),
+          password: document.getElementById("inputPassword").value,
+          role_name: document.getElementById("inputRole").value,
+          status: statusInput ? statusInput.value : "aktif",
         };
 
-        const $btnSimpan = $('#btnSimpanForm');
-        $btnSimpan.prop('disabled', true);
+        const btnSimpan = document.getElementById("btnSimpanForm");
+        btnSimpan.disabled = true;
 
-        const url = editingId ? `${URL_UPDATE_BASE}/${editingId}` : URL_STORE;
-        const method = editingId ? 'PUT' : 'POST';
+        try {
+          const url = editingId ? `${URL_UPDATE_BASE}/${editingId}` : URL_STORE;
+          const method = editingId ? "PUT" : "POST";
+          const res = await fetch(url, {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+              "X-CSRF-TOKEN": CSRF_TOKEN,
+            },
+            body: JSON.stringify(payload),
+          });
+          const result = await res.json();
 
-        $.ajax({
-          url,
-          method,
-          contentType: 'application/json',
-          headers: { 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
-          data: JSON.stringify(payload),
-        }).done(function (result) {
+          if (!res.ok) {
+            if (result.errors) {
+              const pesan = Object.values(result.errors).flat().join(" ");
+              formError.innerText = pesan;
+            } else {
+              formError.innerText = result.message || "Terjadi kesalahan, silakan coba lagi.";
+            }
+            formError.style.display = "block";
+            return;
+          }
+
           const savedUser = {
             id: result.user.id,
             nama: result.user.name,
@@ -359,58 +301,61 @@
           tampilkanToast(result.message);
           tutupForm();
           renderTabel();
-        }).fail(function (xhr) {
-          const result = xhr.responseJSON || {};
-          if (result.errors) {
-            $formError.text(Object.values(result.errors).flat().join(' '));
-          } else {
-            $formError.text(result.message || 'Terjadi kesalahan, silakan coba lagi.');
-          }
-          $formError.show();
-        }).always(function () {
-          $btnSimpan.prop('disabled', false);
-        });
+        } catch (err) {
+          formError.innerText = "Tidak bisa terhubung ke server. Periksa koneksi Anda.";
+          formError.style.display = "block";
+        } finally {
+          btnSimpan.disabled = false;
+        }
       });
 
+      let detailActiveId = null;
       function bukaDetail(id) {
         const p = penggunaList.find((x) => x.id === id);
         if (!p) return;
         detailActiveId = id;
-        $('#detailNama').text(p.nama);
-        $('#detailEmail').text(p.email);
-        $('#detailRole').text(ROLE_LABEL[p.role] ?? p.role);
-        $('#detailStatus').text(p.status === 'aktif' ? 'Aktif' : 'Nonaktif');
-        $modalDetail.removeClass('hidden').addClass('flex');
+        document.getElementById("detailNama").innerText = p.nama;
+        document.getElementById("detailEmail").innerText = p.email;
+        document.getElementById("detailRole").innerText = ROLE_LABEL[p.role] ?? p.role;
+        document.getElementById("detailStatus").innerText = p.status === "aktif" ? "Aktif" : "Nonaktif";
+        modalDetail.classList.add("show");
       }
-
-      $('#btnCloseDetail').on('click', () => $modalDetail.removeClass('flex').addClass('hidden'));
-      $modalDetail.on('click', function (e) { if (e.target === this) $modalDetail.removeClass('flex').addClass('hidden'); });
-      $('#btnEditDariDetail').on('click', function () {
+      document.getElementById("btnCloseDetail").addEventListener("click", () => modalDetail.classList.remove("show"));
+      modalDetail.addEventListener("click", (e) => { if (e.target === modalDetail) modalDetail.classList.remove("show"); });
+      document.getElementById("btnEditDariDetail").addEventListener("click", () => {
         const id = detailActiveId;
-        $modalDetail.removeClass('flex').addClass('hidden');
+        modalDetail.classList.remove("show");
         bukaForm(id);
       });
 
-      function hapusPengguna(id) {
+      async function hapusPengguna(id) {
         const p = penggunaList.find((x) => x.id === id);
         if (!p) return;
         if (!confirm(`Hapus pengguna "${p.nama}"?`)) return;
 
-        $.ajax({
-          url: `${URL_UPDATE_BASE}/${id}`,
-          method: 'DELETE',
-          headers: { 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
-        }).done(function (result) {
+        try {
+          const res = await fetch(`${URL_UPDATE_BASE}/${id}`, {
+            method: "DELETE",
+            headers: {
+              "Accept": "application/json",
+              "X-CSRF-TOKEN": CSRF_TOKEN,
+            },
+          });
+          const result = await res.json();
+
+          if (!res.ok) {
+            tampilkanToast(result.message || "Gagal menghapus pengguna.");
+            return;
+          }
+
           penggunaList = penggunaList.filter((x) => x.id !== id);
           tampilkanToast(result.message);
           renderTabel();
-        }).fail(function (xhr) {
-          const result = xhr.responseJSON || {};
-          tampilkanToast(result.message || 'Gagal menghapus pengguna.');
-        });
+        } catch (err) {
+          tampilkanToast("Tidak bisa terhubung ke server.");
+        }
       }
 
       renderTabel();
-    });
-  </script>
+</script>
 @endpush

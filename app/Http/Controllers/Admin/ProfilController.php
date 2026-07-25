@@ -12,6 +12,7 @@ class ProfilController extends Controller
         $data = [
             'title' => 'Profil',
         ];
-        return view('role.admin.profil.index', compact('data'));
+        $user = auth()->user();
+        return view('role.admin.profil.index', compact('data', 'user'));
     }
 }
