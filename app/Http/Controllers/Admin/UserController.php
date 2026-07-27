@@ -14,17 +14,21 @@ class UserController extends Controller
      * Role sistem yang berlaku (harus sinkron dengan AccessRole middleware).
      */
     public const ROLES = [
-        'super-admin' => 'Super Admin',
-        'advisor' => 'Advisor (Pembimbing)',
-        'mentor' => 'Mentor',
-        'student' => 'Mahasiswa (Maba)',
-        'committee' => 'Panitia',
+        'SUPER-ADMIN' => 'SUPER ADMINISTRATOR',
+        'ADVISOR' => 'ADVISOR (PEMBIMBING)',
+        'MENTOR' => 'MENTOR',
+        'STUDENT' => 'MAHASISWA',
+        'COMMITTEE' => 'PANITIA',
     ];
 
     public function index()
     {
         $users = User::orderBy('name')->get([
-            'id', 'name', 'email', 'role_name', 'status',
+            'id',
+            'name',
+            'email',
+            'role_name',
+            'status',
         ]);
 
         $data = [
