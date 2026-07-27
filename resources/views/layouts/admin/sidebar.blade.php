@@ -14,25 +14,48 @@
             <span class="ic"><i data-lucide="users"></i></span>
             <span class="label">Kelola Pengguna</span>
         </a>
+        <a href="{{ route('admin.mahasiswa.index') }}"
+            class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">
+            <span class="ic"><i data-lucide="graduation-cap"></i></span>
+            <span class="label">Kelola Mahasiswa</span>
+        </a>
+        <a href="{{ route('admin.mentor.index') }}" class="{{ request()->routeIs('admin.mentor.*') ? 'active' : '' }}">
+            <span class="ic"><i data-lucide="user-check"></i></span>
+            <span class="label">Kelola Mentor</span>
+        </a>
+        <a href="{{ route('admin.advisor.index') }}"
+            class="{{ request()->routeIs('admin.advisor.*') ? 'active' : '' }}">
+            <span class="ic"><i data-lucide="user-cog"></i></span>
+            <span class="label">Kelola Advisor</span>
+        </a>
+        <a href="{{ route('admin.panitia.index') }}"
+            class="{{ request()->routeIs('admin.panitia.*') ? 'active' : '' }}">
+            <span class="ic"><i data-lucide="briefcase"></i></span>
+            <span class="label">Kelola Panitia</span>
+        </a>
         <a href="{{ route('admin.role.index') }}" class="{{ request()->routeIs('admin.role.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="shield-check"></i></span>
             <span class="label">Kelola Role & Hak Akses</span>
         </a>
-        <a href="{{ route('admin.data-master.index') }}" class="{{ request()->routeIs('admin.data-master.*') ? 'active' : '' }}">
+        <a href="{{ route('admin.data-master.index') }}"
+            class="{{ request()->routeIs('admin.data-master.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="database"></i></span>
             <span class="label">Kelola Data Master</span>
         </a>
         <p class="sidebar-group-label">Monitoring</p>
-        <a href="{{ route('admin.monitoring.pkkmb') }}" class="{{ request()->routeIs('admin.monitoring.pkkmb') ? 'active' : '' }}">
+        <a href="{{ route('admin.monitoring.pkkmb') }}"
+            class="{{ request()->routeIs('admin.monitoring.pkkmb') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="bar-chart-3"></i></span>
             <span class="label">Monitoring PKKMB</span>
         </a>
-        <a href="{{ route('admin.monitoring.laporan') }}" class="{{ request()->routeIs('admin.monitoring.laporan') ? 'active' : '' }}">
+        <a href="{{ route('admin.monitoring.laporan') }}"
+            class="{{ request()->routeIs('admin.monitoring.laporan') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="file-bar-chart-2"></i></span>
             <span class="label">Monitoring Laporan</span>
         </a>
         <p class="sidebar-group-label">Lainnya</p>
-        <a href="{{ route('admin.pengaturan.index') }}" class="{{ request()->routeIs('admin.pengaturan.*') ? 'active' : '' }}">
+        <a href="{{ route('admin.pengaturan.index') }}"
+            class="{{ request()->routeIs('admin.pengaturan.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="settings"></i></span>
             <span class="label">Pengaturan Sistem</span>
         </a>
