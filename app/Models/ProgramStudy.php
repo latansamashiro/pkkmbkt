@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
-use App\Actions\Audit\AuditTrail;
-use Illuminate\Database\Eloquent\Attributes\Guarded;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Guarded(['id'])]
-#[ObservedBy(AuditTrail::class)]
-#[Table('program_study')]
 class ProgramStudy extends Model
 {
     use SoftDeletes;
+
+    protected $table = 'program_study';
+
+    protected $fillable = ['faculty_id', 'code', 'name', 'created_by_id', 'updated_by_id'];
+
+    public function faculty()
+    {
+        return $this->belongsTo(Faculty::class);
+    }
 }

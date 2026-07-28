@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Faculty;
+use App\Models\ProgramStudy;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,21 +20,12 @@ class UserController extends Controller
         'COMMITTEE' => 'PANITIA',
     ];
 
-    /**
-     * Role yang punya field akademik tambahan (No. HP, Fakultas, Prodi, Jenis Kelamin).
-     */
     public const ROLES_WITH_ACADEMIC_FIELDS = ['STUDENT', 'MENTOR'];
 
-    /**
-     * Role yang dikunci untuk halaman ini, diambil dari route (lihat routes/web.php).
-     * Bukan dari input user, supaya tidak bisa dimanipulasi dari client.
-     */
     protected function lockedRole(Request $request): string
     {
         $role = $request->route('roleKey');
-
         abort_unless(array_key_exists($role, self::ROLES), 404);
-
         return $role;
     }
 
@@ -59,17 +52,39 @@ class UserController extends Controller
                 'gender',
             ]);
 
-        $data = [
-            'title' => 'Kelola ' . self::ROLES[$role],
-        ];
+        // dikirim ke FE buat isi dropdown Fakultas -> Prodi (nested by faculty)
+        $faculties = Faculty::with(['programStudies' => fn($q) => $q->orderBy('name')])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $data = ['title' => 'Kelola ' . self::ROLES[$role]];
 
         return view('role.admin.user.index', [
             'data' => $data,
             'users' => $users,
+            'faculties' => $faculties,
             'lockedRole' => $role,
             'roleLabel' => self::ROLES[$role],
             'showAcademic' => $this->hasAcademicFields($role),
         ]);
+    }
+
+    protected function rulesAcademic(?string $currentFacultyName = null): array
+    {
+        return [
+            'phone_no' => ['required', 'string', 'max:20'],
+            'faculty_name' => ['required', 'string', 'max:255', Rule::exists('faculty', 'name')],
+            'program_study_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::exists('program_study', 'name')->where(function ($q) {
+                    $faculty = Faculty::where('name', request('faculty_name'))->first();
+                    $q->where('faculty_id', $faculty?->id);
+                }),
+            ],
+            'gender' => ['required', Rule::in(['L', 'P'])],
+        ];
     }
 
     public function store(Request $request)
@@ -85,12 +100,7 @@ class UserController extends Controller
         ];
 
         if ($academic) {
-            $rules += [
-                'phone_no' => ['required', 'string', 'max:20'],
-                'faculty_name' => ['required', 'string', 'max:255'],
-                'program_study_name' => ['required', 'string', 'max:255'],
-                'gender' => ['required', Rule::in(['L', 'P'])],
-            ];
+            $rules += $this->rulesAcademic();
         }
 
         $validated = $request->validate($rules);
@@ -140,12 +150,7 @@ class UserController extends Controller
         ];
 
         if ($academic) {
-            $rules += [
-                'phone_no' => ['required', 'string', 'max:20'],
-                'faculty_name' => ['required', 'string', 'max:255'],
-                'program_study_name' => ['required', 'string', 'max:255'],
-                'gender' => ['required', Rule::in(['L', 'P'])],
-            ];
+            $rules += $this->rulesAcademic();
         }
 
         $validated = $request->validate($rules);
@@ -186,17 +191,13 @@ class UserController extends Controller
     public function destroy(Request $request, User $user)
     {
         $role = $this->lockedRole($request);
-
         abort_unless($user->role_name === $role, 404);
 
         if ($user->id === $request->user()->id) {
-            return response()->json([
-                'message' => 'Anda tidak bisa menghapus akun Anda sendiri.',
-            ], 422);
+            return response()->json(['message' => 'Anda tidak bisa menghapus akun Anda sendiri.'], 422);
         }
 
         $user->delete();
-
         return response()->json(['message' => 'Pengguna berhasil dihapus.']);
     }
 }

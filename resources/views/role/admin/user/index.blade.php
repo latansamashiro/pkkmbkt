@@ -133,16 +133,22 @@
                         </div>
                         <div>
                             <label for="inputFakultas" class="block text-xs font-bold text-slate-500 mb-1.5">Fakultas</label>
-                            <input type="text" id="inputFakultas" placeholder="Contoh: Fakultas Teknik" required
-                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                            <select id="inputFakultas" required
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                                <option value="">Pilih Fakultas</option>
+                                @foreach ($faculties as $f)
+                                    <option value="{{ $f->name }}">{{ $f->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label for="inputProdi" class="block text-xs font-bold text-slate-500 mb-1.5">Program Studi</label>
-                            <input type="text" id="inputProdi" placeholder="Contoh: Teknik Informatika" required
-                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                            <select id="inputProdi" required disabled
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600 disabled:bg-slate-50">
+                                <option value="">Pilih Fakultas dahulu</option>
+                            </select>
                         </div>
                     @endif
-
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1.5">Status</label>
                         <div class="flex items-center gap-3 h-[42px]">
@@ -228,6 +234,7 @@
             // ===== Data asli dari database (dikirim server saat halaman dimuat) =====
             let penggunaList = @json($penggunaListJson);
             const SHOW_ACADEMIC = @json($showAcademic);
+            const FACULTIES = @json($faculties); // [{id, name, program_studies: [{id, name}, ...]}]
             const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
             // Base URL sama untuk index/store, tinggal tambah /{id} untuk update & delete.
@@ -255,6 +262,23 @@
                 return g === "L" ? "Laki-laki" : g === "P" ? "Perempuan" : "-";
             }
 
+            // Isi ulang dropdown Program Studi sesuai Fakultas yang dipilih.
+            // Kalau selectedProdiName cocok dengan salah satu opsi, otomatis ke-pilih (dipakai saat bukaForm edit).
+            function isiOpsiProdi(facultyName, selectedProdiName) {
+                const faculty = FACULTIES.find((f) => f.name === facultyName);
+                const programs = faculty ? faculty.program_studies : [];
+                const opts = programs
+                    .map((p) => `<option value="${p.name}" ${selectedProdiName === p.name ? "selected" : ""}>${p.name}</option>`)
+                    .join("");
+                $("#inputProdi")
+                    .html(`<option value="">${programs.length ? "Pilih Program Studi" : "Pilih Fakultas dahulu"}</option>${opts}`)
+                    .prop("disabled", programs.length === 0);
+            }
+
+            $("#inputFakultas").on("change", function () {
+                isiOpsiProdi($(this).val(), null);
+            });
+
             function renderTabel() {
                 const data = filteredData();
                 const totalData = data.length;
@@ -269,27 +293,27 @@
                     html = `<tr><td colspan="${totalCols}" class="text-center py-6 text-slate-400 text-sm">Tidak ada data ditemukan.</td></tr>`;
                 } else {
                     html = pageData.map((p, idx) => `
-                    <tr class="hover:bg-slate-50">
-                        <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${start + idx + 1}</td>
-                        <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200 font-semibold">${p.nama}</td>
-                        <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.email}</td>
-                        ${SHOW_ACADEMIC ? `
-                        <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.phone_no ?? "-"}</td>
-                        <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.program_study_name ?? "-"}</td>
-                        ` : ""}
-                        <td class="px-3.5 py-3 border-b border-slate-200">
-                            <span class="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full ${badgeClass(p.status)}">
-                                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>${p.status === "aktif" ? "Aktif" : "Nonaktif"}
-                            </span>
-                        </td>
-                        <td class="px-3.5 py-3 border-b border-slate-200">
-                            <div class="flex items-center gap-1">
-                                <button data-aksi="lihat" data-id="${p.id}" aria-label="Detail" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                                <button data-aksi="edit" data-id="${p.id}" aria-label="Edit" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                                <button data-aksi="hapus" data-id="${p.id}" aria-label="Hapus" class="w-8 h-8 flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                            </div>
-                        </td>
-                    </tr>`).join("");
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${start + idx + 1}</td>
+                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200 font-semibold">${p.nama}</td>
+                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.email}</td>
+                                ${SHOW_ACADEMIC ? `
+                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.phone_no ?? "-"}</td>
+                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.program_study_name ?? "-"}</td>
+                                ` : ""}
+                                <td class="px-3.5 py-3 border-b border-slate-200">
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full ${badgeClass(p.status)}">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>${p.status === "aktif" ? "Aktif" : "Nonaktif"}
+                                    </span>
+                                </td>
+                                <td class="px-3.5 py-3 border-b border-slate-200">
+                                    <div class="flex items-center gap-1">
+                                        <button data-aksi="lihat" data-id="${p.id}" aria-label="Detail" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                        <button data-aksi="edit" data-id="${p.id}" aria-label="Edit" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                        <button data-aksi="hapus" data-id="${p.id}" aria-label="Hapus" class="w-8 h-8 flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </div>
+                                </td>
+                            </tr>`).join("");
                 }
                 $("#tabelPengguna").html(html);
                 $("#paginationInfo").text(
@@ -342,7 +366,7 @@
                     $("#inputPhone").val(data ? data.phone_no : "");
                     $("#inputGender").val(data ? data.gender : "");
                     $("#inputFakultas").val(data ? data.faculty_name : "");
-                    $("#inputProdi").val(data ? data.program_study_name : "");
+                    isiOpsiProdi(data ? data.faculty_name : "", data ? data.program_study_name : null);
                 }
 
                 $('input[name="statusPengguna"]').each(function () { this.checked = this.value === (data ? data.status : "aktif"); });

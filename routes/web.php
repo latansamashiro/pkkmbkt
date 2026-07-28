@@ -64,8 +64,16 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/panitia/{user}', 'destroy')->name('admin.panitia.destroy')->defaults('roleKey', 'COMMITTEE');
         });
 
+        // ===== Kelola Data Master =====
+        Route::controller(DataMasterController::class)->prefix('data-master')->group(function () {
+            Route::get('/', 'index')->name('admin.data-master.index');
+            Route::get('/{type}/items', 'items')->name('admin.data-master.items');
+            Route::post('/{type}', 'store')->name('admin.data-master.store');
+            Route::put('/{type}/{id}', 'update')->name('admin.data-master.update');
+            Route::delete('/{type}/{id}', 'destroy')->name('admin.data-master.destroy');
+        });
+
         Route::get('/role', [RoleController::class, 'index'])->name('admin.role.index');
-        Route::get('/data-master', [DataMasterController::class, 'index'])->name('admin.data-master.index');
         Route::get('/monitoring/pkkmb', [MonitoringController::class, 'pkkmb'])->name('admin.monitoring.pkkmb');
         Route::get('/monitoring/laporan', [MonitoringController::class, 'laporan'])->name('admin.monitoring.laporan');
         Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('admin.pengaturan.index');
