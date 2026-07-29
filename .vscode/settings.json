@@ -1,10 +1,10 @@
 {
     "[php]": {
-        "editor.defaultFormatter": "DEVSENSE.phptools-vscode",
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client",
         "editor.formatOnSave": true
     },
     "[blade]": {
-        "editor.defaultFormatter": "DEVSENSE.phptools-vscode",
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client",
         "editor.formatOnSave": true
     },
     "[css]": {

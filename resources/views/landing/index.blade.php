@@ -619,7 +619,7 @@
             />
           </svg>
           <div class="logo-frame">
-            <img src="{{ asset('Gambar/unilam-logo-full.png') }}" alt="Universitas La Tansa Mashiro" />
+            <img src="{{ asset('gambar/unilam-logo-full.png') }}" alt="Universitas La Tansa Mashiro" />
           </div>
         </div>
 

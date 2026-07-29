@@ -557,7 +557,7 @@
     <header class="navbar">
       <a href="#" class="navbar-brand" aria-label="PKKMB-KT UNILAM Beranda">
         <div class="navbar-logo">
-          <img src="{{ asset('Gambar/unilam.png') }}" alt="Logo UNILAM" />
+          <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
         </div>
         <div class="navbar-brand-text">
           <strong>PKKMB-KT</strong>
@@ -608,7 +608,7 @@
         class="relative max-w-3xl mx-auto px-6 sm:px-8 py-16 sm:py-24 text-center"
       >
         <img
-          src="{{ asset('Gambar/unilam.png') }}"
+          src="{{ asset('gambar/unilam.png') }}"
           alt="Logo Universitas La Tansa Mashiro"
           class="h-20 sm:h-24 w-auto mx-auto mb-6 drop-shadow-lg"
         />
@@ -791,7 +791,7 @@
         </div>
         <div class="photo-frame rounded-2xl shadow-xl">
           <img
-            src="{{ asset('Gambar/Drs. KH. Ahmad Rifai Arief.png') }}"
+            src="{{ asset('gambar/Drs. KH. Ahmad Rifai Arief.png') }}"
             alt="Foto KH. Ahmad Rifai Arif"
             class="w-full object-cover aspect-[4/5]"
           />
@@ -851,7 +851,7 @@
         <div class="grid sm:grid-cols-2 gap-8 sm:gap-12 items-center">
           <div class="photo-frame rounded-2xl shadow-xl sm:order-1">
             <img
-              src="{{ asset('Gambar/gedungutama.jpeg') }}"
+              src="{{ asset('gambar/gedungutama.jpeg') }}"
               alt="Foto gedung UNILAM 1993"
               class="w-full object-cover aspect-[4/3]"
             />
@@ -955,7 +955,7 @@
         </div>
         <div class="photo-frame rounded-2xl shadow-xl">
           <img
-            src="{{ asset('Gambar/unilam.jpeg') }}"
+            src="{{ asset('gambar/unilam.jpeg') }}"
             alt="Foto kampus Rangkasbitung"
             class="w-full object-cover aspect-[4/3]"
           />
@@ -1030,7 +1030,7 @@
     <footer
       class="bg-[#0d1638] text-slate-400 text-center py-10 px-5 text-xs sm:text-sm"
     >
-      <img src="{{ asset('Gambar/unilam.png') }}" class="h-14 w-auto mx-auto mb-4 opacity-90" />
+      <img src="{{ asset('gambar/unilam.png') }}" class="h-14 w-auto mx-auto mb-4 opacity-90" />
       <p>
         &copy; Universitas La Tansa Mashiro. Sejarah disusun dari arsip internal
         yayasan.
@@ -1080,9 +1080,9 @@
       //    Tambah/ganti foto tinggal edit array di bawah ini.
       // ======================================================================
       const heroSlideImages = [
-        "/Gambar/unilam.jpeg",
-        "/Gambar/rektor.jpeg",
-        "/Gambar/gedungutama.jpeg",
+        "/gambar/unilam.jpeg",
+        "/gambar/rektor.jpeg",
+        "/gambar/gedungutama.jpeg",
       ];
       const HERO_SLIDE_INTERVAL_MS = 6000;
 
