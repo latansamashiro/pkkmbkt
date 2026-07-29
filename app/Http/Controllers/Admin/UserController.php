@@ -57,7 +57,7 @@ class UserController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        $data = ['title' => 'Kelola ' . self::ROLES[$role]];
+        $data = ['title' => 'KELOLA ' . self::ROLES[$role]];
 
         return view('role.admin.user.index', [
             'data' => $data,
@@ -103,8 +103,9 @@ class UserController extends Controller
             $rules += $this->rulesAcademic();
         }
 
-        $validated = $request->validate($rules);
-
+        $validated = $request->validate($rules, [
+            'email.unique' => 'Email sudah digunakan.',
+        ]);
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -153,17 +154,19 @@ class UserController extends Controller
             $rules += $this->rulesAcademic();
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'email.unique' => 'Email sudah digunakan.',
+        ]);
 
-        $user->name = $validated['name'];
+       $user->Name = $validated['name'];
         $user->email = $validated['email'];
         $user->status = $validated['status'];
         $user->updated_by_id = $request->user()->id;
 
         if ($academic) {
             $user->phone_no = $validated['phone_no'];
-            $user->faculty_name = $validated['faculty_name'];
-            $user->program_study_name = $validated['program_study_name'];
+            $user->faculty_Name = $validated['faculty_name'];
+            $user->program_study_Name = $validated['program_study_name'];
             $user->gender = $validated['gender'];
         }
 

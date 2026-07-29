@@ -56,7 +56,7 @@ class DataMasterController extends Controller
                 'fields' => [
                     ['key' => 'section', 'label' => 'Judul', 'type' => 'text', 'required' => true],
                     ['key' => 'content', 'label' => 'Konten', 'type' => 'textarea', 'required' => false],
-                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['aktif' => 'Published', 'nonaktif' => 'Draft']],
+                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['aktif' => 'PUBLISHED', 'draft' => 'DRAFT']],
                 ],
             ],
             'topik' => [
@@ -65,40 +65,59 @@ class DataMasterController extends Controller
                 'display' => 'title',
                 'icon' => 'presentation',
                 'chip' => 'bg-teal-50 text-teal-600',
-                'list_cols' => ['title' => 'Judul', 'category' => 'Kategori', 'status' => 'Status'],
+                'list_cols' => [
+                    'title' => 'Judul',
+                    'topic_type' => 'Jenis Topik',
+                    'category' => 'Kategori',
+                    'trainer' => 'Pemateri',
+                    'status' => 'Status',
+                ],
                 'fields' => [
                     ['key' => 'title', 'label' => 'Judul Topik', 'type' => 'text', 'required' => true],
-                    ['key' => 'description', 'label' => 'Deskripsi', 'type' => 'text', 'required' => true],
+                    [
+                        'key' => 'topic_type',
+                        'label' => 'Jenis Topik',
+                        'type' => 'select',
+                        'required' => true,
+                        'options' => [
+                            'keunilaman' => 'SEJARAH UNILAM',
+                            'akademik' => 'AKADEMIK',
+                            'lkms' => 'LKMS',
+                            'perpustakaan' => 'PERPUSTAKAAN',
+                            'kemahasiswaan' => 'KEMAHASISWAAN',
+                            'narasumber eskternal' => 'NARASUMBER EXTERNAL',
+                        ],
+                    ],
                     [
                         'key' => 'category',
                         'label' => 'Kategori',
                         'type' => 'select',
-                        'required' => false,
+                        'required' => true,
                         'options' => [
-                            'ebook' => 'E-Book',
-                            'video' => 'Video',
+                            'ebook' => 'E-BOOK',
+                            'video' => 'VIDEO',
                         ],
                     ],
-
                     ['key' => 'trainer', 'label' => 'Pemateri', 'type' => 'text', 'required' => false],
-                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['published' => 'Published', 'draft' => 'Draft']],
+                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['published' => 'PUBLISHED', 'draft' => 'DRAFT']],
                     ['key' => 'file_link', 'label' => 'Link Video/File', 'type' => 'text', 'required' => false],
                 ],
             ],
+
             'jadwal' => [
                 'model' => Schedule::class,
                 'label' => 'Data Jadwal',
                 'display' => 'title',
                 'icon' => 'calendar-days',
                 'chip' => 'bg-lime-50 text-lime-600',
-                'list_cols' => ['title' => 'Judul', 'Tempat', 'schedule_date' => 'Tanggal', 'status' => 'Status'],
+                'list_cols' => ['title' => 'Judul', 'place' => 'Tempat', 'schedule_date' => 'Tanggal', 'status' => 'Status'],
                 'fields' => [
                     ['key' => 'title', 'label' => 'Judul Kegiatan', 'type' => 'text', 'required' => true],
                     ['key' => 'place', 'label' => 'Tempat Kegiatan', 'type' => 'text', 'required' => true],
                     ['key' => 'schedule_date', 'label' => 'Tanggal', 'type' => 'date', 'required' => true],
                     ['key' => 'schedule_begin_time', 'label' => 'Jam Mulai', 'type' => 'time', 'required' => true],
                     ['key' => 'schedule_end_time', 'label' => 'Jam Selesai', 'type' => 'time', 'required' => true],
-                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['published' => 'Published', 'draft' => 'Draft']],
+                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['published' => 'PUBLISHED', 'draft' => 'DRAFT']],
                     ['key' => 'pic', 'label' => 'PIC', 'type' => 'text', 'required' => false],
                     ['key' => 'important_flag', 'label' => 'Kegiatan Penting', 'type' => 'checkbox', 'required' => false],
                     ['key' => 'description', 'label' => 'Deskripsi', 'type' => 'textarea', 'required' => false],
@@ -119,13 +138,14 @@ class DataMasterController extends Controller
                         'type' => 'select',
                         'required' => false,
                         'options' => [
-                            'jadwal' => 'Jadwal',
-                            'umum' => 'Umum',
-                            'tugas & evaluasi' => 'Tugas & Evaluasi',
-                            'kelompok & mentor' => 'Kelompok & Mentor',
+                            'jadwal' => 'JADWAL',
+                            'umum' => 'UMUM',
+                            'tugas & evaluasi' => 'TUGAS & EVALUASI',
+                            'kelompok & mentor' => 'KELOMPOK & MENTOR',
+                            'darurat' => 'DARURAT',
                         ],
                     ],
-                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['published' => 'Published', 'draft' => 'Draft']],
+                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['published' => 'PUBLISHED', 'draft' => 'DRAFT']],
                     ['key' => 'important_flag', 'label' => 'Tandai Penting', 'type' => 'checkbox', 'required' => false],
                     ['key' => 'description', 'label' => 'Deskripsi', 'type' => 'textarea', 'required' => false],
                 ],
@@ -136,10 +156,10 @@ class DataMasterController extends Controller
                 'display' => 'title',
                 'icon' => 'file-check-2',
                 'chip' => 'bg-teal-50 text-teal-600',
-                'list_cols' => ['title' => 'Judul', 'deskriptions', 'passing_grade' => 'Passing Grade'],
+                'list_cols' => ['title' => 'Judul', 'subtitle' => 'Sub Judul', 'passing_grade' => 'Passing Grade'],
                 'fields' => [
                     ['key' => 'title', 'label' => 'Judul Evaluasi', 'type' => 'text', 'required' => true],
-                    ['key' => 'deskriptions', 'label' => 'Deskripsi', 'type' => 'text', 'required' => true],
+                    ['key' => 'subtitle', 'label' => 'Sub Judul', 'type' => 'text', 'required' => true],
                     ['key' => 'passing_grade', 'label' => 'Passing Grade', 'type' => 'number', 'required' => true],
                     ['key' => 'max_question', 'label' => 'Jumlah Soal', 'type' => 'number', 'required' => true],
                     ['key' => 'random_flag', 'label' => 'Acak Soal', 'type' => 'checkbox', 'required' => false],
@@ -204,6 +224,7 @@ class DataMasterController extends Controller
                 'chip' => $cfg['chip'],
                 'total' => $cfg['model']::count(),
                 'display' => $cfg['display'],
+                'list_cols' => $cfg['list_cols'],
                 'fields' => $fields,
             ];
         }
@@ -217,19 +238,23 @@ class DataMasterController extends Controller
      */
     public function items(string $type)
     {
-        $cfg = $this->config($type);
+    $cfg = $this->config($type);
 
-        $rows = $cfg['model']::orderBy($cfg['display'])->get()
-            ->map(fn($row) => [
-                'id' => $row->id,
-                ...collect($cfg['fields'])->mapWithKeys(
-                    fn($f) => [$f['key'] => $row->{$f['key']}]
-                )->all()
-            ]);
+    $rows = $cfg['model']::orderBy($cfg['display'])->get()
+        ->map(function ($row) use ($cfg) {
+            $data = ['id' => $row->id];
+            foreach ($cfg['fields'] as $f) {
+                $value = $row->{$f['key']};
+                if ($f['type'] === 'date' && $value) {
+                    $value = \Carbon\Carbon::parse($value)->format('Y-m-d');
+                }
+                $data[$f['key']] = $value;
+            }
+            return $data;
+        });
 
         return response()->json(['data' => $rows]);
     }
-
     protected function rulesFor(array $cfg): array
     {
         $rules = [];
@@ -240,10 +265,10 @@ class DataMasterController extends Controller
 
             $r = [$f['required'] ? 'required' : 'nullable'];
 
-            $r[] = match ($f['type']) {
+           $r[] = match ($f['type']) {
                 'number' => 'integer',
                 'date' => 'date',
-                'time' => 'date_format:H:i',
+                'time' => 'date_format:H:i,H:i:s', // terima dua format sekaligus
                 'checkbox' => 'boolean',
                 'select' => 'string',
                 default => 'string',
@@ -266,9 +291,16 @@ class DataMasterController extends Controller
         $validator = Validator::make($request->all(), $this->rulesFor($cfg));
         $validated = $validator->validate();
 
-        foreach ($cfg['fields'] as $f) {
+                foreach ($cfg['fields'] as $f) {
             if ($f['type'] === 'checkbox') {
                 $validated[$f['key']] = (bool) ($validated[$f['key']] ?? false);
+            }
+            if ($f['type'] === 'time' && !empty($validated[$f['key']])) {
+                // pastikan selalu tersimpan sebagai H:i:s
+                $validated[$f['key']] = \Carbon\Carbon::createFromFormat(
+                    strlen($validated[$f['key']]) === 5 ? 'H:i' : 'H:i:s',
+                    $validated[$f['key']]
+                )->format('H:i:s');
             }
         }
 
@@ -294,10 +326,17 @@ class DataMasterController extends Controller
         $validated = $validator->validate();
 
         foreach ($cfg['fields'] as $f) {
-            if ($f['type'] === 'checkbox') {
-                $validated[$f['key']] = (bool) ($validated[$f['key']] ?? false);
-            }
-        }
+    if ($f['type'] === 'checkbox') {
+        $validated[$f['key']] = (bool) ($validated[$f['key']] ?? false);
+    }
+    if ($f['type'] === 'time' && !empty($validated[$f['key']])) {
+        // pastikan selalu tersimpan sebagai H:i:s
+        $validated[$f['key']] = \Carbon\Carbon::createFromFormat(
+            strlen($validated[$f['key']]) === 5 ? 'H:i' : 'H:i:s',
+            $validated[$f['key']]
+        )->format('H:i:s');
+    }
+}
 
         if ($request->user()) {
             $validated['updated_by_id'] = $request->user()->id;

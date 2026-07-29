@@ -91,7 +91,8 @@
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label for="inputNama" class="block text-xs font-bold text-slate-500 mb-1.5">Nama Lengkap</label>
-                        <input type="text" id="inputNama" placeholder="Contoh: Deni Saputra" required
+                        <input type="text" id="inputNama" placeholder="CONTOH: DENI SAPUTRA" required
+                            oninput="this.value = this.value.toUpperCase()"
                             class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
                     </div>
                     <div>
@@ -389,7 +390,7 @@
 
                 const statusVal = $('input[name="statusPengguna"]:checked').val() || "aktif";
                 const payload = {
-                    name: $("#inputNama").val().trim(),
+                    name: $("#inputNama").val().trim().toUpperCase(),
                     email: $("#inputEmail").val().trim(),
                     password: $("#inputPassword").val(),
                     status: statusVal,

@@ -18,7 +18,7 @@
 
     <!-- ===== MODAL DAFTAR DATA MASTER PER KATEGORI ===== -->
     <div id="modalList" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto p-6">
             <div class="flex items-start justify-between gap-4 mb-5">
                 <div>
                     <h3 id="modalListTitle" class="text-lg font-extrabold text-slate-800 m-0">-</h3>
@@ -48,17 +48,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr>
-                                <th
-                                    class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100">
-                                    No</th>
-                                <th
-                                    class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100">
-                                    Nama</th>
-                                <th
-                                    class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100">
-                                    Aksi</th>
-                            </tr>
+                            <tr id="tabelItemHead"></tr>
                         </thead>
                         <tbody id="tabelItem"></tbody>
                     </table>
@@ -106,6 +96,13 @@
             let activeItems = [];
             let editingId = null;
 
+            function forceUpper(el) {
+                const s = el.selectionStart, e = el.selectionEnd;
+                el.value = el.value.toUpperCase();
+                el.setSelectionRange(s, e);
+            }
+            $(document).on("input", ".js-upper", function () { forceUpper(this); });
+
             // ===== Grid kategori =====
             function renderGrid() {
                 const html = CATEGORIES.map((k) => `
@@ -134,6 +131,7 @@
                 activeKategori = CATEGORIES.find((k) => k.key === key);
                 $("#modalListTitle").text(activeKategori.label);
                 $("#searchItem").val("");
+                renderItemHeader();
                 $modalList.removeClass("hidden").addClass("flex");
                 muatItems();
             }
@@ -160,26 +158,44 @@
                     });
             }
 
+            // Header tabel dibangun sesuai list_cols kategori yang lagi aktif.
+            function renderItemHeader() {
+                const thClass = "text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap";
+                let html = `<th class="${thClass}">No</th>`;
+                Object.entries(activeKategori.list_cols).forEach(([key, label]) => {
+                    html += `<th class="${thClass}">${label}</th>`;
+                });
+                html += `<th class="${thClass}">Aksi</th>`;
+                $("#tabelItemHead").html(html);
+            }
+
             function renderItemTabel() {
                 const q = $("#searchItem").val().trim().toLowerCase();
                 const displayKey = activeKategori.display;
                 const items = activeItems.filter((it) => !q || String(it[displayKey] ?? "").toLowerCase().includes(q));
 
+                const colKeys = Object.keys(activeKategori.list_cols);
+                const totalCols = colKeys.length + 2; // No + Aksi
+
                 let html;
                 if (items.length === 0) {
-                    html = `<tr><td colspan="3" class="text-center py-5 text-slate-400 text-sm">Tidak ada data.</td></tr>`;
+                    html = `<tr><td colspan="${totalCols}" class="text-center py-5 text-slate-400 text-sm">Tidak ada data.</td></tr>`;
                 } else {
-                    html = items.map((it, idx) => `
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${idx + 1}</td>
-                            <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${it[displayKey] ?? "-"}</td>
-                            <td class="px-3.5 py-3 border-b border-slate-200">
-                                <div class="flex items-center gap-2">
-                                    <button data-aksi="edit" data-id="${it.id}" aria-label="Edit" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                                    <button data-aksi="hapus" data-id="${it.id}" aria-label="Hapus" class="w-8 h-8 flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                </div>
-                            </td>
-                        </tr>`).join("");
+                    html = items.map((it, idx) => {
+                        const cells = colKeys.map((key) =>
+                            `<td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${it[key] ?? "-"}</td>`
+                        ).join("");
+                        return `<tr class="hover:bg-slate-50">
+                                    <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${idx + 1}</td>
+                                    ${cells}
+                                    <td class="px-3.5 py-3 border-b border-slate-200">
+                                        <div class="flex items-center gap-2">
+                                            <button data-aksi="edit" data-id="${it.id}" aria-label="Edit" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button data-aksi="hapus" data-id="${it.id}" aria-label="Hapus" class="w-8 h-8 flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>`;
+                    }).join("");
                 }
                 $("#tabelItem").html(html);
                 lucide.createIcons();
@@ -195,25 +211,26 @@
 
                 if (f.type === "textarea") {
                     return `<textarea id="${id}" ${req} rows="3"
-                        class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600">${val}</textarea>`;
+                             class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600 js-upper">${val}</textarea>`;
                 }
                 if (f.type === "select") {
                     const opts = Object.entries(f.options || {}).map(([ov, ol]) =>
                         `<option value="${ov}" ${String(val) === String(ov) ? "selected" : ""}>${ol}</option>`
                     ).join("");
                     return `<select id="${id}" ${req}
-                        class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
-                        <option value="">Pilih ${f.label}</option>${opts}
-                    </select>`;
+                                                    class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                                                    <option value="">Pilih ${f.label}</option>${opts}
+                                                </select>`;
                 }
                 if (f.type === "checkbox") {
                     return `<label class="inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer h-[42px]">
-                        <input type="checkbox" id="${id}" class="accent-teal-600 w-4 h-4" ${value ? "checked" : ""} /> ${f.label}
-                    </label>`;
+                                                    <input type="checkbox" id="${id}" class="accent-teal-600 w-4 h-4" ${value ? "checked" : ""} /> ${f.label}
+                                                </label>`;
                 }
                 // text, number, date, time
+                const upperCls = f.type === "text" ? " js-upper" : "";
                 return `<input type="${f.type}" id="${id}" value="${val}" ${req}
-                    class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />`;
+                    class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600${upperCls}" />`;
             }
 
             function applyDependentFilters(changedFieldName, changedValue) {
@@ -239,9 +256,9 @@
                         return `<div>${inputHtml(f, data ? data[f.name] : false)}</div>`;
                     }
                     return `<div>
-            <label for="field_${f.name}" class="block text-xs font-bold text-slate-500 mb-1.5">${f.label}</label>
-            ${inputHtml(f, data ? data[f.name] : "")}
-        </div>`;
+                                    <label for="field_${f.name}" class="block text-xs font-bold text-slate-500 mb-1.5">${f.label}</label>
+                                    ${inputHtml(f, data ? data[f.name] : "")}
+                                </div>`;
                 }).join("");
                 $("#formFields").html(html);
 
@@ -260,7 +277,13 @@
                 const payload = {};
                 activeKategori.fields.forEach((f) => {
                     const $el = $(`#field_${f.name}`);
-                    payload[f.name] = f.type === "checkbox" ? $el.is(":checked") : $el.val();
+                    if (f.type === "checkbox") {
+                        payload[f.name] = $el.is(":checked");
+                    } else if (f.type === "text" || f.type === "textarea") {
+                        payload[f.name] = ($el.val() || "").toUpperCase();
+                    } else {
+                        payload[f.name] = $el.val();
+                    }
                 });
                 return payload;
             }

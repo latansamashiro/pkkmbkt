@@ -19,5 +19,6 @@ class Topic extends Model
         'file_link',
         'created_by_id',
         'updated_by_id',
+        // 'topic_type', // opsional: hapus kalau memang sudah tidak dipakai
     ];
 }
