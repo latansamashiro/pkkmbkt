@@ -12,7 +12,7 @@
         <p class="sidebar-group-label">Administrasi</p>
         <a href="{{ route('admin.user.index') }}" class="{{ request()->routeIs('admin.user.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="users"></i></span>
-            <span class="label">Kelola Pengguna</span>
+            <span class="label">Kelola Admin</span>
         </a>
         <a href="{{ route('admin.mahasiswa.index') }}"
             class="{{ request()->routeIs('admin.mahasiswa.*') ? 'active' : '' }}">

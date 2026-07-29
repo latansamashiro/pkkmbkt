@@ -9,6 +9,7 @@ Terdapat 5 Roles:
 - committee (panitia)
 ---------------------------------------*/
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DataMasterController;
 use App\Http\Controllers\Admin\MonitoringController;
 use App\Http\Controllers\Admin\PengaturanController;
@@ -19,6 +20,7 @@ use Illuminate\Routing\RouteGroup;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LandingController;
 
+
 Route::get('/', [LandingController::class, 'index'])->name('landing.index');
 Route::get('/home', [LandingController::class, 'home'])->name('landing.home');
 Route::get('/sejarah', [LandingController::class, 'sejarah'])->name('landing.sejarah');
@@ -26,11 +28,10 @@ Route::get('/visi-misi', [LandingController::class, 'visiMisi'])->name('landing.
 Route::get('/tentang-kami', [LandingController::class, 'tentangKami'])->name('landing.tentang-kami');
 Route::get('/informasi', [LandingController::class, 'informasi'])->name('landing.informasi');
 Route::get('/kontak', [LandingController::class, 'kontak'])->name('landing.kontak');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     //Admin
     Route::group(['prefix' => 'admin', 'middleware' => ['accessrole:super-admin']], function () {
