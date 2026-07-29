@@ -258,7 +258,11 @@
                 transform: translateY(0);
                 visibility: visible;
             }
-            .nav-dropdown-menu a { padding: 0; white-space: nowrap; }
+            .nav-dropdown-menu a { padding: 0; white-space: nowrap; 
+            }
+            .nowrap {
+  white-space: nowrap;
+}
         }
 
         .hero{
@@ -268,6 +272,22 @@
             padding: 72px 60px;
             overflow: hidden;
         }
+        /* Tampilan laptop */
+.hero-title {
+    line-height: 1.1;
+}
+
+/* Tampilan HP */
+@media (max-width: 768px) {
+    .hero-title::after {
+        content: "";
+        display: block;
+    }
+
+    .hero-title {
+        max-width: 220px; /* sesuaikan sampai hasilnya pas */
+    }
+}
 
         .hero-slideshow{
             position: absolute;
@@ -1001,9 +1021,9 @@
 
         <div class="hero-content">
             <span class="eyebrow"><span class="dot"></span>Universitas La Tansa Mashiro</span>
-            <h1>Tentang PKKMB-KT</h1>
+            <h1 class="hero-title">Tentang PKKMB-KT</h1>
             <p class="lead">
-                Mengenal Portal PKKMB-KT — satu pintu digital yang menuntun
+                Mengenal Portal PKKMB-KT satu pintu digital yang menuntun
                 perjalanan mahasiswa baru mengenal kehidupan kampus,
                 dari pengenalan awal hingga siap menjadi bagian dari kampus.
             </p>

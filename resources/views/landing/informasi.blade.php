@@ -334,6 +334,9 @@
           padding: 6px 0;
           white-space: nowrap;
         }
+        .nowrap {
+  white-space: nowrap;
+}
       }
 
       /* ======================================================================
@@ -658,9 +661,10 @@
         </span>
         <h1>Pusat Informasi &amp; Pengumuman</h1>
         <p>
-          Pantau terus informasi berkala terkait pelaksanaan PKKMB-KT
-          Universitas La Tansa Mashiro 2026 di bawah ini.
-        </p>
+  Pantau terus informasi berkala terkait pelaksanaan PKKMB-KT
+  <span class="nowrap">Universitas La Tansa Mashiro 2026</span>
+  di bawah ini.
+</p>
       </section>
 
       <section class="info-grid reveal">
