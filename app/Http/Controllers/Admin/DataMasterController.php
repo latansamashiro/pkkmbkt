@@ -313,7 +313,7 @@ class DataMasterController extends Controller
     {
         $cfg = $this->config($type);
 
-       $validator = Validator::make($request->all(), $this->rulesFor($cfg, $id), $this->messagesFor($cfg));
+        $validator = Validator::make($request->all(), $this->rulesFor($cfg), $this->messagesFor($cfg));
         $validated = $validator->validate();
 
                 foreach ($cfg['fields'] as $f) {
