@@ -26,4 +26,14 @@ class Exam extends Model
             'random_flag' => 'boolean',
         ];
     }
+
+    public function details()
+    {
+        return $this->hasMany(ExamDetail::class);
+    }
+
+    public function studentExams()
+    {
+        return $this->hasMany(StudentExam::class);
+    }
 }

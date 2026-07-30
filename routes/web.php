@@ -84,7 +84,26 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/monitoring/laporan', [MonitoringController::class, 'laporan'])->name('admin.monitoring.laporan');
         Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('admin.pengaturan.index');
         Route::get('/profil', [ProfilController::class, 'index'])->name('admin.profil.index');
+        Route::get('/monitoring/absensi', [MonitoringController::class, 'absensi'])
+            ->name('admin.monitoring.absensi');
+        Route::get('/monitoring/absensi/{groupId}/{tanggal}', [MonitoringController::class, 'absensiDetail'])
+            ->name('admin.monitoring.absensi.detail');
     });
+
+    Route::get('/monitoring/keaktifan', [MonitoringController::class, 'keaktifan'])
+        ->name('admin.monitoring.keaktifan');
+    Route::get('/monitoring/keaktifan/{groupId}', [MonitoringController::class, 'keaktifanDetail'])
+        ->name('admin.monitoring.keaktifan.detail');
+
+    Route::get('/monitoring/pelanggaran', [MonitoringController::class, 'pelanggaran'])
+        ->name('admin.monitoring.pelanggaran');
+    Route::get('/monitoring/pelanggaran/{groupId}', [MonitoringController::class, 'pelanggaranDetail'])
+        ->name('admin.monitoring.pelanggaran.detail');
+
+        Route::get('/monitoring/evaluasi', [MonitoringController::class, 'evaluasi'])
+    ->name('admin.monitoring.evaluasi');
+Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'evaluasiDetail'])
+    ->name('admin.monitoring.evaluasi.detail');
 
     //Advisor
 

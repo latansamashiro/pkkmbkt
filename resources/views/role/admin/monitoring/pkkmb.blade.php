@@ -3,7 +3,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
     tailwind.config = {
-        corePlugins: { preflight: false } // jangan reset style global, biar tidak bentrok dengan CSS halaman lain
+        corePlugins: { preflight: false }
     }
 </script>
 
@@ -14,27 +14,73 @@
     </div>
 </div>
 
-<div class="flex items-center gap-2.5 p-4 border border-slate-200 rounded-2xl bg-white mb-5 flex-wrap">
-    <select id="filterTahun" class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
-        <option value="2026">Tahun 2026</option>
-        <option value="2025">Tahun 2025</option>
-        <option value="2024">Tahun 2024</option>
+<form id="formFilter" method="GET" class="flex items-center gap-2.5 p-4 border border-slate-200 rounded-2xl bg-white mb-5 flex-wrap">
+    <select name="tahun" id="filterTahun" class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
+        <option value="2026" @selected($data['filters']['tahun'] == 2026)>Tahun 2026</option>
+        <option value="2025" @selected($data['filters']['tahun'] == 2025)>Tahun 2025</option>
+        <option value="2024" @selected($data['filters']['tahun'] == 2024)>Tahun 2024</option>
     </select>
-    <select id="filterFakultas" class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
+    <select name="fakultas" id="filterFakultas" class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
         <option value="">Semua Fakultas</option>
-        <option value="Teknik">Fakultas Teknik</option>
-        <option value="Ekonomi">Fakultas Ekonomi</option>
-        <option value="Hukum">Fakultas Hukum</option>
+        @foreach ($faculties ?? [] as $f)
+            <option value="{{ $f->name }}" @selected($data['filters']['fakultas'] === $f->name)>{{ $f->name }}</option>
+        @endforeach
     </select>
-    <select id="filterHari" class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
+    <select name="hari" id="filterHari" class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
         <option value="">Semua Hari</option>
-        <option value="1">Hari 1</option>
-        <option value="2">Hari 2</option>
-        <option value="3">Hari 3</option>
+        <option value="1" @selected($data['filters']['hari'] == 1)>Hari 1</option>
+        <option value="2" @selected($data['filters']['hari'] == 2)>Hari 2</option>
+        <option value="3" @selected($data['filters']['hari'] == 3)>Hari 3</option>
     </select>
-</div>
+</form>
 
-<div id="miniStats" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6"></div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50 text-indigo-600">
+            <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+        </span>
+        <div>
+            <p class="text-xl font-extrabold text-slate-800 m-0 leading-tight">{{ $data['stats']['totalMaba'] }}</p>
+            <p class="text-xs font-semibold text-slate-400 m-0">Total Maba</p>
+        </div>
+    </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-teal-50 text-teal-600">
+            <i data-lucide="user-check" class="w-5 h-5"></i>
+        </span>
+        <div>
+            <p class="text-xl font-extrabold text-slate-800 m-0 leading-tight">{{ $data['stats']['hadir'] }}</p>
+            <p class="text-xs font-semibold text-slate-400 m-0">Hadir</p>
+        </div>
+    </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-rose-50 text-rose-500">
+            <i data-lucide="user-x" class="w-5 h-5"></i>
+        </span>
+        <div>
+            <p class="text-xl font-extrabold text-slate-800 m-0 leading-tight">{{ $data['stats']['tidakHadir'] }}</p>
+            <p class="text-xs font-semibold text-slate-400 m-0">Tidak Hadir</p>
+        </div>
+    </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-lime-50 text-lime-600">
+            <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+        </span>
+        <div>
+            <p class="text-xl font-extrabold text-slate-800 m-0 leading-tight">{{ $data['stats']['evaluasiSelesai'] ?? '-' }}</p>
+            <p class="text-xs font-semibold text-slate-400 m-0">Evaluasi Selesai</p>
+        </div>
+    </div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+        <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50 text-indigo-600">
+            <i data-lucide="user-round" class="w-5 h-5"></i>
+        </span>
+        <div>
+            <p class="text-xl font-extrabold text-slate-800 m-0 leading-tight">{{ $data['stats']['mentorAktif'] }}</p>
+            <p class="text-xs font-semibold text-slate-400 m-0">Mentor Aktif</p>
+        </div>
+    </div>
+</div>
 
 <section>
     <div class="flex items-center justify-between mb-3">
@@ -48,50 +94,9 @@
 @endsection
 
 @push('scripts')
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-$(function () {
-
-    // ===== DUMMY DATA (ganti dengan hasil fetch() API saat backend siap) =====
-    const STAT_BASE = { totalMaba: 350, hadir: 320, tidakHadir: 30, evaluasiSelesai: 310, mentorAktif: 18 };
-
-    const CHIP_CLASS = {
-        "chip-navy": "bg-indigo-50 text-indigo-600",
-        "chip-teal": "bg-teal-50 text-teal-600",
-        "chip-coral": "bg-rose-50 text-rose-500",
-        "chip-lime": "bg-lime-50 text-lime-600",
-    };
-
-    function renderStats() {
-        const s = STAT_BASE;
-        const items = [
-            { icon: "graduation-cap", chip: "chip-navy", val: s.totalMaba, label: "Total Maba" },
-            { icon: "user-check", chip: "chip-teal", val: s.hadir, label: "Hadir" },
-            { icon: "user-x", chip: "chip-coral", val: s.tidakHadir, label: "Tidak Hadir" },
-            { icon: "clipboard-check", chip: "chip-lime", val: s.evaluasiSelesai, label: "Evaluasi Selesai" },
-            { icon: "user-round", chip: "chip-navy", val: s.mentorAktif, label: "Mentor Aktif" },
-        ];
-        const html = items.map((i) => `
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
-                <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${CHIP_CLASS[i.chip]}">
-                    <i data-lucide="${i.icon}" class="w-5 h-5"></i>
-                </span>
-                <div>
-                    <p class="text-xl font-extrabold text-slate-800 m-0 leading-tight">${i.val}</p>
-                    <p class="text-xs font-semibold text-slate-400 m-0">${i.label}</p>
-                </div>
-            </div>`).join("");
-        $("#miniStats").html(html);
-        lucide.createIcons();
-    }
-
-    // Filter hanya memicu re-render dummy (nilai statis) -- sambungkan ke API saat backend siap
-    $("#filterTahun, #filterFakultas, #filterHari").on("change", function () {
-        tampilkanToast("Memuat data sesuai filter...");
-        renderStats();
-    });
-
-    renderStats();
-});
+    document.getElementById('filterTahun').addEventListener('change', () => document.getElementById('formFilter').submit());
+    document.getElementById('filterFakultas').addEventListener('change', () => document.getElementById('formFilter').submit());
+    document.getElementById('filterHari').addEventListener('change', () => document.getElementById('formFilter').submit());
 </script>
 @endpush

@@ -14,6 +14,7 @@ use App\Models\ProgramStudy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Models\EvaluationCategory;
 
 class DataMasterController extends Controller
 {
@@ -110,7 +111,7 @@ class DataMasterController extends Controller
                 'display' => 'title',
                 'icon' => 'calendar-days',
                 'chip' => 'bg-lime-50 text-lime-600',
-                'list_cols' => ['title' => 'Judul', 'place' => 'Tempat', 'schedule_date' => 'Tanggal', 'status' => 'Status'],
+                'list_cols' => ['title' => 'Judul', 'place' => 'Tempat', 'schedule_date' => 'Tanggal', 'schedule_begin_time' => 'Jam Mulai','schedule_end_time' => 'Jam Selesai','status' => 'Status'],
                 'fields' => [
                     ['key' => 'title', 'label' => 'Judul Kegiatan', 'type' => 'text', 'required' => true],
                     ['key' => 'place', 'label' => 'Tempat Kegiatan', 'type' => 'text', 'required' => true],
@@ -152,18 +153,31 @@ class DataMasterController extends Controller
             ],
             'ujian' => [
                 'model' => Exam::class,
-                'label' => 'Data Evaluasi',
+                'label' => 'Data Soal Evaluasi',
                 'display' => 'title',
                 'icon' => 'file-check-2',
                 'chip' => 'bg-teal-50 text-teal-600',
-                'list_cols' => ['title' => 'Judul', 'subtitle' => 'Sub Judul', 'passing_grade' => 'Passing Grade'],
+                'list_cols' => ['title' => 'Kategori', 'subtitle' => 'Judul', 'passing_grade' => 'Passing Grade'],
                 'fields' => [
-                    ['key' => 'title', 'label' => 'Judul Evaluasi', 'type' => 'text', 'required' => true],
-                    ['key' => 'subtitle', 'label' => 'Sub Judul', 'type' => 'text', 'required' => true],
+                    ['key' => 'title', 'label' => 'Kategori Evaluasi', 'type' => 'select', 'required' => true, 'options_key' => 'evaluation_categories'],
+                    ['key' => 'subtitle', 'label' => 'Judul', 'type' => 'text', 'required' => true],
                     ['key' => 'passing_grade', 'label' => 'Passing Grade', 'type' => 'number', 'required' => true],
                     ['key' => 'max_question', 'label' => 'Jumlah Soal', 'type' => 'number', 'required' => true],
                     ['key' => 'random_flag', 'label' => 'Acak Soal', 'type' => 'checkbox', 'required' => false],
                 ],
+            ],
+            'kategori_evaluasi' => [
+            'model' => EvaluationCategory::class,
+            'label' => 'Kategori Evaluasi',
+            'display' => 'name',
+            'icon' => 'clipboard-list',
+            'chip' => 'bg-purple-50 text-purple-600',
+            'list_cols' => ['name' => 'Nama Kategori', 'urutan' => 'Urutan'],
+            'fields' => [
+            ['key' => 'name', 'label' => 'Nama Kategori', 'type' => 'text', 'required' => true],
+             ['key' => 'urutan', 'label' => 'Urutan Tampil', 'type' => 'number', 'required' => true, 'unique' => 'evaluation_categories,urutan'],
+
+            ],
             ],
         ];
     }
@@ -185,6 +199,8 @@ class DataMasterController extends Controller
                 ->mapWithKeys(fn($u) => [$u->id => $u->name]),
             'program_studies' => ProgramStudy::orderBy('name')->get(['name'])
                 ->mapWithKeys(fn($p) => [$p->name => $p->name]),
+               'evaluation_categories' => EvaluationCategory::orderBy('urutan')->get(['name'])
+                ->mapWithKeys(fn($c) => [$c->name => 'EVALUASI ' . $c->name]),
         ];
     }
 
@@ -255,40 +271,49 @@ class DataMasterController extends Controller
 
         return response()->json(['data' => $rows]);
     }
-    protected function rulesFor(array $cfg): array
-    {
-        $rules = [];
-        foreach ($cfg['fields'] as $f) {
-            if (!empty($f['virtual'])) {
-                continue; // field UI-only, tidak masuk validasi/tidak disimpan
-            }
-
-            $r = [$f['required'] ? 'required' : 'nullable'];
-
-           $r[] = match ($f['type']) {
-                'number' => 'integer',
-                'date' => 'date',
-                'time' => 'date_format:H:i,H:i:s', // terima dua format sekaligus
-                'checkbox' => 'boolean',
-                'select' => 'string',
-                default => 'string',
-            };
-
-            if ($f['type'] === 'select' && isset($f['options']) && !isset($f['options_key'])) {
-                $r[] = Rule::in(array_keys($f['options']));
-            }
-
-            $rules[$f['key']] = $r;
+    protected function rulesFor(array $cfg, ?int $ignoreId = null): array
+{
+    $rules = [];
+    foreach ($cfg['fields'] as $f) {
+        if (!empty($f['virtual'])) {
+            continue;
         }
 
-        return $rules;
+        $r = [$f['required'] ? 'required' : 'nullable'];
+
+        $r[] = match ($f['type']) {
+            'number' => 'integer',
+            'date' => 'date',
+            'time' => 'date_format:H:i,H:i:s',
+            'checkbox' => 'boolean',
+            'select' => 'string',
+            default => 'string',
+        };
+
+        if ($f['type'] === 'select' && isset($f['options']) && !isset($f['options_key'])) {
+            $r[] = Rule::in(array_keys($f['options']));
+        }
+
+        if (!empty($f['unique'])) {
+            [$table, $column] = explode(',', $f['unique']);
+            $uniqueRule = Rule::unique($table, $column);
+            if ($ignoreId) {
+                $uniqueRule = $uniqueRule->ignore($ignoreId);
+            }
+            $r[] = $uniqueRule;
+        }
+
+        $rules[$f['key']] = $r;
+    }
+
+    return $rules;
     }
 
     public function store(Request $request, string $type)
     {
         $cfg = $this->config($type);
 
-        $validator = Validator::make($request->all(), $this->rulesFor($cfg));
+       $validator = Validator::make($request->all(), $this->rulesFor($cfg, $id), $this->messagesFor($cfg));
         $validated = $validator->validate();
 
                 foreach ($cfg['fields'] as $f) {
@@ -322,7 +347,7 @@ class DataMasterController extends Controller
         $cfg = $this->config($type);
         $row = $cfg['model']::findOrFail($id);
 
-        $validator = Validator::make($request->all(), $this->rulesFor($cfg));
+       $validator = Validator::make($request->all(), $this->rulesFor($cfg, $id), $this->messagesFor($cfg));
         $validated = $validator->validate();
 
         foreach ($cfg['fields'] as $f) {
@@ -358,4 +383,15 @@ class DataMasterController extends Controller
 
         return response()->json(['message' => 'Data berhasil dihapus.']);
     }
+
+    protected function messagesFor(array $cfg): array
+{
+    $messages = [];
+    foreach ($cfg['fields'] as $f) {
+        if (!empty($f['unique'])) {
+            $messages["{$f['key']}.unique"] = "{$f['label']} sudah dipakai, pilih angka lain.";
+        }
+    }
+    return $messages;
+}
 }
