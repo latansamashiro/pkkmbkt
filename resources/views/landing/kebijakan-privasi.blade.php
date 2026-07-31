@@ -618,8 +618,8 @@
         <div class="policy-contact-row">
           <i class="fa-solid fa-location-dot"></i>
           <span
-            >Jl. Soekarno-Hatta, Pasirjati, Kec. Cikande, Kab. Serang,
-            Banten</span
+            >Jl. Soekarno-Hatta, Kec. Rangkasbitung, Kab. Lebak,
+            Banten 42317</span
           >
         </div>
         <div class="policy-contact-row">
@@ -627,13 +627,9 @@
           <span
             >Email:
             <a href="mailto:pkkmb@latansamashiro.ac.id"
-              >pkkmb@latansamashiro.ac.id</a
+              >pmb.latansamashiro@gmail.com</a
             ></span
           >
-        </div>
-        <div class="policy-contact-row">
-          <i class="fa-solid fa-globe"></i>
-          <span>Website: PKKMB-KT Universitas La Tansa Mashiro</span>
         </div>
 
         <p class="policy-contact-foot">
