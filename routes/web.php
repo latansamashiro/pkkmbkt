@@ -112,6 +112,20 @@ Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'eval
     //Mentor
 
     //Student
+    Route::group(['prefix' => 'mahasiswa', 'middleware' => ['accessrole:student']], function () {
+        Route::controller(\App\Http\Controllers\Student\StudentController::class)->group(function () {
+            Route::get('/modul', 'modul')->name('role.student.modul');
+            Route::get('/leaderboard', 'leaderboard')->name('role.student.leaderboard');
+            Route::get('/info', 'info')->name('role.student.info');
+            Route::get('/profil', 'profil')->name('role.student.profil');
+            Route::get('/jadwal', 'jadwal')->name('role.student.jadwal');
+            Route::get('/keaktifan', 'keaktifan')->name('role.student.keaktifan');
+            Route::get('/materi', 'materi')->name('role.student.materi');
+            Route::get('/denah-kampus', 'denahKampus')->name('role.student.denah-kampus');
+            Route::get('/evaluasi', 'evaluasi')->name('role.student.evaluasi');
+            Route::get('/absensi', 'absensi')->name('role.student.absensi');
+        });
+    });
 
     //Committee
 });
