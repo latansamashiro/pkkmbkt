@@ -150,18 +150,7 @@
         transform: translateY(-8px) rotate(-45deg);
       }
       .navbar-links {
-        display: flex;
-        flex-direction: column;
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 280px;
-        height: 100vh;
-        background: #0d1735;
-        padding: 100px 32px 32px;
-        gap: 24px;
-        transition: right 0.3s ease;
-        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
+        display: none;
       }
       .navbar-links.active {
         right: 0;
@@ -785,14 +774,6 @@
         </div>
       </a>
 
-      <button
-        class="menu-toggle"
-        id="menuToggle"
-        aria-label="Buka Menu"
-      >
-        
-      </button>
-
       <nav class="navbar-links" id="navbarLinks">
         <a href="{{ route('role.student.modul') }}">Modul</a>
         <a href="{{ route('role.student.leaderboard') }}">Leaderboard</a>
@@ -825,7 +806,7 @@
             <div class="ring">
               <img
                 id="avatarPreview"
-                src="{{ asset('gambar/nazrul.jpeg') }}"
+                src="{{ auth()->user()->profile_picture ? asset('storage/'.auth()->user()->profile_picture) : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2718%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M20 88c0-22 13-35 30-35s30 13 30 35%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E' }}"
                 alt="Foto Profil"
               />
             </div>
@@ -834,6 +815,8 @@
               <input
                 type="file"
                 id="avatarUpload"
+                name="avatar"
+                form="profileForm"
                 accept="image/*"
                 class="hidden"
                 style="display: none"
@@ -841,9 +824,9 @@
             </label>
           </div>
 
-          <h2 id="summaryName" class="avatar-name">Alexander Arul Husein</h2>
+          <h2 id="summaryName" class="avatar-name">{{ auth()->user()->name }}</h2>
           <span id="summaryRole" class="avatar-role"
-            >Mahasiswa Informatika</span
+            >Mahasiswa {{ auth()->user()->program_study_name ?? '-' }}</span
           >
 
           <div class="avatar-divider"></div>
@@ -875,7 +858,15 @@
               </span>
             </div>
 
-            <form id="profileForm" class="form-body">
+            @if ($errors->profileUpdate->any() ?? false)
+              <div class="lock-banner" style="background:#fdecea; border-color:#e0665a55;">
+                <i class="fa-solid fa-triangle-exclamation" style="color:#e0665a;"></i>
+                <span>{{ $errors->profileUpdate->first() }}</span>
+              </div>
+            @endif
+
+            <form id="profileForm" class="form-body" method="POST" action="{{ route('role.student.profil.update') }}" enctype="multipart/form-data">
+              @csrf
               <div class="field-grid">
                 <div class="field-full">
                   <label class="field-label">
@@ -889,7 +880,7 @@
                     <input
                       type="text"
                       id="inputName"
-                      value="Alexander Arul Husein"
+                      value="{{ auth()->user()->name }}"
                       class="field-input"
                       disabled
                       readonly
@@ -910,7 +901,7 @@
                     <input
                       type="text"
                       id="inputNPM"
-                      value="525241019"
+                      value="{{ auth()->user()->npm ?? '-' }}"
                       class="field-input"
                       disabled
                       readonly
@@ -930,7 +921,7 @@
                     <i class="fa-solid fa-envelope field-icon"></i>
                     <input
                       type="email"
-                      value="salman@example.com"
+                      value="{{ auth()->user()->email }}"
                       class="field-input"
                       disabled
                       readonly
@@ -951,7 +942,7 @@
                     <input
                       type="text"
                       id="inputRole"
-                      value="Teknik Informatika"
+                      value="{{ auth()->user()->program_study_name ?? '-' }}"
                       class="field-input"
                       disabled
                       readonly
@@ -966,7 +957,8 @@
                     <i class="fa-solid fa-phone field-icon"></i>
                     <input
                       type="tel"
-                      value="081234567890"
+                      name="phone_no"
+                      value="{{ old('phone_no', auth()->user()->phone_no) }}"
                       class="field-input"
                     />
                   </div>
@@ -985,7 +977,7 @@
                         type="radio"
                         name="gender"
                         value="laki-laki"
-                        checked
+                        @checked(auth()->user()->gender === 'laki-laki')
                         disabled
                       />
                       <span class="gender-pill">
@@ -997,6 +989,7 @@
                         type="radio"
                         name="gender"
                         value="perempuan"
+                        @checked(auth()->user()->gender === 'perempuan')
                         disabled
                       />
                       <span class="gender-pill">
@@ -1029,7 +1022,12 @@
               <h3>Ubah Kata Sandi</h3>
             </div>
 
-            <form id="passwordForm" class="form-body">
+            @if ($errors->passwordUpdate->any() ?? false)
+              <p class="password-error show">{{ $errors->passwordUpdate->first() }}</p>
+            @endif
+
+            <form id="passwordForm" class="form-body" method="POST" action="{{ route('role.student.profil.password') }}">
+              @csrf
               <p class="password-note">
                 Masukkan kata sandi lama, lalu buat kata sandi baru minimal
                 8 karakter. Pastikan konfirmasi kata sandi baru sama persis.
@@ -1043,6 +1041,7 @@
                     <input
                       type="password"
                       id="oldPassword"
+                      name="old_password"
                       class="field-input"
                       placeholder="Masukkan kata sandi lama"
                       required
@@ -1057,6 +1056,7 @@
                     <input
                       type="password"
                       id="newPassword"
+                      name="new_password"
                       class="field-input"
                       placeholder="Minimal 8 karakter"
                       minlength="8"
@@ -1072,6 +1072,7 @@
                     <input
                       type="password"
                       id="confirmPassword"
+                      name="new_password_confirmation"
                       class="field-input"
                       placeholder="Ulangi kata sandi baru"
                       minlength="8"
@@ -1218,16 +1219,13 @@
         }
       });
 
-      // Nama, NPM, Email, Program Studi & Jenis Kelamin terkunci (disabled),
-      // sehingga ringkasan nama/role di kartu avatar tetap statis mengikuti
-      // data resmi dan tidak lagi bisa diedit langsung dari input.
-      summaryName.textContent = inputName.value;
-      summaryRole.textContent = inputRole.value;
+      // Nama, NPM, Email, Program Studi & Jenis Kelamin terkunci (disabled).
+      // Ringkasan nama/role di kartu avatar sudah dirender langsung dari
+      // data user di server (lihat blade di atas), jadi tidak perlu
+      // ditimpa lagi lewat JS di sini.
 
-      profileForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        alert("Nomor telepon berhasil diperbarui!");
-      });
+      // profileForm sekarang form sungguhan (POST ke server),
+      // jadi tidak perlu preventDefault lagi di sini.
 
       // ======================================================================
       // ►► UBAH KATA SANDI
@@ -1245,10 +1243,10 @@
       });
 
       passwordForm.addEventListener("submit", function (e) {
-        e.preventDefault();
         passwordError.classList.remove("show");
 
         if (newPassword.value.length < 8) {
+          e.preventDefault();
           passwordError.textContent =
             "Kata sandi baru minimal 8 karakter.";
           passwordError.classList.add("show");
@@ -1256,6 +1254,7 @@
         }
 
         if (newPassword.value !== confirmPassword.value) {
+          e.preventDefault();
           passwordError.textContent =
             "Kata sandi baru dan konfirmasi tidak sama.";
           passwordError.classList.add("show");
@@ -1263,15 +1262,16 @@
         }
 
         if (newPassword.value === oldPassword.value) {
+          e.preventDefault();
           passwordError.textContent =
             "Kata sandi baru tidak boleh sama dengan kata sandi lama.";
           passwordError.classList.add("show");
           return;
         }
 
-        // TODO: kirim oldPassword & newPassword ke server/backend untuk diverifikasi & disimpan.
-        alert("Kata sandi berhasil diubah!");
-        passwordForm.reset();
+        // Lolos validasi di browser -> form lanjut submit sungguhan ke
+        // server (route('role.student.profil.password')) untuk verifikasi
+        // kata sandi lama & penyimpanan kata sandi baru yang sebenarnya.
       });
 
       const heroSlideImages = [
@@ -1299,6 +1299,35 @@
         }
       }
 
+    </script>
+
+    <!-- ============ TOAST NOTIFIKASI (sama seperti dashboard admin) ============ -->
+    <div class="toast-wrap" id="toastWrap"
+      style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;">
+      <div id="toastEl"
+        style="opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;transform:translateY(20px);background:var(--navy-900, #152159);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;box-shadow:0 10px 24px rgba(21,33,89,.25);">
+      </div>
+    </div>
+
+    <script>
+      function tampilkanToast(pesan) {
+        const el = document.getElementById("toastEl");
+        el.textContent = pesan;
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0)";
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          el.style.opacity = "0";
+          el.style.transform = "translateY(20px)";
+        }, 2600);
+      }
+
+      @if (session('profileStatus'))
+        tampilkanToast(@json(session('profileStatus')));
+      @endif
+      @if (session('passwordStatus'))
+        tampilkanToast(@json(session('passwordStatus')));
+      @endif
     </script>
   </body>
 </html>

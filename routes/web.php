@@ -118,6 +118,8 @@ Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'eval
             Route::get('/leaderboard', 'leaderboard')->name('role.student.leaderboard');
             Route::get('/info', 'info')->name('role.student.info');
             Route::get('/profil', 'profil')->name('role.student.profil');
+            Route::post('/profil', 'updateProfile')->name('role.student.profil.update');
+            Route::post('/profil/password', 'updatePassword')->name('role.student.profil.password');
             Route::get('/jadwal', 'jadwal')->name('role.student.jadwal');
             Route::get('/keaktifan', 'keaktifan')->name('role.student.keaktifan');
             Route::get('/materi', 'materi')->name('role.student.materi');

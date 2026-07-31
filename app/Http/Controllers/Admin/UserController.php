@@ -205,8 +205,8 @@ class UserController extends Controller
 
         if ($academic) {
             $user->phone_no = $validated['phone_no'];
-            $user->faculty_Name = $validated['faculty_name'];
-            $user->program_study_Name = $validated['program_study_name'];
+            $user->faculty_name = $validated['faculty_name'];
+            $user->program_study_name = $validated['program_study_name'];
             $user->gender = $validated['gender'];
         }
 

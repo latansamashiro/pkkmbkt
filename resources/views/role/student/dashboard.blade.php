@@ -1028,18 +1028,26 @@
           <h1 class="topbar-title">Dashboard Mahasiswa</h1>
           <div class="topbar-actions">
             <a href="{{ route('role.student.profil') }}" class="avatar-btn" aria-label="Masuk ke akun">
-              <svg
-                class="ic"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="8" r="3.4" />
-                <path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6" />
-              </svg>
+              @if (auth()->user()->profile_picture)
+                <img
+                  src="{{ asset('storage/'.auth()->user()->profile_picture) }}"
+                  alt="Foto profil"
+                  style="width:100%; height:100%; border-radius:50%; object-fit:cover;"
+                />
+              @else
+                <svg
+                  class="ic"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="8" r="3.4" />
+                  <path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6" />
+                </svg>
+              @endif
               <span class="avatar-dot"></span>
             </a>
             <!-- ►► LOGOUT KHUSUS MODE HP — otomatis hilang begitu sidebar

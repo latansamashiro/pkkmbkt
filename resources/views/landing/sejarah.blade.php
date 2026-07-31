@@ -163,7 +163,7 @@
         position: fixed;
         top: 0;
         right: -100%;
-        width: 280px;
+        width: 50%;
         height: 100vh;
         background: #0d1735;
         padding: 100px 32px 32px;
@@ -555,7 +555,7 @@
   <body class="bg-white">
     <!-- ============ NAVBAR — IDENTIK DENGAN HOME_PAGE.HTML ============ -->
     <header class="navbar">
-      <a href="#" class="navbar-brand" aria-label="PKKMB-KT UNILAM Beranda">
+      <a href="{{ route('landing.home') }}" class="navbar-brand" aria-label="PKKMB-KT UNILAM Beranda">
         <div class="navbar-logo">
           <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
         </div>

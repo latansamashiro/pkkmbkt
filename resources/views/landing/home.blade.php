@@ -274,7 +274,7 @@ background: rgba(20, 20, 20, 0.9);
       position: fixed;
       top: 0;
       right: 0;
-      width: 280px;
+      width: 50%;
       height: 100vh;
       background: #0d1735;
       padding: 100px 32px 32px;

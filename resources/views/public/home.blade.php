@@ -227,19 +227,8 @@ background: rgba(20, 20, 20, 0.9);
     }
 
     .navbar-links {
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      right: -100%;
-      width: 280px;
-      height: 100vh;
-      background: #0d1735;
-      padding: 100px 32px 32px;
-      gap: 24px;
-      transition: right 0.3s ease;
-      box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
-    }
+        display: none;
+      }
 
     .navbar-links.active {
       right: 0;
