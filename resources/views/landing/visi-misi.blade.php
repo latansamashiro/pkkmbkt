@@ -632,7 +632,7 @@
         <h2
           class="font-display font-bold text-2xl sm:text-3xl text-navy-900 mb-8 text-center"
         >
-          Misi Universitas La Tansa Mashiro
+          Misi <span class="whitespace-nowrap">Universitas La Tansa Mashiro</span>
         </h2>
 
         <!-- ►► TAMBAH / GANTI POIN MISI DI SINI -->
@@ -700,7 +700,7 @@
       <h2
         class="font-display font-bold text-2xl sm:text-3xl text-navy-900 mb-8 text-center"
       >
-        Tujuan Universitas La Tansa Mashiro
+        Tujuan <span class="whitespace-nowrap">Universitas La Tansa Mashiro</span>
       </h2>
 
       <!-- ►► TAMBAH / GANTI POIN TUJUAN DI SINI -->
