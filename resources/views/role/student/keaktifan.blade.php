@@ -146,18 +146,7 @@
         transform: translateY(-8px) rotate(-45deg);
       }
       .navbar-links {
-        display: flex;
-        flex-direction: column;
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 280px;
-        height: 100vh;
-        background: #0d1735;
-        padding: 100px 32px 32px;
-        gap: 24px;
-        transition: right 0.3s ease;
-        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
+        display: none;
       }
       .navbar-links.active {
         right: 0;
@@ -842,7 +831,7 @@
       <!-- ============ IDENTITAS AKUN — HANYA DATA MILIK SENDIRI ============ -->
       <div class="identity-card">
         <div class="identity-avatar">
-          <img src="{{ asset('gambar/nazrul.jpeg') }}" alt="Foto Profil" />
+          <img src="{{ auth()->user()->profile_picture ? asset('storage/'.auth()->user()->profile_picture) : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2718%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M20 88c0-22 13-35 30-35s30 13 30 35%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E' }}" alt="Foto Profil" />
         </div>
         <div>
           <p class="identity-name" id="identityName">Alexander Arul Husein</p>

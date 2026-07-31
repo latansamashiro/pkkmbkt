@@ -147,18 +147,7 @@
         transform: translateY(-8px) rotate(-45deg);
       }
       .navbar-links {
-        display: flex;
-        flex-direction: column;
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 280px;
-        height: 100vh;
-        background: #0d1735;
-        padding: 100px 32px 32px;
-        gap: 24px;
-        transition: right 0.3s ease;
-        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
+        display: none;
       }
       .navbar-links.active {
         right: 0;
@@ -882,10 +871,6 @@
         </div>
       </a>
 
-      <button class="menu-toggle" id="menuToggle" aria-label="Buka Menu">
-        
-      </button>
-
       <nav class="navbar-links" id="navbarLinks">
         <a href="{{ route('role.student.modul') }}">Modul</a>
         <a href="{{ route('role.student.leaderboard') }}">Leaderboard</a>
@@ -938,13 +923,13 @@
       <!-- ============ IDENTITAS AKUN — HANYA DATA MILIK SENDIRI ============ -->
       <div class="identity-card">
         <div class="identity-avatar">
-          <img src="{{ asset('gambar/nazrul.jpeg') }}" alt="Foto Profil" />
+          <img src="{{ auth()->user()->profile_picture ? asset('storage/'.auth()->user()->profile_picture) : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2718%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M20 88c0-22 13-35 30-35s30 13 30 35%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E' }}" alt="Foto Profil" />
         </div>
         <div>
-          <p class="identity-name" id="identityName">Alexander Arul Husein</p>
+          <p class="identity-name" id="identityName">{{ auth()->user()->name }}</p>
           <p class="identity-meta">
-            NPM <span id="identityNPM">525241019</span>
-            <span class="badge-kelompok" id="identityKelompok">Kelompok 01</span>
+            NPM <span id="identityNPM">{{ auth()->user()->npm ?? '-' }}</span>
+            <span class="badge-kelompok" id="identityKelompok">{{ $groupName ?? 'Belum tergabung kelompok' }}</span>
           </p>
         </div>
         <span class="identity-lock">
@@ -1102,22 +1087,13 @@
       /* ---------- NAVBAR HAMBURGER (mobile) ---------- */
     
       // ======================================================================
-      // ►► IDENTITAS AKUN YANG SEDANG LOGIN — GANTI DENGAN DATA ASLI
-      //    Saat ini masih hardcode karena belum ada sistem login/backend
-      //    beneran. Kalau nanti sudah ada, gantikan blok ini dengan data
-      //    yang diambil dari sesi login (mis. dari server / token JWT),
-      //    supaya tidak mungkin ada mahasiswa lain yang bisa mengganti
-      //    NPM di localStorage untuk melihat data orang lain.
+      // ►► IDENTITAS AKUN — sekarang diambil dari sesi login Laravel
+      //    (lihat identity-card di atas), bukan lagi hardcode di sini.
       // ======================================================================
       const CURRENT_STUDENT = {
-        nama: "Alexander Arul Husein",
-        npm: "525241019",
-        kelompok: "Kelompok 01",
+        nama: @json(auth()->user()->name),
+        kelompok: @json($groupName ?? 'Belum tergabung kelompok'),
       };
-
-      document.getElementById("identityName").textContent = CURRENT_STUDENT.nama;
-      document.getElementById("identityNPM").textContent = CURRENT_STUDENT.npm;
-      document.getElementById("identityKelompok").textContent = CURRENT_STUDENT.kelompok;
 
       // Kode singkat (dari panel mentor) -> label penuh dipakai halaman ini
       const KODE_KE_LABEL = { H: "Hadir", S: "Sakit", I: "Izin", A: "Alpha" };

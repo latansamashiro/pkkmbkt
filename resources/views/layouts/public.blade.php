@@ -24,13 +24,6 @@
         </div>
       </a>
 
-      <!-- Tombol Garis Tiga (Hanya muncul di HP) -->
-      <button class="menu-toggle" id="menuToggle" aria-label="Buka Menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
       <nav class="navbar-links" id="navbarLinks" aria-label="Navigasi utama">
         <a href="{{ route('public.home') }}" @if(request()->routeIs('public.home')) class="active" @endif>Beranda</a>
 
@@ -57,13 +50,7 @@
     <script>
       lucide.createIcons();
 
-      const menuToggle = document.getElementById("menuToggle");
       const navbarLinks = document.getElementById("navbarLinks");
-
-      menuToggle.addEventListener("click", () => {
-        menuToggle.classList.toggle("active");
-        navbarLinks.classList.toggle("active");
-      });
 
       const dropdownTentang = document.getElementById("dropdownTentang");
       const dropdownTentangToggle = document.getElementById("dropdownTentangToggle");
@@ -85,7 +72,6 @@
       const navLinksAll = navbarLinks.querySelectorAll("a");
       navLinksAll.forEach((link) => {
         link.addEventListener("click", () => {
-          menuToggle.classList.remove("active");
           navbarLinks.classList.remove("active");
         });
       });

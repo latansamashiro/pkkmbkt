@@ -158,15 +158,15 @@ class UserController extends Controller
             'email.unique' => 'Email sudah digunakan.',
         ]);
 
-       $user->Name = $validated['name'];
+        $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->status = $validated['status'];
         $user->updated_by_id = $request->user()->id;
 
         if ($academic) {
             $user->phone_no = $validated['phone_no'];
-            $user->faculty_Name = $validated['faculty_name'];
-            $user->program_study_Name = $validated['program_study_name'];
+            $user->faculty_name = $validated['faculty_name'];
+            $user->program_study_name = $validated['program_study_name'];
             $user->gender = $validated['gender'];
         }
 

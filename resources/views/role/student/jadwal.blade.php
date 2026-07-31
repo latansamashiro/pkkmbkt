@@ -143,18 +143,7 @@
       }
 
       .navbar-links {
-        display: flex;
-        flex-direction: column;
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 280px;
-        height: 100vh;
-        background: #0d1735;
-        padding: 100px 32px 32px;
-        gap: 24px;
-        transition: right 0.3s ease;
-        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
+        display: none;
       }
       .navbar-links.active {
         right: 0;
@@ -935,10 +924,6 @@
         </div>
       </a>
 
-      <button class="menu-toggle" id="menuToggle" aria-label="Buka Menu">
-        <span></span><span></span><span></span>
-      </button>
-
       <nav class="navbar-links" id="navbarLinks" aria-label="Navigasi utama">
          <a href="{{ route('role.student.modul') }}">Modul</a>
         <a href="{{ route('role.student.leaderboard') }}">Leaderboard</a>
@@ -1298,13 +1283,7 @@
     </nav>
 
     <script>
-      const menuToggle = document.getElementById("menuToggle");
       const navbarLinks = document.getElementById("navbarLinks");
-
-      menuToggle.addEventListener("click", () => {
-        menuToggle.classList.toggle("active");
-        navbarLinks.classList.toggle("active");
-      });
 
       const dropdownTentang = document.getElementById("dropdownTentang");
       const dropdownTentangToggle = document.getElementById("dropdownTentangToggle");
@@ -1325,7 +1304,6 @@
 
       navbarLinks.querySelectorAll("a").forEach((link) => {
         link.addEventListener("click", () => {
-          menuToggle.classList.remove("active");
           navbarLinks.classList.remove("active");
         });
       });
