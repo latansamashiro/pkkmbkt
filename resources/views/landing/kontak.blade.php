@@ -667,9 +667,9 @@
     <footer class="footer">
       <p>© 2026 PKKMB-KT UNILAM. Semua hak dilindungi.</p>
       <div class="footer-links">
-        <a href="kebijakan-privasi.html">Kebijakan Privasi</a>
-        <a href="syarat-ketentuan.html">Syarat &amp; Ketentuan</a>
-        <a href="bantuan.html">Bantuan</a>
+        <a href="{{ route('landing.kebijakan-privasi') }}">Kebijakan Privasi</a>
+        <a href="{{ route('landing.syarat-ketentuan') }}">Syarat &amp; Ketentuan</a>
+        <a href="{{ route('landing.bantuan') }}">Bantuan</a>
       </div>
     </footer>
 

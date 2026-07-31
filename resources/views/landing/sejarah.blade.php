@@ -1035,6 +1035,13 @@
         &copy; Universitas La Tansa Mashiro. Sejarah disusun dari arsip internal
         yayasan.
       </p>
+      <div class="flex items-center justify-center gap-4 mt-4">
+        <a href="{{ route('landing.kebijakan-privasi') }}" class="text-slate-400 hover:text-white transition">Kebijakan Privasi</a>
+        <span class="opacity-40">&bull;</span>
+        <a href="{{ route('landing.syarat-ketentuan') }}" class="text-slate-400 hover:text-white transition">Syarat &amp; Ketentuan</a>
+        <span class="opacity-40">&bull;</span>
+        <a href="{{ route('landing.bantuan') }}" class="text-slate-400 hover:text-white transition">Bantuan</a>
+      </div>
     </footer>
 
     <script>

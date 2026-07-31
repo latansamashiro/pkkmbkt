@@ -1020,7 +1020,7 @@
         <div class="hero-slideshow" id="heroSlideshow"></div>
 
         <div class="hero-content">
-            <span class="eyebrow"><span class="dot"></span>Universitas La Tansa Mashiro</span>
+            <span class="eyebrow"><span class="dot"></span><span class="whitespace-nowrap">Universitas La Tansa Mashiro</span></span>
             <h1 class="hero-title">Tentang PKKMB-KT</h1>
             <p class="lead">
                 Mengenal Portal PKKMB-KT satu pintu digital yang menuntun
@@ -1255,7 +1255,7 @@
             </div>
             <div>
                 <h4 class="fw-bold mb-0">Informasi Aplikasi</h4>
-                <p class="app-info-sub">Portal PKKMB-KT Universitas La Tansa Mashiro</p>
+                <p class="app-info-sub">Portal PKKMB-KT <span class="whitespace-nowrap">Universitas La Tansa Mashiro</span></p>
             </div>
         </div>
 
@@ -1273,7 +1273,7 @@
                 <div class="app-info-icon accent-lime-i"><i class="fa-solid fa-users-gear"></i></div>
                 <div>
                     <span class="app-info-label">Pengembang</span>
-                    <span class="app-info-value">HIMA Informatika Universitas La Tansa Mashiro<br>Periode 2025&ndash;2026</span>
+                    <span class="app-info-value">HIMA Informatika <span class="whitespace-nowrap">Universitas La Tansa Mashiro</span><br>Periode 2025&ndash;2026</span>
                 </div>
             </div>
 
@@ -1289,6 +1289,13 @@
 
         <div class="app-info-foot">
             <p>&copy; 2026 PKKMB-KT UNILAM &mdash; Dikembangkan oleh HIMA Informatika.</p>
+            <div class="flex items-center justify-center gap-4 mt-2 text-xs" style="color: rgba(255,255,255,.45)">
+                <a href="{{ route('landing.kebijakan-privasi') }}" class="hover:text-white transition" style="color: inherit">Kebijakan Privasi</a>
+                <span class="opacity-40">&bull;</span>
+                <a href="{{ route('landing.syarat-ketentuan') }}" class="hover:text-white transition" style="color: inherit">Syarat &amp; Ketentuan</a>
+                <span class="opacity-40">&bull;</span>
+                <a href="{{ route('landing.bantuan') }}" class="hover:text-white transition" style="color: inherit">Bantuan</a>
+            </div>
         </div>
     </footer>
 

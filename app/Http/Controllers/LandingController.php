@@ -40,4 +40,19 @@ class LandingController extends Controller
     {
         return view('landing.kontak');
     }
+
+    public function kebijakanPrivasi()
+    {
+        return view('landing.kebijakan-privasi');
+    }
+
+    public function syaratKetentuan()
+    {
+        return view('landing.syarat-ketentuan');
+    }
+
+    public function bantuan()
+    {
+        return view('landing.bantuan');
+    }
 }
