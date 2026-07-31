@@ -22,6 +22,9 @@ class UserController extends Controller
 
     public const ROLES_WITH_ACADEMIC_FIELDS = ['STUDENT', 'MENTOR'];
 
+    // Hanya mahasiswa & mentor yang punya NPM
+    public const ROLES_WITH_NIM = ['STUDENT', 'MENTOR'];
+
     protected function lockedRole(Request $request): string
     {
         $role = $request->route('roleKey');
@@ -32,6 +35,11 @@ class UserController extends Controller
     protected function hasAcademicFields(string $role): bool
     {
         return in_array($role, self::ROLES_WITH_ACADEMIC_FIELDS, true);
+    }
+
+    protected function hasNim(string $role): bool
+    {
+        return in_array($role, self::ROLES_WITH_NIM, true);
     }
 
     public function index(Request $request)
@@ -46,13 +54,13 @@ class UserController extends Controller
                 'email',
                 'role_name',
                 'status',
+                'npm',
                 'phone_no',
                 'faculty_name',
                 'program_study_name',
                 'gender',
             ]);
 
-        // dikirim ke FE buat isi dropdown Fakultas -> Prodi (nested by faculty)
         $faculties = Faculty::with(['programStudies' => fn($q) => $q->orderBy('name')])
             ->orderBy('name')
             ->get(['id', 'name']);
@@ -66,6 +74,7 @@ class UserController extends Controller
             'lockedRole' => $role,
             'roleLabel' => self::ROLES[$role],
             'showAcademic' => $this->hasAcademicFields($role),
+            'showNim' => $this->hasNim($role),
         ]);
     }
 
@@ -87,10 +96,23 @@ class UserController extends Controller
         ];
     }
 
+    protected function rulesNim(?int $ignoreUserId = null): array
+    {
+        return [
+            'npm' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('users', 'npm')->ignore($ignoreUserId),
+            ],
+        ];
+    }
+
     public function store(Request $request)
     {
         $role = $this->lockedRole($request);
         $academic = $this->hasAcademicFields($role);
+        $nim = $this->hasNim($role);
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
@@ -99,14 +121,21 @@ class UserController extends Controller
             'status' => ['required', Rule::in(['aktif', 'nonaktif'])],
         ];
 
+        if ($nim) {
+            $rules += $this->rulesNim();
+        }
+
         if ($academic) {
             $rules += $this->rulesAcademic();
         }
 
         $validated = $request->validate($rules, [
             'email.unique' => 'Email sudah digunakan.',
+            'npm.unique' => 'NPM sudah digunakan.',
         ]);
+
         $user = User::create([
+            'npm' => $validated['npm'] ?? null,
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
@@ -128,6 +157,7 @@ class UserController extends Controller
                 'email',
                 'role_name',
                 'status',
+                'npm',
                 'phone_no',
                 'faculty_name',
                 'program_study_name',
@@ -140,6 +170,7 @@ class UserController extends Controller
     {
         $role = $this->lockedRole($request);
         $academic = $this->hasAcademicFields($role);
+        $nim = $this->hasNim($role);
 
         abort_unless($user->role_name === $role, 404);
 
@@ -150,18 +181,27 @@ class UserController extends Controller
             'status' => ['required', Rule::in(['aktif', 'nonaktif'])],
         ];
 
+        if ($nim) {
+            $rules += $this->rulesNim($user->id);
+        }
+
         if ($academic) {
             $rules += $this->rulesAcademic();
         }
 
         $validated = $request->validate($rules, [
             'email.unique' => 'Email sudah digunakan.',
+            'npm.unique' => 'NPM sudah digunakan.',
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->status = $validated['status'];
         $user->updated_by_id = $request->user()->id;
+
+        if ($nim) {
+            $user->npm = $validated['npm'];
+        }
 
         if ($academic) {
             $user->phone_no = $validated['phone_no'];
@@ -179,6 +219,7 @@ class UserController extends Controller
             'message' => 'Data pengguna berhasil diperbarui.',
             'user' => $user->only([
                 'id',
+                'npm',
                 'name',
                 'email',
                 'role_name',
