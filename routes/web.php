@@ -28,7 +28,6 @@ Route::get('/visi-misi', [LandingController::class, 'visiMisi'])->name('landing.
 Route::get('/tentang-kami', [LandingController::class, 'tentangKami'])->name('landing.tentang-kami');
 Route::get('/informasi', [LandingController::class, 'informasi'])->name('landing.informasi');
 Route::get('/kontak', [LandingController::class, 'kontak'])->name('landing.kontak');
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

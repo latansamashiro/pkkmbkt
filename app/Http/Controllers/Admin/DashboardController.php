@@ -9,7 +9,30 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    /**
+     * Titik masuk netral "/dashboard".
+     * Melempar ke tampilan dashboard sesuai role_name user yang login.
+     * Dashboard ADVISOR, MENTOR, STUDENT, COMMITTEE masih placeholder
+     * (menyusul, tinggal ganti isi view-nya di resources/views/role/{role}/dashboard.blade.php).
+     */
     public function index()
+    {
+        $role = strtoupper(trim(auth()->user()->role_name ?? ''));
+
+        return match ($role) {
+            'SUPER-ADMIN' => $this->superAdmin(),
+            'ADVISOR'     => view('role.advisor.dashboard'),
+            'MENTOR'      => view('role.mentor.dashboard'),
+            'STUDENT'     => view('role.student.dashboard'),
+            'COMMITTEE'   => view('role.committee.dashboard'),
+            default       => abort(403, 'Role akun tidak dikenali: "' . auth()->user()->role_name . '"'),
+        };
+    }
+
+    /**
+     * Dashboard khusus SUPER-ADMIN (logic lama, tidak diubah).
+     */
+    protected function superAdmin()
     {
         // Total Pengguna: semua akun di tabel users (SUPER-ADMIN, ADVISOR, MENTOR, STUDENT, COMMITTEE)
         $totalPengguna = User::count();
