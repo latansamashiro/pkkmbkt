@@ -315,6 +315,9 @@
                     html = pageData.map((p, idx) => `
                             <tr class="hover:bg-slate-50">
                                 <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${start + idx + 1}</td>
+                                ${SHOW_NIM ? `
+                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.npm ?? "-"}</td>
+                                ` : ""}
                                 <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200 font-semibold">${p.nama}</td>
                                 <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.email}</td>
                                 ${SHOW_ACADEMIC ? `
@@ -326,9 +329,6 @@
                                         <span class="w-1.5 h-1.5 rounded-full bg-current"></span>${p.status === "aktif" ? "Aktif" : "Nonaktif"}
                                     </span>
                                 </td>
-                                ${SHOW_NIM ? `
-                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.npm ?? "-"}</td>
-                                ` : ""}
                                 <td class="px-3.5 py-3 border-b border-slate-200">
                                     <div class="flex items-center gap-1">
                                         <button data-aksi="lihat" data-id="${p.id}" aria-label="Detail" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="eye" class="w-4 h-4"></i></button>
