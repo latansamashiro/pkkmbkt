@@ -40,6 +40,11 @@
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             No</th>
+                            @if ($showNim)
+                            <th
+                                class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
+                                NPM</th>
+                        @endif
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Nama</th>
@@ -57,6 +62,7 @@
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Status</th>
+                        
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Aksi</th>
@@ -89,9 +95,16 @@
                     class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3">
                 </p>
                 <div class="grid grid-cols-1 gap-4">
+                      @if ($showNim)
+                        <div>
+                            <label for="inputNpm" class="block text-xs font-bold text-slate-500 mb-1.5">NPM</label>
+                            <input type="text" id="inputNpm" placeholder="CONTOH: 2210631170001" required
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                        </div>
+                    @endif
                     <div>
                         <label for="inputNama" class="block text-xs font-bold text-slate-500 mb-1.5">Nama Lengkap</label>
-                        <input type="text" id="inputNama" placeholder="CONTOH: DENI SAPUTRA" required
+                        <input type="text" id="inputNama" placeholder="CONTOH: AZIR GANTENG" required
                             oninput="this.value = this.value.toUpperCase()"
                             class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
                     </div>
@@ -113,7 +126,6 @@
                         <p id="hintPassword" class="text-xs text-slate-400 mt-1.5">Kosongkan saat edit jika tidak ingin
                             mengubah password.</p>
                     </div>
-
                     @if ($showAcademic)
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -190,6 +202,11 @@
                 <div class="flex items-center justify-between py-2.5"><span
                         class="text-xs font-bold text-slate-400">Email</span><span id="detailEmail"
                         class="text-sm font-semibold text-slate-800">-</span></div>
+                @if ($showNim)
+                    <div class="flex items-center justify-between py-2.5"><span
+                            class="text-xs font-bold text-slate-400">NPM</span><span id="detailNpm"
+                            class="text-sm font-semibold text-slate-800">-</span></div>
+                @endif
                 @if ($showAcademic)
                     <div class="flex items-center justify-between py-2.5"><span class="text-xs font-bold text-slate-400">No.
                             HP</span><span id="detailPhone" class="text-sm font-semibold text-slate-800">-</span></div>
@@ -217,6 +234,7 @@
 @php
     $penggunaListJson = $users->map(fn($u) => [
         'id' => $u->id,
+        'npm' => $u->npm,
         'nama' => $u->name,
         'email' => $u->email,
         'status' => $u->status,
@@ -235,6 +253,7 @@
             // ===== Data asli dari database (dikirim server saat halaman dimuat) =====
             let penggunaList = @json($penggunaListJson);
             const SHOW_ACADEMIC = @json($showAcademic);
+            const SHOW_NIM = @json($showNim);
             const FACULTIES = @json($faculties); // [{id, name, program_studies: [{id, name}, ...]}]
             const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
@@ -287,7 +306,7 @@
                 if (currentPage > totalPage) currentPage = totalPage;
                 const start = (currentPage - 1) * PER_PAGE;
                 const pageData = data.slice(start, start + PER_PAGE);
-                const totalCols = SHOW_ACADEMIC ? 7 : 5;
+                const totalCols = (SHOW_ACADEMIC ? 7 : 5) + (SHOW_NIM ? 1 : 0);
 
                 let html;
                 if (pageData.length === 0) {
@@ -307,6 +326,9 @@
                                         <span class="w-1.5 h-1.5 rounded-full bg-current"></span>${p.status === "aktif" ? "Aktif" : "Nonaktif"}
                                     </span>
                                 </td>
+                                ${SHOW_NIM ? `
+                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.npm ?? "-"}</td>
+                                ` : ""}
                                 <td class="px-3.5 py-3 border-b border-slate-200">
                                     <div class="flex items-center gap-1">
                                         <button data-aksi="lihat" data-id="${p.id}" aria-label="Detail" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="eye" class="w-4 h-4"></i></button>
@@ -363,6 +385,10 @@
                 $("#inputPassword").val("").prop("required", !id);
                 $("#hintPassword").toggle(!!id);
 
+                if (SHOW_NIM) {
+                    $("#inputNpm").val(data ? data.npm : "");
+                }
+
                 if (SHOW_ACADEMIC) {
                     $("#inputPhone").val(data ? data.phone_no : "");
                     $("#inputGender").val(data ? data.gender : "");
@@ -396,6 +422,10 @@
                     status: statusVal,
                 };
 
+                if (SHOW_NIM) {
+                    payload.npm = $("#inputNpm").val().trim();
+                }
+
                 if (SHOW_ACADEMIC) {
                     payload.phone_no = $("#inputPhone").val().trim();
                     payload.gender = $("#inputGender").val();
@@ -417,6 +447,7 @@
                 }).done(function (result) {
                     const savedUser = {
                         id: result.user.id,
+                        npm: result.user.npm,
                         nama: result.user.name,
                         email: result.user.email,
                         status: result.user.status,
@@ -454,6 +485,9 @@
                 detailActiveId = id;
                 $("#detailNama").text(p.nama);
                 $("#detailEmail").text(p.email);
+                if (SHOW_NIM) {
+                    $("#detailNpm").text(p.npm || "-");
+                }
                 if (SHOW_ACADEMIC) {
                     $("#detailPhone").text(p.phone_no || "-");
                     $("#detailGender").text(genderLabel(p.gender));
