@@ -659,7 +659,7 @@
             transition: flex 0.55s cubic-bezier(.4,0,.2,1);
         }
         .dev-accordion.has-active .dev-card{ flex: 0.55 1 0; }
-        .dev-accordion.has-active .dev-card.active{ flex: 5.5 1 0; }
+        .dev-accordion.has-active .dev-card.active{ flex: 4 1 0; }
 
         .dev-card .top-accent{
             position: absolute;

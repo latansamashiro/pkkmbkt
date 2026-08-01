@@ -1223,6 +1223,29 @@
                   >
                 </a>
 
+                <a class="menu-card" href="{{ route('role.student.info') }}">
+                  <span class="menu-chip chip-teal">
+                    <svg
+                      class="ic"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5"
+                      />
+                      <path d="M9 17a3 3 0 0 0 6 0" />
+                    </svg>
+                  </span>
+                  <span class="menu-label">Info</span>
+                  <span class="menu-desc"
+                    >Pengumuman &amp; informasi terbaru PKKMB</span
+                  >
+                </a>
+
                 <a class="menu-card" href="{{ route('role.student.leaderboard') }}">
                   <span class="menu-chip chip-lime">
                     <svg
