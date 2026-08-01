@@ -67,7 +67,12 @@ class UserController extends Controller
 
         $data = ['title' => 'KELOLA ' . self::ROLES[$role]];
 
-        return view('role.admin.user.index', [
+        // Nama view bisa di-override lewat route default 'view' (mis. untuk area committee),
+        // supaya controller ini tetap satu untuk semua role/area tanpa duplikasi logic.
+        // Kalau tidak di-set di route, fallback ke view admin (perilaku lama, tidak berubah).
+        $view = $request->route('view') ?? 'role.admin.user.index';
+
+        return view($view, [
             'data' => $data,
             'users' => $users,
             'faculties' => $faculties,

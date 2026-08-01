@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Models\EvaluationCategory;
+use App\Models\ExamDetail;
 
 class DataMasterController extends Controller
 {
@@ -111,7 +112,7 @@ class DataMasterController extends Controller
                 'display' => 'title',
                 'icon' => 'calendar-days',
                 'chip' => 'bg-lime-50 text-lime-600',
-                'list_cols' => ['title' => 'Judul', 'place' => 'Tempat', 'schedule_date' => 'Tanggal', 'schedule_begin_time' => 'Jam Mulai','schedule_end_time' => 'Jam Selesai','status' => 'Status'],
+                'list_cols' => ['title' => 'Judul', 'place' => 'Tempat', 'schedule_date' => 'Tanggal', 'schedule_begin_time' => 'Jam Mulai', 'schedule_end_time' => 'Jam Selesai', 'status' => 'Status'],
                 'fields' => [
                     ['key' => 'title', 'label' => 'Judul Kegiatan', 'type' => 'text', 'required' => true],
                     ['key' => 'place', 'label' => 'Tempat Kegiatan', 'type' => 'text', 'required' => true],
@@ -167,18 +168,37 @@ class DataMasterController extends Controller
                 ],
             ],
             'kategori_evaluasi' => [
-            'model' => EvaluationCategory::class,
-            'label' => 'Kategori Evaluasi',
-            'display' => 'name',
-            'icon' => 'clipboard-list',
-            'chip' => 'bg-purple-50 text-purple-600',
-            'list_cols' => ['name' => 'Nama Kategori', 'urutan' => 'Urutan'],
-            'fields' => [
-            ['key' => 'name', 'label' => 'Nama Kategori', 'type' => 'text', 'required' => true],
-             ['key' => 'urutan', 'label' => 'Urutan Tampil', 'type' => 'number', 'required' => true, 'unique' => 'evaluation_categories,urutan'],
-
+                'model' => EvaluationCategory::class,
+                'label' => 'Kategori Evaluasi',
+                'display' => 'name',
+                'icon' => 'clipboard-list',
+                'chip' => 'bg-purple-50 text-purple-600',
+                'list_cols' => ['name' => 'Nama Kategori', 'urutan' => 'Urutan'],
+                'fields' => [
+                    ['key' => 'name', 'label' => 'Nama Kategori', 'type' => 'text', 'required' => true],
+                    ['key' => 'urutan', 'label' => 'Urutan Tampil', 'type' => 'number', 'required' => true, 'unique' => 'evaluation_categories,urutan'],
+                ],
             ],
-            ],
+                        // ===== 2) Tambahkan entri 'soal' di dalam types(), taruh persis setelah entri 'ujian' =====
+            
+            'soal' => [
+                'model' => ExamDetail::class,
+                'label' => 'Bank Soal',
+                'display' => 'id',
+                'icon' => 'list-checks',
+                'chip' => 'bg-slate-50 text-slate-600',
+                'list_cols' => ['question' => 'Pertanyaan', 'key' => 'Kunci'],
+                'scope_field' => 'exam_id', // data ini terikat ke satu Paket Evaluasi (exam_id), bukan berdiri sendiri
+                'fields' => [
+                    ['key' => 'question', 'label' => 'Pertanyaan', 'type' => 'textarea', 'required' => true],
+                    ['key' => 'question_value', 'label' => 'Bobot Nilai', 'type' => 'number', 'required' => true],
+                    ['key' => 'option_a', 'label' => 'Opsi A', 'type' => 'text', 'required' => true],
+                    ['key' => 'option_b', 'label' => 'Opsi B', 'type' => 'text', 'required' => true],
+                    ['key' => 'option_c', 'label' => 'Opsi C', 'type' => 'text', 'required' => true],
+                    ['key' => 'option_d', 'label' => 'Opsi D', 'type' => 'text', 'required' => true],
+                    ['key' => 'key', 'label' => 'Kunci Jawaban', 'type' => 'select', 'required' => true, 'options' => ['A' => 'A', 'B' => 'B', 'C' => 'C', 'D' => 'D']],
+                    ],
+                ],
         ];
     }
 
@@ -199,7 +219,7 @@ class DataMasterController extends Controller
                 ->mapWithKeys(fn($u) => [$u->id => $u->name]),
             'program_studies' => ProgramStudy::orderBy('name')->get(['name'])
                 ->mapWithKeys(fn($p) => [$p->name => $p->name]),
-               'evaluation_categories' => EvaluationCategory::orderBy('urutan')->get(['name'])
+            'evaluation_categories' => EvaluationCategory::orderBy('urutan')->get(['name'])
                 ->mapWithKeys(fn($c) => [$c->name => 'EVALUASI ' . $c->name]),
         ];
     }
@@ -213,9 +233,29 @@ class DataMasterController extends Controller
         ];
     }
 
-    public function index()
+    /**
+     * Cek apakah $type ini boleh diakses lewat route saat ini.
+     * Route bisa titip default 'onlyTypes' => ['jadwal'] misalnya, untuk membatasi
+     * area tertentu (mis. Committee) hanya boleh CRUD kategori tertentu saja.
+     */
+    protected function assertTypeAllowed(Request $request, string $type): void
+    {
+        $only = $request->route('onlyTypes');
+        if ($only && !in_array($type, $only, true)) {
+            abort(404);
+        }
+    }
+
+    public function index(Request $request)
     {
         $types = self::types();
+
+        // Kalau route ini dibatasi (mis. Committee cuma boleh 'jadwal'), filter di sini
+        $only = $request->route('onlyTypes');
+        if ($only) {
+            $types = array_intersect_key($types, array_flip($only));
+        }
+
         $sources = $this->optionSources();
         $metaSources = $this->optionMetaSources();
 
@@ -245,18 +285,29 @@ class DataMasterController extends Controller
             ];
         }
 
-        $data = ['title' => 'Kelola Data Master'];
-        return view('role.admin.data-master.index', compact('data', 'categories'));
+        $data = ['title' => $request->route('title') ?? 'Kelola Data Master'];
+        $view = $request->route('view') ?? 'role.admin.data-master.index';
+
+        return view($view, compact('data', 'categories'));
     }
 
     /**
      * AJAX: daftar item untuk satu kategori (dipanggil saat modal list dibuka).
      */
-    public function items(string $type)
+    public function items(Request $request, string $type)
     {
-    $cfg = $this->config($type);
-
-    $rows = $cfg['model']::orderBy($cfg['display'])->get()
+        $this->assertTypeAllowed($request, $type);
+        $cfg = $this->config($type);
+    
+        $query = $cfg['model']::query();
+ 
+    if (!empty($cfg['scope_field'])) {
+        $scopeValue = $request->query($cfg['scope_field']);
+        abort_if(!$scopeValue, 422, "Parameter {$cfg['scope_field']} wajib diisi.");
+        $query->where($cfg['scope_field'], $scopeValue);
+        }
+ 
+    $rows = $query->orderBy($cfg['display'])->get()
         ->map(function ($row) use ($cfg) {
             $data = ['id' => $row->id];
             foreach ($cfg['fields'] as $f) {
@@ -268,55 +319,98 @@ class DataMasterController extends Controller
             }
             return $data;
         });
-
+ 
         return response()->json(['data' => $rows]);
     }
+
     protected function rulesFor(array $cfg, ?int $ignoreId = null): array
-{
-    $rules = [];
-    foreach ($cfg['fields'] as $f) {
-        if (!empty($f['virtual'])) {
-            continue;
-        }
-
-        $r = [$f['required'] ? 'required' : 'nullable'];
-
-        $r[] = match ($f['type']) {
-            'number' => 'integer',
-            'date' => 'date',
-            'time' => 'date_format:H:i,H:i:s',
-            'checkbox' => 'boolean',
-            'select' => 'string',
-            default => 'string',
-        };
-
-        if ($f['type'] === 'select' && isset($f['options']) && !isset($f['options_key'])) {
-            $r[] = Rule::in(array_keys($f['options']));
-        }
-
-        if (!empty($f['unique'])) {
-            [$table, $column] = explode(',', $f['unique']);
-            $uniqueRule = Rule::unique($table, $column);
-            if ($ignoreId) {
-                $uniqueRule = $uniqueRule->ignore($ignoreId);
-            }
-            $r[] = $uniqueRule;
-        }
-
-        $rules[$f['key']] = $r;
-    }
-
-    return $rules;
-    }
-
-    public function store(Request $request, string $type)
     {
-        $cfg = $this->config($type);
+        $rules = [];
+        foreach ($cfg['fields'] as $f) {
+            if (!empty($f['virtual'])) {
+                continue;
+            }
 
-        $validator = Validator::make($request->all(), $this->rulesFor($cfg), $this->messagesFor($cfg));
+            $r = [$f['required'] ? 'required' : 'nullable'];
+
+            $r[] = match ($f['type']) {
+                'number' => 'integer',
+                'date' => 'date',
+                'time' => 'date_format:H:i,H:i:s',
+                'checkbox' => 'boolean',
+                'select' => 'string',
+                default => 'string',
+            };
+
+            if ($f['type'] === 'select' && isset($f['options']) && !isset($f['options_key'])) {
+                $r[] = Rule::in(array_keys($f['options']));
+            }
+
+            if (!empty($f['unique'])) {
+                [$table, $column] = explode(',', $f['unique']);
+                $uniqueRule = Rule::unique($table, $column);
+                if ($ignoreId) {
+                    $uniqueRule = $uniqueRule->ignore($ignoreId);
+                }
+                $r[] = $uniqueRule;
+            }
+
+            $rules[$f['key']] = $r;
+        }
+
+        return $rules;
+    }
+
+   public function store(Request $request, string $type)
+{
+    $this->assertTypeAllowed($request, $type);
+    $cfg = $this->config($type);
+ 
+    $validator = Validator::make($request->all(), $this->rulesFor($cfg, null), $this->messagesFor($cfg));
+    $validated = $validator->validate();
+ 
+    foreach ($cfg['fields'] as $f) {
+        if ($f['type'] === 'checkbox') {
+            $validated[$f['key']] = (bool) ($validated[$f['key']] ?? false);
+        }
+        if ($f['type'] === 'time' && !empty($validated[$f['key']])) {
+            $validated[$f['key']] = \Carbon\Carbon::createFromFormat(
+                strlen($validated[$f['key']]) === 5 ? 'H:i' : 'H:i:s',
+                $validated[$f['key']]
+            )->format('H:i:s');
+        }
+    }
+        if (!empty($cfg['scope_field'])) {
+            $scopeValue = $request->input($cfg['scope_field']);
+            abort_if(!$scopeValue, 422, "Parameter {$cfg['scope_field']} wajib diisi.");
+            $validated[$cfg['scope_field']] = $scopeValue;
+        }
+    
+        if ($request->user()) {
+            $validated['created_by_id'] = $request->user()->id;
+            $validated['updated_by_id'] = $request->user()->id;
+        }
+    
+        $row = $cfg['model']::create($validated);
+    
+        return response()->json([
+            'message' => 'Data berhasil ditambahkan.',
+            'data' => $row,
+        ], 201);
+    }
+
+
+       
+    public function update(Request $request, string $type, int $id)
+    {
+        $this->assertTypeAllowed($request, $type);
+        $cfg = $this->config($type);
+        $row = $cfg['model']::findOrFail($id);
+
+        $validator = Validator::make($request->all(), $this->rulesFor($cfg, $id), $this->messagesFor($cfg));
         $validated = $validator->validate();
 
-                foreach ($cfg['fields'] as $f) {
+        foreach ($cfg['fields'] as $f) {
             if ($f['type'] === 'checkbox') {
                 $validated[$f['key']] = (bool) ($validated[$f['key']] ?? false);
             }
@@ -328,40 +422,6 @@ class DataMasterController extends Controller
                 )->format('H:i:s');
             }
         }
-
-        if ($request->user()) {
-            $validated['created_by_id'] = $request->user()->id;
-            $validated['updated_by_id'] = $request->user()->id;
-        }
-
-        $row = $cfg['model']::create($validated);
-
-        return response()->json([
-            'message' => 'Data berhasil ditambahkan.',
-            'data' => $row,
-        ], 201);
-    }
-
-    public function update(Request $request, string $type, int $id)
-    {
-        $cfg = $this->config($type);
-        $row = $cfg['model']::findOrFail($id);
-
-       $validator = Validator::make($request->all(), $this->rulesFor($cfg, $id), $this->messagesFor($cfg));
-        $validated = $validator->validate();
-
-        foreach ($cfg['fields'] as $f) {
-    if ($f['type'] === 'checkbox') {
-        $validated[$f['key']] = (bool) ($validated[$f['key']] ?? false);
-    }
-    if ($f['type'] === 'time' && !empty($validated[$f['key']])) {
-        // pastikan selalu tersimpan sebagai H:i:s
-        $validated[$f['key']] = \Carbon\Carbon::createFromFormat(
-            strlen($validated[$f['key']]) === 5 ? 'H:i' : 'H:i:s',
-            $validated[$f['key']]
-        )->format('H:i:s');
-    }
-}
 
         if ($request->user()) {
             $validated['updated_by_id'] = $request->user()->id;
@@ -377,6 +437,7 @@ class DataMasterController extends Controller
 
     public function destroy(Request $request, string $type, int $id)
     {
+        $this->assertTypeAllowed($request, $type);
         $cfg = $this->config($type);
         $row = $cfg['model']::findOrFail($id);
         $row->delete();
@@ -384,14 +445,68 @@ class DataMasterController extends Controller
         return response()->json(['message' => 'Data berhasil dihapus.']);
     }
 
-    protected function messagesFor(array $cfg): array
-{
-    $messages = [];
-    foreach ($cfg['fields'] as $f) {
-        if (!empty($f['unique'])) {
-            $messages["{$f['key']}.unique"] = "{$f['label']} sudah dipakai, pilih angka lain.";
+    /**
+     * Toggle boolean 'important_flag' — dipakai oleh tombol bintang (⭐).
+     * Hanya berlaku kalau kategori punya field 'important_flag'.
+     */
+    public function toggleImportant(Request $request, string $type, int $id)
+    {
+        $this->assertTypeAllowed($request, $type);
+        $cfg = $this->config($type);
+
+        $hasField = collect($cfg['fields'])->contains(fn ($f) => $f['key'] === 'important_flag');
+        abort_unless($hasField, 404);
+
+        $row = $cfg['model']::findOrFail($id);
+        $row->important_flag = !$row->important_flag;
+        if ($request->user()) {
+            $row->updated_by_id = $request->user()->id;
         }
+        $row->save();
+
+        return response()->json([
+            'message' => $row->important_flag ? 'Ditandai penting.' : 'Tanda penting dihapus.',
+            'data' => $row,
+        ]);
     }
-    return $messages;
-}
+
+    /**
+     * Toggle antara dua opsi field 'status' (mis. published <-> draft) —
+     * dipakai oleh tombol mata (👁). Berlaku untuk kategori apa pun yang
+     * field 'status'-nya berupa select dengan opsi (options) statis.
+     */
+    public function togglePublish(Request $request, string $type, int $id)
+    {
+        $this->assertTypeAllowed($request, $type);
+        $cfg = $this->config($type);
+
+        $statusField = collect($cfg['fields'])->firstWhere('key', 'status');
+        abort_unless($statusField && !empty($statusField['options']), 404);
+
+        $options = array_keys($statusField['options']);
+        $row = $cfg['model']::findOrFail($id);
+
+        $lainnya = collect($options)->first(fn ($o) => $o !== $row->status) ?? $row->status;
+        $row->status = $lainnya;
+        if ($request->user()) {
+            $row->updated_by_id = $request->user()->id;
+        }
+        $row->save();
+
+        return response()->json([
+            'message' => "Status diubah menjadi {$lainnya}.",
+            'data' => $row,
+        ]);
+    }
+
+    protected function messagesFor(array $cfg): array
+    {
+        $messages = [];
+        foreach ($cfg['fields'] as $f) {
+            if (!empty($f['unique'])) {
+                $messages["{$f['key']}.unique"] = "{$f['label']} sudah dipakai, pilih angka lain.";
+            }
+        }
+        return $messages;
+    }
 }

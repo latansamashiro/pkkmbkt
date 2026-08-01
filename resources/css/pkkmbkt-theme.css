@@ -1,47 +1,75 @@
 /* ============================================================
    PKKMB-KT UNILAM 2026 — Design System
-   Tokens & komponen sinkron dengan seluruh prototype HTML
-   (index.html, kelola_absensi.html, dashboard_superadmin.html, dll)
+   Tailwind v4 entry (@tailwindcss/vite) + tokens & komponen
+   sinkron dengan seluruh prototype HTML
    ============================================================ */
 
+@import 'tailwindcss';
 
-      /* ============ TOKENS (sinkron dengan index.html & kelola_absensi.html) ============ */
-      :root {
-        --navy-900: #152159;
-        --navy-700: #1e3a8f;
-        --navy-600: #2a4bb0;
-        --teal-600: #0f8a8c;
-        --teal-500: #16a0a1;
-        --teal-tint: #e2f3f2;
-        --lime-500: #a9c73b;
-        --lime-tint: #f2f6e0;
-        --navy-tint: #e6e9f6;
-        --coral-500: #e0665a;
-        --coral-tint: #fbeae8;
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
 
-        --bg: #f2f4fa;
-        --surface: #ffffff;
-        --surface-muted: #e8ebf6;
-        --border: #e1e5f1;
+@theme {
+    --color-navy-900: #152159;
+    --color-navy-700: #1e3a8f;
+    --color-navy-600: #2a4bb0;
+    --color-teal-600: #0f8a8c;
+    --color-teal-500: #16a0a1;
+    --color-teal-tint: #e2f3f2;
+    --color-lime-500: #a9c73b;
+    --color-lime-tint: #f2f6e0;
+    --color-navy-tint: #e6e9f6;
+    --color-coral-500: #e0665a;
+    --color-coral-tint: #fbeae8;
+    --color-bg: #f2f4fa;
+    --color-surface: #ffffff;
+    --color-surface-muted: #e8ebf6;
+    --color-border: #e1e5f1;
+    --color-ink-900: #1b2238;
+    --color-ink-600: #5b6175;
+    --color-ink-400: #8d92a6;
 
-        --ink-900: #1b2238;
-        --ink-600: #5b6175;
-        --ink-400: #8d92a6;
+    --font-display: "Lora", serif;
+    --font-sans: "Plus Jakarta Sans", sans-serif;
 
-        --radius-lg: 28px;
-        --radius-md: 18px;
-        --radius-sm: 13px;
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --radius-sm: 13px;
 
-        --shadow-card: 0 2px 14px rgba(21, 33, 89, 0.07), 0 1px 2px rgba(21, 33, 89, 0.05);
-        --shadow-pop: 0 10px 24px rgba(21, 33, 89, 0.16);
+    --shadow-card: 0 2px 14px rgba(21, 33, 89, 0.07), 0 1px 2px rgba(21, 33, 89, 0.05);
+    --shadow-pop: 0 10px 24px rgba(21, 33, 89, 0.16);
 
-        --font-display: "Lora", serif;
-        --font-sans: "Plus Jakarta Sans", sans-serif;
+    --animate-pulse-dot: pulse 1.6s infinite ease-in-out;
+}
 
+[x-cloak] {
+    display: none !important;
+}
+
+@layer base {
+    :root {
+        --navy-900: var(--color-navy-900);
+        --navy-700: var(--color-navy-700);
+        --navy-600: var(--color-navy-600);
+        --teal-600: var(--color-teal-600);
+        --teal-500: var(--color-teal-500);
+        --teal-tint: var(--color-teal-tint);
+        --lime-500: var(--color-lime-500);
+        --lime-tint: var(--color-lime-tint);
+        --navy-tint: var(--color-navy-tint);
+        --coral-500: var(--color-coral-500);
+        --coral-tint: var(--color-coral-tint);
+        --bg: var(--color-bg);
+        --surface: var(--color-surface);
+        --surface-muted: var(--color-surface-muted);
+        --border: var(--color-border);
+        --ink-900: var(--color-ink-900);
+        --ink-600: var(--color-ink-600);
+        --ink-400: var(--color-ink-400);
         --sidebar-w-tablet: 84px;
         --sidebar-w-desktop: 264px;
         --bottomnav-h: 74px;
-      }
+    }
 
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; max-width: 100%; }
@@ -62,7 +90,20 @@
       :focus-visible { outline: 2.5px solid var(--teal-600); outline-offset: 2px; border-radius: 6px; }
       .font-display { font-family: var(--font-display); }
 
-      /* ============ APP SHELL ============ */
+    
+
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+        @apply bg-surface-muted rounded-full;
+    }
+}
+
+@layer components {
+
+/* ============ APP SHELL ============ */
       .app { display: flex; min-height: 100vh; }
       .sidebar {
         display: none;
@@ -649,3 +690,11 @@
         .login-shell { grid-template-columns: 1fr 1fr; }
         .login-info { display: flex; }
       }
+}
+
+@layer utilities {
+        /* Progress ring kehadiran (dipakai di stat card wide) */
+    .ring-fill {
+        transition: stroke-dashoffset 0.6s ease;
+    }
+}

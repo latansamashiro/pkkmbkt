@@ -1,4 +1,4 @@
-@extends('layouts.admin.main')
+@extends('layouts.committee.main')
 @section('content')
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -9,7 +9,7 @@
 
     <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
         <div>
-            <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Administrasi</p>
+            <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Kelola Data</p>
             <h2 class="text-2xl font-extrabold text-slate-800 m-0">{{ $data['title'] }}</h2>
         </div>
         <button id="btnTambah"
@@ -26,7 +26,7 @@
                 <option value="aktif">Aktif</option>
                 <option value="nonaktif">Nonaktif</option>
             </select>
-            @if ($showAcademic)
+             @if ($showAcademic)
                 <select id="filterProdi"
                     class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
                     <option value="">Semua Program Studi</option>
@@ -73,7 +73,7 @@
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Status</th>
-                        
+
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Aksi</th>
@@ -257,9 +257,9 @@
 @endphp
 
 @push('scripts')
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        (function ($) { 
+         (function ($) {
         $(function () {
 
             // ===== Data asli dari database (dikirim server saat halaman dimuat) =====
@@ -277,18 +277,18 @@
             let currentPage = 1;
             let editingId = null;
 
-           function normalizeText(str) {
+            function normalizeText(str) {
             return (str || "").trim().toLowerCase();
-            }
+        }
 
             function filteredData() {
-            const status = $("#filterStatus").val();
-            const prodi = SHOW_ACADEMIC ? normalizeText($("#filterProdi").val()) : "";
-            const q = $("#searchPengguna").val().trim().toLowerCase();
-            return penggunaList.filter((p) =>
-                (!status || p.status === status) &&
-                (!prodi || normalizeText(p.program_study_name) === prodi) &&
-                (!q || p.nama.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
+                const status = $("#filterStatus").val();
+                const prodi = SHOW_ACADEMIC ? normalizeText($("#filterProdi").val()) : "";
+                const q = $("#searchPengguna").val().trim().toLowerCase();
+                return penggunaList.filter((p) =>
+                    (!status || p.status === status) &&
+                    (!prodi || normalizeText(p.program_study_name) === prodi) &&
+                    (!q || p.nama.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
                 );
             }
 
@@ -386,7 +386,7 @@
                 $('[data-aksi="hapus"]').on("click", function () { hapusPengguna(Number($(this).data("id"))); });
             }
 
-          $("#filterStatus").on("change", () => { currentPage = 1; renderTabel(); });
+           $("#filterStatus").on("change", () => { currentPage = 1; renderTabel(); });
             if (SHOW_ACADEMIC) {
                 $("#filterProdi").on("change", () => { currentPage = 1; renderTabel(); });
             }
@@ -544,7 +544,8 @@
                     tampilkanToast(result.message || "Gagal menghapus data.");
                 });
             }
-            renderTabel();
+
+           renderTabel();
         });
     })(jQuery);
     </script>
