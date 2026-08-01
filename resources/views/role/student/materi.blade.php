@@ -1103,6 +1103,11 @@
       .footer-links a:hover {
         color: #aeb6e0;
       }
+      @media (max-width: 767px) {
+        .footer {
+          padding-bottom: calc(var(--bottomnav-h) + 16px);
+        }
+      }
 
       .scroller-clean::-webkit-scrollbar {
         display: none;
