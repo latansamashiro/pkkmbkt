@@ -21,6 +21,53 @@ use App\Models\ExamDetail;
 class DataMasterController extends Controller
 {
     /**
+     * Jam sesi absensi FIXED (sesuai Ketentuan Absensi) — Panitia cuma
+     * masukin tanggal, 3 sesi ini otomatis dibuat untuk tanggal itu.
+     */
+    protected const SESI_ABSENSI_FIXED = [
+        ['session_name' => 'Sesi 1', 'time_begin' => '08:00', 'time_end' => '10:00'],
+        ['session_name' => 'Sesi 2', 'time_begin' => '13:00', 'time_end' => '15:00'],
+        ['session_name' => 'Sesi 3', 'time_begin' => '16:00', 'time_end' => '18:00'],
+    ];
+
+    /**
+     * Tambah satu HARI presensi sekaligus — otomatis membuat 3 sesi fixed
+     * (08.00-10.00, 13.00-15.00, 16.00-18.00) untuk tanggal yang dipilih.
+     * Kalau salah satu sesi di tanggal itu sudah ada, dilewati saja (tidak dobel).
+     */
+    public function jadwalAbsensiStoreHari(Request $request)
+    {
+        $validated = $request->validate([
+            'attendance_date' => ['required', 'date'],
+        ]);
+
+        $dayName = \Carbon\Carbon::parse($validated['attendance_date'])->locale('id')->translatedFormat('l');
+
+        $dibuat = [];
+        foreach (self::SESI_ABSENSI_FIXED as $sesi) {
+            $row = \App\Models\AttendanceTemplate::firstOrCreate(
+                [
+                    'attendance_date' => $validated['attendance_date'],
+                    'session_name' => $sesi['session_name'],
+                ],
+                [
+                    'day_name' => $dayName,
+                    'time_begin' => $sesi['time_begin'],
+                    'time_end' => $sesi['time_end'],
+                    'created_by_id' => $request->user()->id,
+                    'updated_by_id' => $request->user()->id,
+                ]
+            );
+            $dibuat[] = $row;
+        }
+
+        return response()->json([
+            'message' => 'Hari & 3 sesi absensi berhasil ditambahkan.',
+            'data' => $dibuat,
+        ], 201);
+    }
+
+    /**
      * Konfigurasi tiap jenis data master.
      * - model     : class Eloquent yang dipakai
      * - label     : judul yang tampil di card & modal
@@ -63,8 +110,12 @@ class DataMasterController extends Controller
                     'time_end' => 'Jam Selesai',
                 ],
                 'fields' => [
-                    ['key' => 'day_name', 'label' => 'Nama Hari', 'type' => 'text', 'required' => true],
-                    ['key' => 'session_name', 'label' => 'Nama Sesi', 'type' => 'text', 'required' => true],
+                    ['key' => 'session_name', 'label' => 'Sesi', 'type' => 'select', 'required' => true, 'options' => [
+                        'Sesi 1' => 'Sesi 1',
+                        'Sesi 2' => 'Sesi 2',
+                        'Sesi 3' => 'Sesi 3',
+                        'Sesi 4' => 'Sesi 4',
+                    ]],
                     ['key' => 'attendance_date', 'label' => 'Tanggal', 'type' => 'date', 'required' => true],
                     ['key' => 'time_begin', 'label' => 'Jam Mulai', 'type' => 'time', 'required' => true],
                     ['key' => 'time_end', 'label' => 'Jam Selesai', 'type' => 'time', 'required' => true],
@@ -402,6 +453,15 @@ class DataMasterController extends Controller
             )->format('H:i:s');
         }
     }
+        // "Nama Hari" tidak diisi manual — otomatis dari tanggal yang dipilih.
+        if ($type === 'jadwal_absensi' && !empty($validated['attendance_date'])) {
+            $validated['day_name'] = \Carbon\Carbon::parse($validated['attendance_date'])->locale('id')->translatedFormat('l');
+
+            $sudahAda = \App\Models\AttendanceTemplate::where('attendance_date', $validated['attendance_date'])
+                ->where('session_name', $validated['session_name'])
+                ->exists();
+            abort_if($sudahAda, 422, "{$validated['session_name']} untuk tanggal itu sudah ada, tidak boleh dobel.");
+        }
         if (!empty($cfg['scope_field'])) {
             $scopeValue = $request->input($cfg['scope_field']);
             abort_if(!$scopeValue, 422, "Parameter {$cfg['scope_field']} wajib diisi.");
@@ -443,6 +503,17 @@ class DataMasterController extends Controller
                     $validated[$f['key']]
                 )->format('H:i:s');
             }
+        }
+
+        // "Nama Hari" tidak diisi manual — otomatis dari tanggal yang dipilih.
+        if ($type === 'jadwal_absensi' && !empty($validated['attendance_date'])) {
+            $validated['day_name'] = \Carbon\Carbon::parse($validated['attendance_date'])->locale('id')->translatedFormat('l');
+
+            $sudahAda = \App\Models\AttendanceTemplate::where('attendance_date', $validated['attendance_date'])
+                ->where('session_name', $validated['session_name'])
+                ->where('id', '!=', $id)
+                ->exists();
+            abort_if($sudahAda, 422, "{$validated['session_name']} untuk tanggal itu sudah ada, tidak boleh dobel.");
         }
 
         if ($request->user()) {

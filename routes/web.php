@@ -215,6 +215,9 @@ Route::middleware(['auth'])->group(function () {
                 $withDefaults(Route::put("/{$sec['path']}/{type}/{id}", 'update')->name("committee.{$key}.update"), $defaults);
                 $withDefaults(Route::delete("/{$sec['path']}/{type}/{id}", 'destroy')->name("committee.{$key}.destroy"), $defaults);
             }
+
+            // Tambah 1 hari sekaligus (3 sesi fixed) khusus untuk jadwal absensi
+            Route::post('/absensi-hari', 'jadwalAbsensiStoreHari')->name('committee.absensi.store-hari');
         });
     });
 });

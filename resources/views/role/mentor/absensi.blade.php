@@ -285,11 +285,12 @@
       //    (Kelola Jadwal Absensi), dikelompokkan otomatis per hari.
       // ======================================================================
       @php
-          $jadwalHariJs = $templates->groupBy('day_name')->map(function ($sesiHari, $dayName) use ($attendanceMap) {
+          $jadwalHariJs = $templates->groupBy('attendance_date')->map(function ($sesiHari, $tanggal) use ($attendanceMap) {
+              $dayName = optional($sesiHari->first())->day_name;
               return [
-                  'key' => \Illuminate\Support\Str::slug($dayName) ?: 'hari',
+                  'key' => (string) $tanggal,
                   'label' => $dayName,
-                  'tanggal' => optional($sesiHari->first())->attendance_date,
+                  'tanggal' => $tanggal,
                   'sesi' => $sesiHari->map(function ($t) use ($attendanceMap) {
                       return [
                           'key' => (string) $t->id,
@@ -538,12 +539,14 @@
       // ======================================================================
       // ►► SIMPAN (draft) & SUBMIT (kunci permanen) — beneran ke server.
       // ======================================================================
-      async function simpanPresensi() {
-        if (!sesiAktif) return;
+      // dipanggil dari tombol "Simpan Presensi" (tampilkan toast + pesan)
+      // maupun otomatis dari submitPresensi() sebelum mengunci (diam-diam).
+      async function simpanKeServer(diam = false) {
+        if (!sesiAktif) return false;
         const marks = dataPresensi[sesiAktif] || {};
         if (Object.keys(marks).length === 0) {
-          alert("Isi dulu minimal satu tanda kehadiran sebelum menyimpan.");
-          return;
+          if (!diam) alert("Isi dulu minimal satu tanda kehadiran sebelum menyimpan.");
+          return false;
         }
         try {
           const res = await fetch(`{{ url('mentor/absensi') }}/${sesiAktif}/save`, {
@@ -557,17 +560,39 @@
           });
           const result = await res.json();
           if (!res.ok) throw new Error(result.message || "Gagal menyimpan.");
-          tampilkanToast(result.message || "Presensi tersimpan.");
+          if (!diam) tampilkanToast(result.message || "Presensi tersimpan.");
+          return true;
         } catch (e) {
-          alert(e.message || "Gagal menyimpan presensi. Coba lagi.");
+          if (!diam) alert(e.message || "Gagal menyimpan presensi. Coba lagi.");
+          return false;
         }
+      }
+
+      async function simpanPresensi() {
+        await simpanKeServer(false);
       }
 
       async function submitPresensi() {
         if (!sesiAktif) return;
         const hari = getHari(hariAktif);
         const sesi = getSesi(hari, sesiAktif);
+
+        // Kalau belum ada tanda kehadiran sama sekali, minta isi dulu (sama seperti Simpan).
+        const marks = dataPresensi[sesiAktif] || {};
+        if (Object.keys(marks).length === 0) {
+          alert("Isi dulu minimal satu tanda kehadiran sebelum submit.");
+          return;
+        }
+
         if (!confirm(`Yakin submit presensi "${sesi.label}, ${hari.label}"? Setelah disubmit, data TIDAK BISA diubah lagi oleh siapa pun.`)) return;
+
+        // Simpan diam-diam dulu (jaga-jaga kalau belum pernah diklik Simpan sebelumnya),
+        // baru kunci. Kalau simpan gagal, jangan lanjut submit.
+        const tersimpan = await simpanKeServer(true);
+        if (!tersimpan) {
+          alert("Gagal menyimpan presensi sebelum submit. Coba lagi.");
+          return;
+        }
 
         try {
           const res = await fetch(`{{ url('mentor/absensi') }}/${sesiAktif}/submit`, {

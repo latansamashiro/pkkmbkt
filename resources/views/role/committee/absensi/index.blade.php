@@ -12,13 +12,14 @@
             <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Kelola Data</p>
             <h2 class="text-2xl font-extrabold text-slate-800 m-0">{{ $data['title'] }}</h2>
             <p class="text-xs text-slate-400 m-0 mt-1">
-                Atur hari & sesi presensi (mis. Sesi 1 pukul 07.00&ndash;10.00). Sesi yang sudah punya absensi
+                Setiap hari otomatis punya 3 sesi tetap: <b>Sesi 1 (08.00&ndash;10.00)</b>, <b>Sesi 2 (13.00&ndash;15.00)</b>,
+                <b>Sesi 3 (16.00&ndash;18.00)</b>. Tinggal masukkan tanggalnya. Sesi yang sudah punya absensi
                 yang disubmit mentor tidak bisa diubah/dihapus lagi &mdash; datanya jadi arsip.
             </p>
         </div>
-        <button id="btnTambahSesi"
+        <button id="btnTambahHari"
             class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
-            <i data-lucide="calendar-plus" class="w-4 h-4"></i>Tambah Sesi
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>Tambah Hari
         </button>
     </div>
 
@@ -43,11 +44,39 @@
         <p id="sesiEmpty" class="hidden text-center text-sm text-slate-400 py-10">Belum ada sesi absensi dibuat.</p>
     </div>
 
-    <!-- ===== MODAL TAMBAH / EDIT SESI ===== -->
+    <!-- ===== MODAL TAMBAH HARI (otomatis buat 3 sesi fixed) ===== -->
+    <div id="modalTambahHari" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6">
+            <div class="flex items-start justify-between gap-4 mb-2">
+                <h3 class="text-lg font-extrabold text-slate-800 m-0">Tambah Hari</h3>
+                <button id="btnCloseTambahHari" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">
+                3 sesi (08.00&ndash;10.00, 13.00&ndash;15.00, 16.00&ndash;18.00) otomatis dibuat untuk tanggal ini.
+            </p>
+            <form id="formTambahHari">
+                <p id="tambahHariError"
+                    class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3"></p>
+                <label for="inputTanggalHari" class="block text-xs font-bold text-slate-500 mb-1.5">Tanggal</label>
+                <input type="date" id="inputTanggalHari" required
+                    class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                <div class="flex items-center justify-end gap-3 mt-6">
+                    <button type="button" id="btnBatalTambahHari"
+                        class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm px-4 py-2.5 rounded-xl transition">Batal</button>
+                    <button type="submit" id="btnSimpanTambahHari"
+                        class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition disabled:opacity-60">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL EDIT SESI (satu sesi, kalau perlu diubah manual) ===== -->
     <div id="modalForm" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6">
             <div class="flex items-start justify-between gap-4 mb-5">
-                <h3 id="modalFormTitle" class="text-lg font-extrabold text-slate-800 m-0">Tambah Sesi</h3>
+                <h3 id="modalFormTitle" class="text-lg font-extrabold text-slate-800 m-0">Edit Sesi</h3>
                 <button id="btnCloseForm" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -149,6 +178,17 @@
                 const id = `field_${f.name}`;
                 const req = f.required ? "required" : "";
                 const val = value ?? "";
+
+                if (f.type === "select") {
+                    const opsi = Object.entries(f.options || {})
+                        .map(([k, label]) => `<option value="${k}" ${String(val) === String(k) ? "selected" : ""}>${label}</option>`)
+                        .join("");
+                    return `<select id="${id}" ${req}
+                        class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                        <option value="">Pilih...</option>${opsi}
+                    </select>`;
+                }
+
                 return `<input type="${f.type}" id="${id}" value="${val}" ${req}
                     class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />`;
             }
@@ -182,7 +222,49 @@
             }
             function tutupForm() { $modalForm.addClass("hidden").removeClass("flex"); editingId = null; }
 
-            $("#btnTambahSesi").on("click", () => bukaForm(null));
+            // ===== Modal Tambah Hari (bikin 3 sesi fixed sekaligus) =====
+            const $modalHari = $("#modalTambahHari");
+            const $hariError = $("#tambahHariError");
+
+            function bukaTambahHari() {
+                $hariError.addClass("hidden");
+                $("#inputTanggalHari").val("");
+                $modalHari.removeClass("hidden").addClass("flex");
+            }
+            function tutupTambahHari() { $modalHari.addClass("hidden").removeClass("flex"); }
+
+            $("#btnTambahHari").on("click", bukaTambahHari);
+            $("#btnCloseTambahHari").on("click", tutupTambahHari);
+            $("#btnBatalTambahHari").on("click", tutupTambahHari);
+            $modalHari.on("click", function (e) { if (e.target === this) tutupTambahHari(); });
+
+            $("#formTambahHari").on("submit", function (e) {
+                e.preventDefault();
+                $hariError.addClass("hidden");
+                const tanggal = $("#inputTanggalHari").val();
+                if (!tanggal) return;
+
+                const $btn = $("#btnSimpanTambahHari");
+                $btn.prop("disabled", true);
+
+                $.ajax({
+                    url: `{{ route('committee.absensi.store-hari') }}`,
+                    method: "POST",
+                    contentType: "application/json",
+                    headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
+                    data: JSON.stringify({ attendance_date: tanggal }),
+                }).done(function (result) {
+                    allItems.push(...result.data);
+                    tampilkanToast(result.message);
+                    tutupTambahHari();
+                    renderTabel();
+                }).fail(function (xhr) {
+                    const result = xhr.responseJSON || {};
+                    $hariError.text(result.message || "Terjadi kesalahan, silakan coba lagi.").removeClass("hidden");
+                }).always(function () {
+                    $btn.prop("disabled", false);
+                });
+            });
             $("#btnCloseForm").on("click", tutupForm);
             $("#btnBatalForm").on("click", tutupForm);
             $modalForm.on("click", function (e) { if (e.target === this) tutupForm(); });
