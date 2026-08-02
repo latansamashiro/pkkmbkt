@@ -286,8 +286,8 @@ class DataMasterController extends Controller
     protected function optionSources(): array
     {
         return [
-            'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name'])
-                ->mapWithKeys(fn($u) => [$u->id => $u->name]),
+            'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name', 'program_study_name'])
+                ->mapWithKeys(fn($u) => [$u->id => $u->name . ($u->program_study_name ? ' — ' . $u->program_study_name : '')]),
             'advisors' => User::where('role_name', 'ADVISOR')->orderBy('name')->get(['id', 'name'])
                 ->mapWithKeys(fn($u) => [$u->id => $u->name]),
             'program_studies' => ProgramStudy::orderBy('name')->get(['name'])
@@ -299,11 +299,15 @@ class DataMasterController extends Controller
 
     protected function optionMetaSources(): array
     {
-        return [
-            'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name', 'program_study_name'])
-                ->map(fn($u) => ['value' => $u->id, 'label' => $u->name, 'filter_value' => $u->program_study_name])
-                ->values(),
-        ];
+    return [
+        'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name', 'program_study_name'])
+            ->map(fn($u) => [
+                'value' => $u->id,
+                'label' => $u->name . ($u->program_study_name ? ' — ' . $u->program_study_name : ''),
+                'filter_value' => $u->program_study_name,
+            ])
+            ->values(),
+    ];
     }
 
     /**

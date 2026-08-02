@@ -36,7 +36,7 @@
             <span class="ic"><i data-lucide="megaphone"></i></span>
             <span class="label">Informasi</span>
         </a>
-        <a href="{{ route('committee.modul-pkkmb.index') }}" class="{{ request()->routeIs('committee.master.*') ? 'active' : '' }}">
+        <a href="{{ route('committee.modul-pkkmb.index') }}" class="{{ request()->routeIs('committee.modul-pkkmb.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="book-open"></i></span>
             <span class="label">Modul PKKMB</span>
         </a>

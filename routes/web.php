@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\ProfilController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Committee\AdvisorController;
 use Illuminate\Routing\RouteGroup;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LandingController;
@@ -188,16 +189,34 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mentor.destroy'), $defaults);
         });
 
-        // ===== Kelompok (reuse GroupController, view komite) =====
-        Route::controller(\App\Http\Controllers\Admin\GroupController::class)->prefix('kelompok')->group(function () use ($withDefaults) {
-            $defaults = ['title' => 'Kelola Kelompok', 'view' => 'role.committee.kelompok.index'];
+        // ===== Kelola Advisor (reuse AdvisorController) =====
+        Route::controller(AdvisorController::class)->prefix('advisor')->group(function () {
+            Route::get('/', 'index')->name('committee.advisor.index');
+            Route::post('/', 'store')->name('committee.advisor.store');
+            Route::put('/{user}', 'update')->name('committee.advisor.update');
+            Route::delete('/{user}', 'destroy')->name('committee.advisor.destroy');
+        });
+
+        // ===== Kelompok (reuse DataMasterController, tipe 'kelompok' — basis CRUD sama persis dengan Admin) =====
+        Route::controller(DataMasterController::class)->prefix('kelompok')->group(function () use ($withDefaults) {
+            $defaults = ['onlyTypes' => ['kelompok'], 'title' => 'Kelola Kelompok', 'view' => 'role.committee.kelompok.index'];
             $withDefaults(Route::get('/', 'index')->name('committee.master.index'), $defaults);
-            Route::post('/{group}/anggota', 'addMember')->name('committee.kelompok.anggota.store');
-            Route::delete('/{group}/anggota/{student}', 'removeMember')->name('committee.kelompok.anggota.destroy');
+            $withDefaults(Route::get('/{type}/items', 'items')->name('committee.master.items'), $defaults);
+            $withDefaults(Route::post('/{type}', 'store')->name('committee.master.store'), $defaults);
+            $withDefaults(Route::put('/{type}/{id}', 'update')->name('committee.master.update'), $defaults);
+            $withDefaults(Route::delete('/{type}/{id}', 'destroy')->name('committee.master.destroy'), $defaults);
+        });
+
+        // ===== Kelola Anggota per Kelompok (reuse GroupController) =====
+        Route::controller(\App\Http\Controllers\Admin\GroupController::class)->prefix('kelompok')->group(function () {
+            Route::get('/{group}/anggota', 'anggotaData')->name('committee.master.anggota.data');
+            Route::post('/{group}/anggota', 'addMember')->name('committee.master.anggota.store');
+            Route::delete('/{group}/anggota/{student}', 'removeMember')->name('committee.master.anggota.destroy');
+            Route::post('/{group}/anggota/import', 'importMembers')->name('committee.master.anggota.import');
         });
 
         // ===== Jadwal, Informasi, Modul PKKMB, Materi, Evaluasi (reuse DataMasterController, dibatasi per tipe) =====
-        Route::controller(\App\Http\Controllers\Admin\DataMasterController::class)->group(function () use ($withDefaults) {
+        Route::controller(DataMasterController::class)->group(function () use ($withDefaults) {
             $sections = [
                 'data-master' => ['path' => 'jadwal',      'types' => ['jadwal'],                          'title' => 'Kelola Jadwal',      'view' => 'role.committee.jadwal.index'],
                 'informasi'   => ['path' => 'informasi',   'types' => ['informasi'],                       'title' => 'Kelola Informasi',   'view' => 'role.committee.informasi.index'],

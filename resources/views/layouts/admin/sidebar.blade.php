@@ -23,6 +23,11 @@
             <span class="ic"><i data-lucide="user-check"></i></span>
             <span class="label">Kelola Mentor</span>
         </a>
+        <a href="{{ route('admin.kelompok.index') }}"
+            class="{{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
+            <span class="ic"><i data-lucide="users-round"></i></span>
+            <span class="label">Kelola Kelompok</span>
+        </a>
         <a href="{{ route('admin.advisor.index') }}"
             class="{{ request()->routeIs('admin.advisor.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="user-cog"></i></span>
@@ -32,11 +37,6 @@
             class="{{ request()->routeIs('admin.panitia.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="briefcase"></i></span>
             <span class="label">Kelola Panitia</span>
-        </a>
-        <a href="{{ route('admin.kelompok.index') }}"
-            class="{{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
-            <span class="ic"><i data-lucide="users-round"></i></span>
-            <span class="label">Kelola Kelompok</span>
         </a>
         <a href="{{ route('admin.role.index') }}" class="{{ request()->routeIs('admin.role.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="shield-check"></i></span>
