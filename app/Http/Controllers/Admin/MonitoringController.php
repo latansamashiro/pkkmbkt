@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Attendance;
 use App\Models\AttendanceDetail;
+use App\Models\AttendanceTemplate;
 use App\Models\Exam;
 use App\Models\Faculty;
 use App\Models\StudentExam;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Group;
+use App\Models\Member;
 use App\Models\Evaluation;
 use App\Models\EvaluationCategory;
 use App\Models\EvaluationDetail;
@@ -89,6 +91,8 @@ class MonitoringController extends Controller
                 'status'     => $totalDetail > 0 && $hadirDetail === $totalDetail ? 'Selesai' : 'Diproses',
                 'ref_type'   => 'attendance',
                 'ref_id'     => $a->id,
+                'group_id'   => $a->group_id,
+                'submitted'  => $a->status === 'submitted',
             ];
         });
 
@@ -111,6 +115,7 @@ class MonitoringController extends Controller
                     'status'     => $dijawab >= $exam->max_question ? 'Selesai' : 'Diproses',
                     'ref_type'   => 'exam',
                     'ref_id'     => $exam->id,
+                    'group_id'   => \App\Models\Member::where('student_id', $row->student_id)->value('group_id'),
                 ];
             });
     });
@@ -126,6 +131,7 @@ class MonitoringController extends Controller
             'status'     => 'Selesai',
             'ref_type'   => 'activity',
             'ref_id'     => $act->id,
+            'group_id'   => \App\Models\Member::where('student_id', $act->student_id)->value('group_id'),
         ]);
 
     // 4. Pelanggaran (poin minus) -- dari activities juga, activity_value < 0
@@ -139,6 +145,7 @@ class MonitoringController extends Controller
             'status'     => 'Selesai',
             'ref_type'   => 'activity',
             'ref_id'     => $act->id,
+            'group_id'   => \App\Models\Member::where('student_id', $act->student_id)->value('group_id'),
         ]);
 
     // gabung + filter + search

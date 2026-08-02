@@ -49,6 +49,25 @@
             </thead>
             <tbody>
                 @forelse ($laporan as $idx => $l)
+                    @php
+                        $lihatUrl = null;
+                        $downloadUrl = null;
+
+                        if (($l['group_id'] ?? null)) {
+                            if ($l['jenis'] === 'Absensi') {
+                                $lihatUrl = route('admin.monitoring.absensi.detail', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]);
+                                if ($l['submitted'] ?? false) {
+                                    $downloadUrl = route('admin.monitoring.absensi.export-pdf', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]);
+                                }
+                            } elseif ($l['jenis'] === 'Evaluasi') {
+                                $lihatUrl = route('admin.monitoring.evaluasi.detail', $l['group_id']);
+                            } elseif ($l['jenis'] === 'Keaktifan') {
+                                $lihatUrl = route('admin.monitoring.keaktifan.detail', $l['group_id']);
+                            } elseif ($l['jenis'] === 'Pelanggaran') {
+                                $lihatUrl = route('admin.monitoring.pelanggaran.detail', $l['group_id']);
+                            }
+                        }
+                    @endphp
                     <tr class="hover:bg-slate-50">
                         <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">{{ ($page - 1) * $perPage + $idx + 1 }}</td>
                         <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">{{ $l['jenis'] }}</td>
@@ -63,8 +82,17 @@
                         </td>
                         <td class="px-3.5 py-3 border-b border-slate-200">
                             <div class="flex items-center gap-3">
-                                <button type="button" class="text-teal-600 hover:text-teal-700 text-xs font-bold">Lihat</button>
-                                <button type="button" class="text-teal-600 hover:text-teal-700 text-xs font-bold">Download</button>
+                                @if ($lihatUrl)
+                                    <a href="{{ $lihatUrl }}" class="text-teal-600 hover:text-teal-700 text-xs font-bold">Lihat</a>
+                                @else
+                                    <span class="text-slate-300 text-xs font-bold cursor-not-allowed" title="Kelompok tidak diketahui">Lihat</span>
+                                @endif
+
+                                @if ($downloadUrl)
+                                    <a href="{{ $downloadUrl }}" target="_blank" class="text-teal-600 hover:text-teal-700 text-xs font-bold">Download</a>
+                                @elseif ($l['jenis'] === 'Absensi')
+                                    <span class="text-slate-300 text-xs font-bold cursor-not-allowed" title="Baru bisa didownload setelah absensi ini disubmit mentor">Download</span>
+                                @endif
                             </div>
                         </td>
                     </tr>

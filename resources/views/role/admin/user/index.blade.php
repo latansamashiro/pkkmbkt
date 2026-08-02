@@ -37,7 +37,7 @@
     @if ($showImport)
         <!-- ===== MODAL IMPORT EXCEL/CSV ===== -->
         <div id="modalImport" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
-            <div class="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-6">
+            <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6">
                 <div class="flex items-start justify-between gap-4 mb-1">
                     <h3 class="text-lg font-extrabold text-slate-800 m-0">Import {{ $roleLabel }} dari Excel/CSV</h3>
                     <button id="btnCloseImport" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
@@ -57,7 +57,7 @@
                 <form id="formImport">
                     <div id="importError" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3"></div>
                     <input type="file" id="inputFileImport" accept=".csv,.txt" required
-                        class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                        class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-500 cursor-pointer focus:outline-none focus:border-teal-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-teal-600 file:text-white file:font-bold file:text-xs file:cursor-pointer hover:file:bg-teal-700" />
                     <div class="flex items-center justify-end gap-3 mt-5">
                         <button type="button" id="btnBatalImport" class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm px-4 py-2.5 rounded-xl transition">Batal</button>
                         <button type="submit" id="btnProsesImport" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition disabled:opacity-60">Proses Import</button>
@@ -70,17 +70,26 @@
                         <div class="flex items-center justify-between mb-1.5">
                             <p class="text-xs font-bold text-teal-600 m-0">Akun berhasil dibuat:</p>
                             <button type="button" id="btnDownloadHasil"
-                                class="inline-flex items-center gap-1.5 text-xs font-bold text-teal-600 hover:underline">
+                                class="inline-flex items-center gap-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold px-3 py-1.5 rounded-lg transition">
                                 <i data-lucide="download" class="w-3.5 h-3.5"></i>Download Hasil (CSV)
                             </button>
                         </div>
-                        <div class="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
-                            <table class="w-full text-xs">
-                                <thead><tr class="bg-slate-50"><th class="text-left px-3 py-2">Nama</th><th class="text-left px-3 py-2">Email</th><th class="text-left px-3 py-2">Password</th><th class="text-left px-3 py-2">Kelompok</th></tr></thead>
-                                <tbody id="importBerhasilList"></tbody>
-                            </table>
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="max-h-52 overflow-y-auto overflow-x-auto">
+                                <table class="w-full text-xs border-collapse">
+                                    <thead class="sticky top-0 z-10">
+                                        <tr class="bg-slate-100">
+                                            <th class="text-left px-3 py-2 font-bold text-slate-500 whitespace-nowrap">Nama</th>
+                                            <th class="text-left px-3 py-2 font-bold text-slate-500 whitespace-nowrap">Email</th>
+                                            <th class="text-left px-3 py-2 font-bold text-slate-500 whitespace-nowrap">Password</th>
+                                            <th class="text-left px-3 py-2 font-bold text-slate-500 whitespace-nowrap">Kelompok</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="importBerhasilList"></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-1.5">Catat/kirim password ini ke mahasiswa &mdash; tidak ditampilkan lagi setelah modal ditutup. Kalau lupa, klik "Download Hasil (CSV)" dulu sebelum menutup ini.</p>
+                        <p class="text-[11px] text-slate-400 mt-1.5">Geser tabel ke samping kalau kepotong di layar kecil. Catat/kirim password ini ke mahasiswa &mdash; tidak ditampilkan lagi setelah modal ditutup. Kalau lupa, klik "Download Hasil (CSV)" dulu sebelum menutup ini.</p>
                     </div>
                     <div id="importGagalWrap" class="hidden">
                         <p class="text-xs font-bold text-rose-500 mb-1.5">Baris bermasalah:</p>
@@ -547,7 +556,7 @@
                         const $bWrap = $("#importBerhasilWrap").toggleClass("hidden", !(result.berhasil && result.berhasil.length));
                         const $bList = $("#importBerhasilList").empty();
                         (result.berhasil || []).forEach((b) => {
-                            $bList.append(`<tr class="border-t border-slate-100"><td class="px-3 py-1.5">${b.nama}</td><td class="px-3 py-1.5">${b.email}</td><td class="px-3 py-1.5 font-mono">${b.password}</td><td class="px-3 py-1.5">${b.kelompok || "-"}</td></tr>`);
+                            $bList.append(`<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="px-3 py-2 whitespace-nowrap font-semibold text-slate-700">${b.nama}</td><td class="px-3 py-2 whitespace-nowrap text-slate-500">${b.email}</td><td class="px-3 py-2 whitespace-nowrap"><span class="font-mono bg-amber-50 text-amber-700 px-2 py-0.5 rounded">${b.password}</span></td><td class="px-3 py-2 whitespace-nowrap text-slate-500">${b.kelompok || "-"}</td></tr>`);
                         });
                         const $gWrap = $("#importGagalWrap").toggleClass("hidden", !(result.gagal && result.gagal.length));
                         const $gList = $("#importGagalList").empty();
