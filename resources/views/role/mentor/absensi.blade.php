@@ -132,10 +132,11 @@
 
       .empty-state { padding: 30px 20px; text-align: center; font-size: 12.5px; color: var(--ink-400); font-weight: 600; }
 
-      .save-bar { position: sticky; bottom: calc(var(--bottomnav-h) + 12px); display: flex; justify-content: flex-end; margin-top: -4px; }
+      .save-bar { position: sticky; bottom: calc(var(--bottomnav-h) + 12px); display: flex; justify-content: flex-end; gap: 10px; margin-top: -4px; }
       @media (min-width: 768px) { .save-bar { bottom: 16px; } }
       .btn-save { display: inline-flex; align-items: center; gap: 8px; background: var(--navy-900); color: #fff; font-weight: 800; font-size: 13px; padding: 13px 26px; border-radius: 99px; border: none; cursor: pointer; box-shadow: var(--shadow-pop); transition: filter .15s, transform .15s; }
       .btn-save:hover { filter: brightness(1.12); transform: translateY(-2px); }
+      .btn-save:disabled { opacity: .45; cursor: not-allowed; transform: none; filter: none; }
       .btn-save svg { width: 16px; height: 16px; }
       .save-toast { position: fixed; bottom: calc(var(--bottomnav-h) + 16px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--navy-900); color: #fff; font-size: 12.5px; font-weight: 700; padding: 12px 22px; border-radius: 99px; box-shadow: var(--shadow-pop); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 60; display: flex; align-items: center; gap: 8px; }
       .save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -223,16 +224,20 @@
       </div>
 
       <div class="save-bar">
-        <button class="btn-save" id="btnSimpan">
+        <button class="btn-save" id="btnSimpan" style="flex:1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" /><path d="M17 21v-8H7v8M7 3v5h8" /></svg>
           Simpan Presensi
+        </button>
+        <button class="btn-save" id="btnSubmit" style="flex:1; background:#152159;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+          Submit &amp; Kunci
         </button>
       </div>
     </main>
 
     <div class="save-toast" id="saveToast">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-      <span>Presensi tersimpan</span>
+      <span class="toast-text">Presensi tersimpan</span>
     </div>
 
     <footer class="footer">
@@ -272,67 +277,51 @@
       // ►► KELOMPOK MENTOR — satu kelompok saja. Ganti nama & anggotanya
       //    sesuai penugasan mentor.
       // ======================================================================
-      const KELOMPOK_MENTOR = "Kelompok 01";
-      const ANGGOTA_KELOMPOK = [
-        { nama: "Alexander Arul Husein", npm: "525241019" },
-        { nama: "Bunga Citra Lestari", npm: "525241020" },
-        { nama: "Dimas Prakoso", npm: "525241021" },
-        { nama: "Eka Putri Ramadhani", npm: "525241022" },
-        { nama: "Farhan Maulana", npm: "525241023" },
-        { nama: "Gita Ayu Saputri", npm: "525241024" },
-        { nama: "Hendra Wijaya", npm: "525241025" },
-        { nama: "Indah Permata Sari", npm: "525241026" },
-        { nama: "Joko Anggoro", npm: "525241027" },
-        { nama: "Kirana Dewi", npm: "525241028" },
-        { nama: "Lutfi Hakim", npm: "525241029" },
-        { nama: "Mega Puspita", npm: "525241030" },
-        { nama: "Naufal Ramadhan", npm: "525241031" },
-        { nama: "Olivia Salsabila", npm: "525241032" },
-        { nama: "Putra Setiawan", npm: "525241033" },
-        { nama: "Qonita Rahmawati", npm: "525241034" },
-        { nama: "Rizky Aditya", npm: "525241035" },
-        { nama: "Salsa Nabila", npm: "525241036" },
-      ];
+      const KELOMPOK_MENTOR = @json($group->name ?? 'Belum ada kelompok');
+      const ANGGOTA_KELOMPOK = @json($students->map(fn($s) => ['nama' => $s->name, 'npm' => $s->npm ?? '-', 'id' => $s->id])->values());
 
       // ======================================================================
-      // ►► JADWAL 3 HARI × 3 SESI — ubah tanggal & jam tiap sesi di sini.
-      //    Tiap hari punya tanggal sendiri, dan tiap sesi dalam hari itu
-      //    otomatis terbuka/terkunci berdasarkan tanggal + jam gabungan.
+      // ►► JADWAL HARI & SESI — diambil dari sesi yang dibuat Panitia
+      //    (Kelola Jadwal Absensi), dikelompokkan otomatis per hari.
       // ======================================================================
-      const JADWAL_HARI = [
-        {
-          key: "hari1", label: "Hari 1", tanggal: "2026-09-07",
-          sesi: [
-            { key: "pagi", label: "Sesi Pagi", mulai: "08:00", selesai: "10:00" },
-            { key: "siang", label: "Sesi Siang", mulai: "13:00", selesai: "15:00" },
-            { key: "sore", label: "Sesi Sore", mulai: "16:00", selesai: "18:00" },
-          ],
-        },
-        {
-          key: "hari2", label: "Hari 2", tanggal: "2026-09-08",
-          sesi: [
-            { key: "pagi", label: "Sesi Pagi", mulai: "08:00", selesai: "10:00" },
-            { key: "siang", label: "Sesi Siang", mulai: "13:00", selesai: "15:00" },
-            { key: "sore", label: "Sesi Sore", mulai: "16:00", selesai: "18:00" },
-          ],
-        },
-        {
-          key: "hari3", label: "Hari 3", tanggal: "2026-09-09",
-          sesi: [
-            { key: "pagi", label: "Sesi Pagi", mulai: "08:00", selesai: "10:00" },
-            { key: "siang", label: "Sesi Siang", mulai: "13:00", selesai: "15:00" },
-            { key: "sore", label: "Sesi Sore", mulai: "16:00", selesai: "18:00" },
-          ],
-        },
-      ];
+      @php
+          $jadwalHariJs = $templates->groupBy('day_name')->map(function ($sesiHari, $dayName) use ($attendanceMap) {
+              return [
+                  'key' => \Illuminate\Support\Str::slug($dayName) ?: 'hari',
+                  'label' => $dayName,
+                  'tanggal' => optional($sesiHari->first())->attendance_date,
+                  'sesi' => $sesiHari->map(function ($t) use ($attendanceMap) {
+                      return [
+                          'key' => (string) $t->id,
+                          'label' => $t->session_name,
+                          'mulai' => substr($t->time_begin, 0, 5),
+                          'selesai' => substr($t->time_end, 0, 5),
+                          'terkunci' => ($attendanceMap[$t->id]['status'] ?? null) === 'submitted',
+                      ];
+                  })->values(),
+              ];
+          })->values();
+
+          $tandaTersimpanJs = collect($attendanceMap)->mapWithKeys(function ($v, $templateId) {
+              return [(string) $templateId => $v['marks']];
+          });
+      @endphp
+      const JADWAL_HARI = @json($jadwalHariJs);
+
+      // tanda H/I/S/A yang sudah tersimpan sebelumnya: { [templateId]: { [studentId]: 'H'|'I'|'S'|'A' } }
+      const TANDA_TERSIMPAN = @json($tandaTersimpanJs);
+
+      const CSRF_TOKEN = @json(csrf_token());
 
       const LABEL_STATUS = { H: "Hadir", I: "Izin", S: "Sakit", A: "Alpa" };
       const HURUF_STATUS = ["H", "I", "S", "A"];
 
       document.getElementById("kelompokNama").innerText = KELOMPOK_MENTOR;
 
-      let hariAktif = JADWAL_HARI[0].key;
+      let hariAktif = JADWAL_HARI.length ? JADWAL_HARI[0].key : null;
       let sesiAktif = null;
+      // dataPresensi sekarang berbasis ID mahasiswa (bukan nama), per sesi (template id):
+      // { [templateId]: { [studentId]: 'H'|'I'|'S'|'A' } }
       let dataPresensi = {};
       let kataKunciCari = "";
 
@@ -348,6 +337,7 @@
       function waktuGabung(tanggal, jam) { return new Date(`${tanggal}T${jam}:00`); }
 
       function statusSesi(hari, sesi) {
+        if (sesi.terkunci) return "disubmit";
         const now = new Date();
         const mulai = waktuGabung(hari.tanggal, sesi.mulai);
         const selesai = waktuGabung(hari.tanggal, sesi.selesai);
@@ -381,12 +371,14 @@
       function renderSesiTabs() {
         const hari = getHari(hariAktif);
         const wrap = document.getElementById("sesiTabs");
+        if (!hari) { wrap.innerHTML = ""; return; }
         wrap.innerHTML = hari.sesi.map((sesi) => {
           const st = statusSesi(hari, sesi);
           const isSelected = sesi.key === sesiAktif;
           let statusHtml = "";
           if (st === "buka") statusHtml = `<span class="sesi-status">● Sedang Berlangsung</span>`;
           else if (st === "terkunci") statusHtml = `<span class="sesi-status">🔒 Belum Dibuka</span>`;
+          else if (st === "disubmit") statusHtml = `<span class="sesi-status">📦 Sudah Disubmit</span>`;
           else statusHtml = `<span class="sesi-status">✓ Ditutup</span>`;
           return `
             <div class="sesi-tab ${st} ${isSelected ? "active-selected" : ""}" data-key="${sesi.key}">
@@ -405,14 +397,18 @@
       }
 
       function renderLockBanner() {
-        const hari = getHari(hariAktif);
-        const sesi = getSesi(hari, sesiAktif);
         const wrap = document.getElementById("lockBannerWrap");
+        const hari = getHari(hariAktif);
+        if (!hari) { wrap.innerHTML = ""; return; }
+        const sesi = getSesi(hari, sesiAktif);
+        if (!sesi) { wrap.innerHTML = ""; return; }
         const st = statusSesi(hari, sesi);
         if (st === "buka") { wrap.innerHTML = ""; return; }
         const pesan =
           st === "terkunci"
             ? `${sesi.label} ${hari.label} (${formatTanggalIndo(hari.tanggal)}) belum dibuka. Presensi bisa diisi mulai pukul ${sesi.mulai} WIB.`
+            : st === "disubmit"
+            ? `${sesi.label} ${hari.label} (${formatTanggalIndo(hari.tanggal)}) sudah DISUBMIT dan menjadi arsip. Data tidak bisa diubah lagi.`
             : `${sesi.label} ${hari.label} (${formatTanggalIndo(hari.tanggal)}) sudah ditutup. Kamu masih bisa melihat rekapnya, tapi tidak bisa mengubah presensi.`;
         wrap.innerHTML = `
           <div class="lock-banner">
@@ -423,6 +419,7 @@
       }
 
       function tentukanHariSesiAwal() {
+        if (!JADWAL_HARI.length) { hariAktif = null; sesiAktif = null; return; }
         for (const h of JADWAL_HARI) {
           const sesiBuka = h.sesi.find((s) => statusSesi(h, s) === "buka");
           if (sesiBuka) { hariAktif = h.key; sesiAktif = sesiBuka.key; return; }
@@ -432,42 +429,29 @@
           if (sesiTerkunci) { hariAktif = h.key; sesiAktif = sesiTerkunci.key; return; }
         }
         hariAktif = JADWAL_HARI[0].key;
-        sesiAktif = JADWAL_HARI[0].sesi[0].key;
+        sesiAktif = JADWAL_HARI[0].sesi.length ? JADWAL_HARI[0].sesi[0].key : null;
       }
 
-      function storageKeyPresensi() {
-        const hari = getHari(hariAktif);
-        return `absensi:${KELOMPOK_MENTOR}:${hari.tanggal}`;
+      // Data presensi yang sudah tersimpan dikirim langsung dari server
+      // (TANDA_TERSIMPAN), jadi tidak perlu fetch async lagi seperti sebelumnya.
+      function muatDataPresensi() {
+        dataPresensi = JSON.parse(JSON.stringify(TANDA_TERSIMPAN || {}));
       }
 
-      async function muatDataPresensi() {
-        dataPresensi = {};
-        try {
-          const res = await window.storage.get(storageKeyPresensi(), true);
-          if (res && res.value) {
-            const payload = JSON.parse(res.value);
-            if (payload && Array.isArray(payload.rows)) {
-              payload.rows.forEach((r) => {
-                if (r.nama) dataPresensi[r.nama] = { pagi: r.pagi || null, siang: r.siang || null, sore: r.sore || null };
-              });
-            }
-          }
-        } catch (e) {
-          // belum ada data tersimpan untuk hari ini — normal di awal
-        }
+      // sesiKey di sini = ID template presensi (angka, dikirim sebagai string dari server)
+      function getStatusAnggota(studentId, sesiKey) {
+        return dataPresensi[sesiKey] ? (dataPresensi[sesiKey][studentId] || null) : null;
       }
-
-      function getStatusAnggota(nama, sesiKey) { return dataPresensi[nama] ? dataPresensi[nama][sesiKey] : null; }
-      function setStatusAnggota(nama, sesiKey, kode) {
-        if (!dataPresensi[nama]) dataPresensi[nama] = { pagi: null, siang: null, sore: null };
-        dataPresensi[nama][sesiKey] = kode;
+      function setStatusAnggota(studentId, sesiKey, kode) {
+        if (!dataPresensi[sesiKey]) dataPresensi[sesiKey] = {};
+        dataPresensi[sesiKey][studentId] = kode;
       }
 
       function renderStatusStats() {
         const wrap = document.getElementById("statusStats");
         const hitung = { H: 0, I: 0, S: 0, A: 0 };
         ANGGOTA_KELOMPOK.forEach((m) => {
-          const s = getStatusAnggota(m.nama, sesiAktif);
+          const s = getStatusAnggota(m.id, sesiAktif);
           if (s) hitung[s]++;
         });
         const warna = { H: "#22c55e", I: "#3b82f6", S: "#f59e0b", A: "#ef4444" };
@@ -482,9 +466,19 @@
       }
 
       function renderMhsList() {
+        if (!hariAktif || !sesiAktif) {
+          document.getElementById("cardTitle").innerText = "Belum ada sesi absensi";
+          document.getElementById("cardCount").innerText = "";
+          document.getElementById("mhsList").innerHTML = `<div class="empty-state">Panitia belum membuat jadwal sesi absensi.</div>`;
+          document.getElementById("btnSimpan").disabled = true;
+          document.getElementById("btnSubmit").disabled = true;
+          return;
+        }
         const hari = getHari(hariAktif);
         const sesi = getSesi(hari, sesiAktif);
         const bisaEdit = statusSesi(hari, sesi) === "buka";
+        document.getElementById("btnSimpan").disabled = !bisaEdit;
+        document.getElementById("btnSubmit").disabled = !bisaEdit || sesi.terkunci;
         document.getElementById("cardTitle").innerText = `Daftar Anggota — ${sesi.label}, ${hari.label}`;
 
         const listEl = document.getElementById("mhsList");
@@ -494,14 +488,14 @@
         document.getElementById("cardCount").innerText = `${anggota.length} mahasiswa`;
 
         if (anggota.length === 0) {
-          listEl.innerHTML = `<div class="empty-state">Tidak ada anggota yang cocok dengan pencarian.</div>`;
+          listEl.innerHTML = `<div class="empty-state">${ANGGOTA_KELOMPOK.length === 0 ? "Belum ada anggota di kelompokmu." : "Tidak ada anggota yang cocok dengan pencarian."}</div>`;
         } else {
           listEl.innerHTML = anggota
             .map((m) => {
               const inisial = m.nama.split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
-              const statusNow = getStatusAnggota(m.nama, sesiAktif);
+              const statusNow = getStatusAnggota(m.id, sesiAktif);
               const tombol = HURUF_STATUS.map(
-                (k) => `<button class="status-btn ${statusNow === k ? "on" : ""}" data-k="${k}" data-nama="${m.nama}" ${bisaEdit ? "" : "disabled"}>${LABEL_STATUS[k]}</button>`,
+                (k) => `<button class="status-btn ${statusNow === k ? "on" : ""}" data-k="${k}" data-id="${m.id}" ${bisaEdit ? "" : "disabled"}>${LABEL_STATUS[k]}</button>`,
               ).join("");
               return `
                 <div class="mhs-row">
@@ -520,7 +514,7 @@
 
           listEl.querySelectorAll(".status-btn").forEach((btn) => {
             btn.addEventListener("click", () => {
-              setStatusAnggota(btn.dataset.nama, sesiAktif, btn.dataset.k);
+              setStatusAnggota(btn.dataset.id, sesiAktif, btn.dataset.k);
               renderMhsList();
               renderStatusStats();
               renderStatHero();
@@ -532,7 +526,7 @@
       function renderStatHero() {
         let hadir = 0, belum = 0;
         ANGGOTA_KELOMPOK.forEach((m) => {
-          const s = getStatusAnggota(m.nama, sesiAktif);
+          const s = getStatusAnggota(m.id, sesiAktif);
           if (s === "H") hadir++;
           if (!s) belum++;
         });
@@ -541,23 +535,58 @@
         document.getElementById("statHeroTotal").innerText = ANGGOTA_KELOMPOK.length;
       }
 
+      // ======================================================================
+      // ►► SIMPAN (draft) & SUBMIT (kunci permanen) — beneran ke server.
+      // ======================================================================
       async function simpanPresensi() {
-        const rows = ANGGOTA_KELOMPOK.map((m) => ({
-          nama: m.nama,
-          pagi: dataPresensi[m.nama]?.pagi || null,
-          siang: dataPresensi[m.nama]?.siang || null,
-          sore: dataPresensi[m.nama]?.sore || null,
-        }));
+        if (!sesiAktif) return;
+        const marks = dataPresensi[sesiAktif] || {};
+        if (Object.keys(marks).length === 0) {
+          alert("Isi dulu minimal satu tanda kehadiran sebelum menyimpan.");
+          return;
+        }
         try {
-          await window.storage.set(storageKeyPresensi(), JSON.stringify({ rows }), true);
-          tampilkanToast();
+          const res = await fetch(`{{ url('mentor/absensi') }}/${sesiAktif}/save`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-TOKEN": CSRF_TOKEN,
+              "Accept": "application/json",
+            },
+            body: JSON.stringify({ marks }),
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.message || "Gagal menyimpan.");
+          tampilkanToast(result.message || "Presensi tersimpan.");
         } catch (e) {
-          alert("Gagal menyimpan presensi. Coba lagi.");
+          alert(e.message || "Gagal menyimpan presensi. Coba lagi.");
         }
       }
 
-      function tampilkanToast() {
+      async function submitPresensi() {
+        if (!sesiAktif) return;
+        const hari = getHari(hariAktif);
+        const sesi = getSesi(hari, sesiAktif);
+        if (!confirm(`Yakin submit presensi "${sesi.label}, ${hari.label}"? Setelah disubmit, data TIDAK BISA diubah lagi oleh siapa pun.`)) return;
+
+        try {
+          const res = await fetch(`{{ url('mentor/absensi') }}/${sesiAktif}/submit`, {
+            method: "POST",
+            headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.message || "Gagal submit.");
+          sesi.terkunci = true;
+          tampilkanToast(result.message || "Presensi disubmit.");
+          renderSemua();
+        } catch (e) {
+          alert(e.message || "Gagal submit presensi. Coba lagi.");
+        }
+      }
+
+      function tampilkanToast(pesan) {
         const toast = document.getElementById("saveToast");
+        if (pesan) toast.querySelector(".toast-text").innerText = pesan;
         toast.classList.add("show");
         setTimeout(() => toast.classList.remove("show"), 2200);
       }
@@ -567,6 +596,7 @@
         renderMhsList();
       });
       document.getElementById("btnSimpan").addEventListener("click", simpanPresensi);
+      document.getElementById("btnSubmit").addEventListener("click", submitPresensi);
 
       function renderSemua() {
         renderHariTabs();
@@ -577,9 +607,9 @@
         renderStatHero();
       }
 
-      async function init() {
+      function init() {
         tentukanHariSesiAwal();
-        await muatDataPresensi();
+        muatDataPresensi();
         renderSemua();
         setInterval(() => { renderSesiTabs(); renderLockBanner(); renderMhsList(); }, 30000);
       }

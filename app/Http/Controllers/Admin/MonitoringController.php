@@ -219,6 +219,10 @@ public function absensiDetail(Request $request, $groupId, $tanggal)
         ->sortBy(fn ($a) => $a->template->time_begin ?? '')
         ->values();
 
+    // Export PDF/Excel cuma boleh kalau minimal satu sesi di tanggal ini sudah disubmit
+    // (data draft belum final, belum layak jadi laporan resmi).
+    $adaSubmitted = $sesiList->contains(fn ($a) => $a->status === 'submitted');
+
     $matrix = Member::where('group_id', $groupId)
         ->with('student')
         ->get()
@@ -240,7 +244,99 @@ public function absensiDetail(Request $request, $groupId, $tanggal)
             ];
         });
 
-    return view('role.admin.monitoring.absensi-detail', compact('group', 'tanggal', 'sesiList', 'matrix'));
+    return view('role.admin.monitoring.absensi-detail', compact('group', 'tanggal', 'sesiList', 'matrix', 'adaSubmitted'));
+}
+
+/**
+ * Halaman cetak (letterhead) untuk Export PDF — dibuka di tab baru,
+ * tinggal Ctrl+P / tombol Print di halaman itu untuk simpan sebagai PDF.
+ */
+public function absensiExportPdf($groupId, $tanggal)
+{
+    [$group, $tanggal, $sesiList, $matrix, $adaSubmitted] = array_values(
+        $this->siapkanDataAbsensiDetail($groupId, $tanggal)
+    );
+    abort_unless($adaSubmitted, 403, 'Belum ada sesi yang disubmit untuk tanggal ini.');
+
+    return view('role.admin.monitoring.absensi-print', compact('group', 'tanggal', 'sesiList', 'matrix'));
+}
+
+/**
+ * Export Excel (CSV) — dibuka Excel/Sheets langsung karena formatnya .csv.
+ */
+public function absensiExportExcel($groupId, $tanggal)
+{
+    [$group, $tanggal, $sesiList, $matrix, $adaSubmitted] = array_values(
+        $this->siapkanDataAbsensiDetail($groupId, $tanggal)
+    );
+    abort_unless($adaSubmitted, 403, 'Belum ada sesi yang disubmit untuk tanggal ini.');
+
+    $namaFile = 'absensi_' . \Illuminate\Support\Str::slug($group->name) . '_' . $tanggal . '.csv';
+
+    $callback = function () use ($sesiList, $matrix) {
+        $out = fopen('php://output', 'w');
+        fwrite($out, "\xEF\xBB\xBF"); // BOM biar Excel baca UTF-8 dengan benar
+
+        $header = ['No', 'Mahasiswa'];
+        foreach ($sesiList as $i => $sesi) {
+            $header[] = 'Sesi ' . ($i + 1) . ' (' . ($sesi->template->session_name ?? '-') . ')';
+        }
+        $header[] = 'Kehadiran (%)';
+        fputcsv($out, $header);
+
+        $labelStatus = ['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alfa' => 'Alfa'];
+        foreach ($matrix as $idx => $m) {
+            $row = [$idx + 1, $m['nama']];
+            foreach ($m['sesi'] as $status) {
+                $row[] = $labelStatus[$status] ?? '-';
+            }
+            $row[] = $m['persen'] . '%';
+            fputcsv($out, $row);
+        }
+        fclose($out);
+    };
+
+    return response()->stream($callback, 200, [
+        'Content-Type' => 'text/csv; charset=UTF-8',
+        'Content-Disposition' => "attachment; filename=\"{$namaFile}\"",
+    ]);
+}
+
+/**
+ * Helper bareng buat absensiExportPdf() & absensiExportExcel() supaya
+ * tidak duplikasi query dari absensiDetail().
+ */
+protected function siapkanDataAbsensiDetail($groupId, $tanggal): array
+{
+    $group = Group::with('mentor')->findOrFail($groupId);
+
+    $sesiList = Attendance::with('template')
+        ->where('group_id', $groupId)
+        ->where('attendance_date', $tanggal)
+        ->get()
+        ->sortBy(fn ($a) => $a->template->time_begin ?? '')
+        ->values();
+
+    $adaSubmitted = $sesiList->contains(fn ($a) => $a->status === 'submitted');
+
+    $matrix = Member::where('group_id', $groupId)
+        ->with('student')
+        ->get()
+        ->map(function ($m) use ($sesiList) {
+            $sesiStatus = $sesiList->map(function ($sesi) use ($m) {
+                $d = AttendanceDetail::where('attendance_id', $sesi->id)
+                    ->where('student_id', $m->student_id)
+                    ->first();
+                return $d->status_presence ?? '-';
+            });
+
+            $hadir  = $sesiStatus->filter(fn ($s) => $s === 'hadir')->count();
+            $persen = $sesiList->count() ? round($hadir / $sesiList->count() * 100) : 0;
+
+            return ['nama' => $m->student->name ?? '-', 'sesi' => $sesiStatus, 'persen' => $persen];
+        });
+
+    return compact('group', 'tanggal', 'sesiList', 'matrix', 'adaSubmitted');
 }
 public function keaktifan(Request $request)
 {

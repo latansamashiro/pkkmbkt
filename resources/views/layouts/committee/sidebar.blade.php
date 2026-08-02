@@ -28,7 +28,7 @@
             <span class="ic"><i data-lucide="calendar-days"></i></span>
             <span class="label">Jadwal</span>
         </a>
-        <a href="#">
+        <a href="{{ route('committee.absensi.index') }}" class="{{ request()->routeIs('committee.absensi.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="calendar-check"></i></span>
             <span class="label">Absensi</span>
         </a>

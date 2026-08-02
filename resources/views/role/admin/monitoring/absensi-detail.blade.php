@@ -7,16 +7,36 @@
     }
 </script>
 
-<div class="mb-5">
-    <a href="{{ route('admin.monitoring.absensi') }}" class="text-sm font-semibold text-teal-600 inline-flex items-center gap-1 mb-3">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
-    </a>
-    <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Detail Absensi</p>
-    <h2 class="text-2xl font-extrabold text-slate-800 m-0">
-        {{ $group->mentor->name ?? '-' }}
-        <span class="text-slate-400 font-semibold">— {{ $group->name ?? '-' }}</span>
-    </h2>
-    <p class="text-sm text-slate-500 m-0">{{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d M Y') }}</p>
+<div class="mb-5 flex items-start justify-between flex-wrap gap-3">
+    <div>
+        <a href="{{ route('admin.monitoring.absensi') }}" class="text-sm font-semibold text-teal-600 inline-flex items-center gap-1 mb-3">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
+        </a>
+        <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Detail Absensi</p>
+        <h2 class="text-2xl font-extrabold text-slate-800 m-0">
+            {{ $group->mentor->name ?? '-' }}
+            <span class="text-slate-400 font-semibold">— {{ $group->name ?? '-' }}</span>
+        </h2>
+        <p class="text-sm text-slate-500 m-0">{{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d M Y') }}</p>
+    </div>
+
+    @if ($adaSubmitted)
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.monitoring.absensi.export-pdf', ['groupId' => $group->id, 'tanggal' => $tanggal]) }}"
+                target="_blank"
+                class="inline-flex items-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                <i data-lucide="file-text" class="w-4 h-4"></i>Export PDF
+            </a>
+            <a href="{{ route('admin.monitoring.absensi.export-excel', ['groupId' => $group->id, 'tanggal' => $tanggal]) }}"
+                class="inline-flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>Export Excel
+            </a>
+        </div>
+    @else
+        <p class="text-xs text-slate-400 italic max-w-[220px] text-right">
+            Export tersedia setelah minimal satu sesi di tanggal ini disubmit mentor.
+        </p>
+    @endif
 </div>
 
 <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">

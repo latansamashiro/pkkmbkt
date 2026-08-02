@@ -26,17 +26,6 @@
                 <option value="aktif">Aktif</option>
                 <option value="nonaktif">Nonaktif</option>
             </select>
-            @if ($showAcademic)
-                <select id="filterProdi"
-                    class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
-                    <option value="">Semua Program Studi</option>
-                    @foreach ($faculties as $f)
-                        @foreach ($f->programStudies as $p)
-                            <option value="{{ $p->name }}">{{ $p->name }}</option>
-                        @endforeach
-                    @endforeach
-                </select>
-                @endif
             <div
                 class="flex-1 min-w-[200px] flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5">
                 <i data-lucide="search" class="w-4 h-4 text-slate-400 shrink-0"></i>
@@ -51,11 +40,6 @@
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             No</th>
-                            @if ($showNim)
-                            <th
-                                class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
-                                NPM</th>
-                        @endif
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Nama</th>
@@ -73,7 +57,6 @@
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Status</th>
-                        
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Aksi</th>
@@ -106,16 +89,17 @@
                     class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3">
                 </p>
                 <div class="grid grid-cols-1 gap-4">
-                      @if ($showNim)
+                    @if ($showNpm)
                         <div>
                             <label for="inputNpm" class="block text-xs font-bold text-slate-500 mb-1.5">NPM</label>
-                            <input type="text" id="inputNpm" placeholder="CONTOH: 2210631170001" required
+                            <input type="text" id="inputNpm" placeholder="Contoh: 525241019"
                                 class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
                         </div>
                     @endif
+
                     <div>
                         <label for="inputNama" class="block text-xs font-bold text-slate-500 mb-1.5">Nama Lengkap</label>
-                        <input type="text" id="inputNama" placeholder="CONTOH: AZIR GANTENG" required
+                        <input type="text" id="inputNama" placeholder="CONTOH: DENI SAPUTRA" required
                             oninput="this.value = this.value.toUpperCase()"
                             class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
                     </div>
@@ -137,6 +121,7 @@
                         <p id="hintPassword" class="text-xs text-slate-400 mt-1.5">Kosongkan saat edit jika tidak ingin
                             mengubah password.</p>
                     </div>
+
                     @if ($showAcademic)
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -170,6 +155,18 @@
                             <select id="inputProdi" required disabled
                                 class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600 disabled:bg-slate-50">
                                 <option value="">Pilih Fakultas dahulu</option>
+                            </select>
+                        </div>
+                    @endif
+                    @if ($showGroup)
+                        <div>
+                            <label for="inputKelompok" class="block text-xs font-bold text-slate-500 mb-1.5">Kelompok</label>
+                            <select id="inputKelompok"
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                                <option value="">Belum ada kelompok</option>
+                                @foreach ($groups as $g)
+                                    <option value="{{ $g->id }}">{{ $g->code }} &mdash; {{ $g->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                     @endif
@@ -207,17 +204,17 @@
                 </button>
             </div>
             <div class="divide-y divide-slate-100">
+                @if ($showNpm)
+                    <div class="flex items-center justify-between py-2.5"><span
+                            class="text-xs font-bold text-slate-400">NPM</span><span id="detailNpm"
+                            class="text-sm font-semibold text-slate-800">-</span></div>
+                @endif
                 <div class="flex items-center justify-between py-2.5"><span
                         class="text-xs font-bold text-slate-400">Nama</span><span id="detailNama"
                         class="text-sm font-semibold text-slate-800">-</span></div>
                 <div class="flex items-center justify-between py-2.5"><span
                         class="text-xs font-bold text-slate-400">Email</span><span id="detailEmail"
                         class="text-sm font-semibold text-slate-800">-</span></div>
-                @if ($showNim)
-                    <div class="flex items-center justify-between py-2.5"><span
-                            class="text-xs font-bold text-slate-400">NPM</span><span id="detailNpm"
-                            class="text-sm font-semibold text-slate-800">-</span></div>
-                @endif
                 @if ($showAcademic)
                     <div class="flex items-center justify-between py-2.5"><span class="text-xs font-bold text-slate-400">No.
                             HP</span><span id="detailPhone" class="text-sm font-semibold text-slate-800">-</span></div>
@@ -228,6 +225,11 @@
                             class="text-sm font-semibold text-slate-800">-</span></div>
                     <div class="flex items-center justify-between py-2.5"><span
                             class="text-xs font-bold text-slate-400">Prodi</span><span id="detailProdi"
+                            class="text-sm font-semibold text-slate-800">-</span></div>
+                @endif
+                @if ($showGroup)
+                    <div class="flex items-center justify-between py-2.5"><span
+                            class="text-xs font-bold text-slate-400">Kelompok</span><span id="detailKelompok"
                             class="text-sm font-semibold text-slate-800">-</span></div>
                 @endif
                 <div class="flex items-center justify-between py-2.5"><span
@@ -245,7 +247,6 @@
 @php
     $penggunaListJson = $users->map(fn($u) => [
         'id' => $u->id,
-        'npm' => $u->npm,
         'nama' => $u->name,
         'email' => $u->email,
         'status' => $u->status,
@@ -253,19 +254,22 @@
         'faculty_name' => $u->faculty_name,
         'program_study_name' => $u->program_study_name,
         'gender' => $u->gender,
+        'npm' => $u->npm,
+        'group_id' => $u->group_id ?? null,
     ]);
 @endphp
 
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        (function ($) { 
         $(function () {
 
             // ===== Data asli dari database (dikirim server saat halaman dimuat) =====
             let penggunaList = @json($penggunaListJson);
             const SHOW_ACADEMIC = @json($showAcademic);
-            const SHOW_NIM = @json($showNim);
+            const SHOW_GROUP = @json($showGroup);
+            const SHOW_NPM = @json($showNpm);
+            const GROUPS_MAP = @json($groups instanceof \Illuminate\Support\Collection ? $groups->mapWithKeys(fn($g) => [$g->id => $g->code . ' — ' . $g->name]) : []);
             const FACULTIES = @json($faculties); // [{id, name, program_studies: [{id, name}, ...]}]
             const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
@@ -277,18 +281,12 @@
             let currentPage = 1;
             let editingId = null;
 
-           function normalizeText(str) {
-            return (str || "").trim().toLowerCase();
-            }
-
             function filteredData() {
-            const status = $("#filterStatus").val();
-            const prodi = SHOW_ACADEMIC ? normalizeText($("#filterProdi").val()) : "";
-            const q = $("#searchPengguna").val().trim().toLowerCase();
-            return penggunaList.filter((p) =>
-                (!status || p.status === status) &&
-                (!prodi || normalizeText(p.program_study_name) === prodi) &&
-                (!q || p.nama.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
+                const status = $("#filterStatus").val();
+                const q = $("#searchPengguna").val().trim().toLowerCase();
+                return penggunaList.filter((p) =>
+                    (!status || p.status === status) &&
+                    (!q || p.nama.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
                 );
             }
 
@@ -324,7 +322,7 @@
                 if (currentPage > totalPage) currentPage = totalPage;
                 const start = (currentPage - 1) * PER_PAGE;
                 const pageData = data.slice(start, start + PER_PAGE);
-                const totalCols = (SHOW_ACADEMIC ? 7 : 5) + (SHOW_NIM ? 1 : 0);
+                const totalCols = SHOW_ACADEMIC ? 7 : 5;
 
                 let html;
                 if (pageData.length === 0) {
@@ -333,9 +331,6 @@
                     html = pageData.map((p, idx) => `
                             <tr class="hover:bg-slate-50">
                                 <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${start + idx + 1}</td>
-                                ${SHOW_NIM ? `
-                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.npm ?? "-"}</td>
-                                ` : ""}
                                 <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200 font-semibold">${p.nama}</td>
                                 <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.email}</td>
                                 ${SHOW_ACADEMIC ? `
@@ -386,10 +381,7 @@
                 $('[data-aksi="hapus"]').on("click", function () { hapusPengguna(Number($(this).data("id"))); });
             }
 
-          $("#filterStatus").on("change", () => { currentPage = 1; renderTabel(); });
-            if (SHOW_ACADEMIC) {
-                $("#filterProdi").on("change", () => { currentPage = 1; renderTabel(); });
-            }
+            $("#filterStatus").on("change", () => { currentPage = 1; renderTabel(); });
             $("#searchPengguna").on("keyup", () => { currentPage = 1; renderTabel(); });
 
             const $modalForm = $("#modalForm");
@@ -406,15 +398,19 @@
                 $("#inputPassword").val("").prop("required", !id);
                 $("#hintPassword").toggle(!!id);
 
-                if (SHOW_NIM) {
-                    $("#inputNpm").val(data ? data.npm : "");
-                }
-
                 if (SHOW_ACADEMIC) {
                     $("#inputPhone").val(data ? data.phone_no : "");
                     $("#inputGender").val(data ? data.gender : "");
                     $("#inputFakultas").val(data ? data.faculty_name : "");
                     isiOpsiProdi(data ? data.faculty_name : "", data ? data.program_study_name : null);
+                }
+
+                if (SHOW_NPM) {
+                    $("#inputNpm").val(data ? (data.npm || "") : "");
+                }
+
+                if (SHOW_GROUP) {
+                    $("#inputKelompok").val(data && data.group_id ? data.group_id : "");
                 }
 
                 $('input[name="statusPengguna"]').each(function () { this.checked = this.value === (data ? data.status : "aktif"); });
@@ -443,15 +439,19 @@
                     status: statusVal,
                 };
 
-                if (SHOW_NIM) {
-                    payload.npm = $("#inputNpm").val().trim();
-                }
-
                 if (SHOW_ACADEMIC) {
                     payload.phone_no = $("#inputPhone").val().trim();
                     payload.gender = $("#inputGender").val();
                     payload.faculty_name = $("#inputFakultas").val().trim();
                     payload.program_study_name = $("#inputProdi").val().trim();
+                }
+
+                if (SHOW_NPM) {
+                    payload.npm = $("#inputNpm").val().trim();
+                }
+
+                if (SHOW_GROUP) {
+                    payload.group_id = $("#inputKelompok").val() || null;
                 }
 
                 const $btnSimpan = $("#btnSimpanForm");
@@ -468,7 +468,6 @@
                 }).done(function (result) {
                     const savedUser = {
                         id: result.user.id,
-                        npm: result.user.npm,
                         nama: result.user.name,
                         email: result.user.email,
                         status: result.user.status,
@@ -476,6 +475,8 @@
                         faculty_name: result.user.faculty_name,
                         program_study_name: result.user.program_study_name,
                         gender: result.user.gender,
+                        npm: result.user.npm,
+                        group_id: result.user.group_id,
                     };
                     if (editingId) {
                         const idx = penggunaList.findIndex((p) => p.id === editingId);
@@ -490,6 +491,8 @@
                     const result = xhr.responseJSON || {};
                     if (result.errors) {
                         $formError.text(Object.values(result.errors).flat().join(" "));
+                    } else if (xhr.status === 404) {
+                        $formError.text("Data ini sudah tidak ditemukan (mungkin sudah dihapus/berubah). Silakan tutup form ini dan refresh halaman.");
                     } else {
                         $formError.text(result.message || "Terjadi kesalahan, silakan coba lagi.");
                     }
@@ -506,7 +509,7 @@
                 detailActiveId = id;
                 $("#detailNama").text(p.nama);
                 $("#detailEmail").text(p.email);
-                if (SHOW_NIM) {
+                if (SHOW_NPM) {
                     $("#detailNpm").text(p.npm || "-");
                 }
                 if (SHOW_ACADEMIC) {
@@ -514,6 +517,9 @@
                     $("#detailGender").text(genderLabel(p.gender));
                     $("#detailFakultas").text(p.faculty_name || "-");
                     $("#detailProdi").text(p.program_study_name || "-");
+                }
+                if (SHOW_GROUP) {
+                    $("#detailKelompok").text(p.group_id ? (GROUPS_MAP[p.group_id] || "-") : "Belum ada kelompok");
                 }
                 $("#detailStatus").text(p.status === "aktif" ? "Aktif" : "Nonaktif");
                 $modalDetail.removeClass("hidden").addClass("flex");
@@ -544,8 +550,8 @@
                     tampilkanToast(result.message || "Gagal menghapus data.");
                 });
             }
+
             renderTabel();
         });
-    })(jQuery);
     </script>
 @endpush

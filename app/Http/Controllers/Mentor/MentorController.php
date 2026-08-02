@@ -83,9 +83,131 @@ class MentorController extends Controller
         return view('role.mentor.jadwal');
     }
 
+    /**
+     * Halaman Absensi mentor: menampilkan kelompok bimbingannya + semua
+     * sesi presensi yang dibuat Panitia, beserta tanda H/I/S/A yang sudah
+     * tersimpan (kalau ada).
+     */
+    /**
+     * Mentor UI pakai kode singkat H/I/S/A, tapi data di database (dan
+     * laporan Admin di MonitoringController) pakai kata penuh
+     * hadir/izin/sakit/alfa — peta ini menjembatani keduanya.
+     */
+    protected const STATUS_SINGKAT_KE_PENUH = ['H' => 'hadir', 'I' => 'izin', 'S' => 'sakit', 'A' => 'alfa'];
+    protected const STATUS_PENUH_KE_SINGKAT = ['hadir' => 'H', 'izin' => 'I', 'sakit' => 'S', 'alfa' => 'A'];
+
     public function absensi()
     {
-        return view('role.mentor.absensi');
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+
+        $students = $group
+            ? \App\Models\Member::with('student:id,name')
+                ->where('group_id', $group->id)
+                ->get()
+                ->pluck('student')
+                ->filter()
+                ->values()
+            : collect();
+
+        $templates = \App\Models\AttendanceTemplate::orderBy('attendance_date')->orderBy('time_begin')->get();
+
+        // Attendance (per sesi, untuk kelompok ini) + detail per mahasiswa, dipetakan
+        // supaya gampang dipakai di FE: [template_id => ['status' => ..., 'marks' => [student_id => 'H'|'I'|'S'|'A']]]
+        $attendanceMap = [];
+        if ($group) {
+            $attendances = \App\Models\Attendance::with('details')
+                ->where('group_id', $group->id)
+                ->whereIn('attendance_template_id', $templates->pluck('id'))
+                ->get();
+
+            foreach ($attendances as $att) {
+                $attendanceMap[$att->attendance_template_id] = [
+                    'status' => $att->status,
+                    'marks' => $att->details->pluck('status_presence', 'student_id')
+                        ->map(fn($v) => self::STATUS_PENUH_KE_SINGKAT[$v] ?? $v),
+                ];
+            }
+        }
+
+        return view('role.mentor.absensi', compact('group', 'students', 'templates', 'attendanceMap'));
+    }
+
+    /**
+     * Simpan tanda H/I/S/A untuk satu sesi (masih draft, belum dikunci).
+     */
+    public function absensiSave(\Illuminate\Http\Request $request, \App\Models\AttendanceTemplate $template)
+    {
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+        abort_unless($group, 403, 'Kamu belum ditugaskan ke kelompok manapun.');
+
+        $validated = $request->validate([
+            'marks' => ['required', 'array'],
+            'marks.*' => ['required', 'in:H,I,S,A'],
+        ]);
+
+        $attendance = \App\Models\Attendance::firstOrNew([
+            'group_id' => $group->id,
+            'attendance_template_id' => $template->id,
+        ]);
+
+        if ($attendance->exists && $attendance->status === 'submitted') {
+            return response()->json(['message' => 'Sesi ini sudah disubmit dan tidak bisa diubah lagi.'], 422);
+        }
+
+        $attendance->attendance_date = $template->attendance_date;
+        $attendance->status = 'draft';
+        if (!$attendance->exists) {
+            $attendance->created_by_id = auth()->id();
+        }
+        $attendance->updated_by_id = auth()->id();
+        $attendance->save();
+
+        // student_id di 'marks' dikirim sebagai string key JSON -> pastikan integer
+        $validStudentIds = \App\Models\Member::where('group_id', $group->id)->pluck('student_id')->all();
+
+        foreach ($validated['marks'] as $studentId => $status) {
+            $studentId = (int) $studentId;
+            if (!in_array($studentId, $validStudentIds, true)) {
+                continue; // abaikan kalau bukan anggota kelompok ini
+            }
+            \App\Models\AttendanceDetail::updateOrCreate(
+                ['attendance_id' => $attendance->id, 'student_id' => $studentId],
+                [
+                    'status_presence' => self::STATUS_SINGKAT_KE_PENUH[$status] ?? $status,
+                    'created_by_id' => auth()->id(),
+                    'updated_by_id' => auth()->id(),
+                ]
+            );
+        }
+
+        return response()->json(['message' => 'Presensi berhasil disimpan (draft).']);
+    }
+
+    /**
+     * Submit (kunci) presensi untuk satu sesi. Setelah ini, tidak ada yang
+     * bisa mengubah data sesi tersebut lagi — jadi arsip.
+     */
+    public function absensiSubmit(\App\Models\AttendanceTemplate $template)
+    {
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+        abort_unless($group, 403, 'Kamu belum ditugaskan ke kelompok manapun.');
+
+        $attendance = \App\Models\Attendance::where('group_id', $group->id)
+            ->where('attendance_template_id', $template->id)
+            ->first();
+
+        if (!$attendance) {
+            return response()->json(['message' => 'Belum ada presensi yang diisi untuk sesi ini.'], 422);
+        }
+        if ($attendance->status === 'submitted') {
+            return response()->json(['message' => 'Sesi ini sudah disubmit sebelumnya.'], 422);
+        }
+
+        $attendance->status = 'submitted';
+        $attendance->updated_by_id = auth()->id();
+        $attendance->save();
+
+        return response()->json(['message' => 'Presensi berhasil disubmit dan sekarang terkunci.']);
     }
 
     public function evaluasi()

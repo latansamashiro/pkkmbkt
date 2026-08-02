@@ -81,6 +81,13 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{type}/{id}', 'destroy')->name('admin.data-master.destroy');
         });
 
+        // ===== Kelola Kelompok (anggota) =====
+        Route::controller(\App\Http\Controllers\Admin\GroupController::class)->prefix('kelompok')->group(function () {
+            Route::get('/', 'index')->name('admin.kelompok.index');
+            Route::post('/{group}/anggota', 'addMember')->name('admin.kelompok.anggota.store');
+            Route::delete('/{group}/anggota/{student}', 'removeMember')->name('admin.kelompok.anggota.destroy');
+        });
+
         Route::get('/role', [RoleController::class, 'index'])->name('admin.role.index');
         Route::get('/monitoring/pkkmb', [MonitoringController::class, 'pkkmb'])->name('admin.monitoring.pkkmb');
         Route::get('/monitoring/laporan', [MonitoringController::class, 'laporan'])->name('admin.monitoring.laporan');
@@ -90,22 +97,26 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.monitoring.absensi');
         Route::get('/monitoring/absensi/{groupId}/{tanggal}', [MonitoringController::class, 'absensiDetail'])
             ->name('admin.monitoring.absensi.detail');
-    });
+        Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-pdf', [MonitoringController::class, 'absensiExportPdf'])
+            ->name('admin.monitoring.absensi.export-pdf');
+        Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-excel', [MonitoringController::class, 'absensiExportExcel'])
+            ->name('admin.monitoring.absensi.export-excel');
 
-    Route::get('/monitoring/keaktifan', [MonitoringController::class, 'keaktifan'])
-        ->name('admin.monitoring.keaktifan');
-    Route::get('/monitoring/keaktifan/{groupId}', [MonitoringController::class, 'keaktifanDetail'])
-        ->name('admin.monitoring.keaktifan.detail');
+        Route::get('/monitoring/keaktifan', [MonitoringController::class, 'keaktifan'])
+            ->name('admin.monitoring.keaktifan');
+        Route::get('/monitoring/keaktifan/{groupId}', [MonitoringController::class, 'keaktifanDetail'])
+            ->name('admin.monitoring.keaktifan.detail');
 
-    Route::get('/monitoring/pelanggaran', [MonitoringController::class, 'pelanggaran'])
-        ->name('admin.monitoring.pelanggaran');
-    Route::get('/monitoring/pelanggaran/{groupId}', [MonitoringController::class, 'pelanggaranDetail'])
-        ->name('admin.monitoring.pelanggaran.detail');
+        Route::get('/monitoring/pelanggaran', [MonitoringController::class, 'pelanggaran'])
+            ->name('admin.monitoring.pelanggaran');
+        Route::get('/monitoring/pelanggaran/{groupId}', [MonitoringController::class, 'pelanggaranDetail'])
+            ->name('admin.monitoring.pelanggaran.detail');
 
         Route::get('/monitoring/evaluasi', [MonitoringController::class, 'evaluasi'])
-    ->name('admin.monitoring.evaluasi');
-Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'evaluasiDetail'])
-    ->name('admin.monitoring.evaluasi.detail');
+            ->name('admin.monitoring.evaluasi');
+        Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'evaluasiDetail'])
+            ->name('admin.monitoring.evaluasi.detail');
+    });
 
     //Advisor
 
@@ -120,6 +131,8 @@ Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'eval
             Route::post('/profil/password', 'updatePassword')->name('role.mentor.profil.password');
             Route::get('/jadwal', 'jadwal')->name('role.mentor.jadwal');
             Route::get('/absensi', 'absensi')->name('role.mentor.absensi');
+            Route::post('/absensi/{template}/save', 'absensiSave')->name('role.mentor.absensi.save');
+            Route::post('/absensi/{template}/submit', 'absensiSubmit')->name('role.mentor.absensi.submit');
             Route::get('/evaluasi', 'evaluasi')->name('role.mentor.evaluasi');
             Route::get('/evaluasi/detail', 'evaluasiDetail')->name('role.mentor.evaluasi.detail');
             Route::get('/keaktifan', 'keaktifan')->name('role.mentor.keaktifan');
@@ -146,4 +159,62 @@ Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'eval
     });
 
     //Committee
+    Route::group(['prefix' => 'panitia', 'middleware' => ['accessrole:committee']], function () {
+
+        // Route::defaults() di versi Laravel ini cuma terima (key, value) satu-satu,
+        // bukan array langsung — helper kecil ini yang mengulanginya.
+        $withDefaults = function ($route, array $defaults) {
+            foreach ($defaults as $key => $value) {
+                $route->defaults($key, $value);
+            }
+            return $route;
+        };
+
+        // ===== Kelola Mahasiswa Baru (reuse UserController, view komite) =====
+        Route::controller(\App\Http\Controllers\Admin\UserController::class)->prefix('mahasiswa-baru')->group(function () use ($withDefaults) {
+            $defaults = ['roleKey' => 'STUDENT', 'title' => 'Kelola Mahasiswa Baru', 'view' => 'role.committee.mahasiswa-baru.index'];
+            $withDefaults(Route::get('/', 'index')->name('committee.mahasiswa.index'), $defaults);
+            $withDefaults(Route::post('/', 'store')->name('committee.mahasiswa.store'), $defaults);
+            $withDefaults(Route::put('/{user}', 'update')->name('committee.mahasiswa.update'), $defaults);
+            $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mahasiswa.destroy'), $defaults);
+        });
+
+        // ===== Kelola Mentor (reuse UserController, view komite) =====
+        Route::controller(\App\Http\Controllers\Admin\UserController::class)->prefix('mentor')->group(function () use ($withDefaults) {
+            $defaults = ['roleKey' => 'MENTOR', 'title' => 'Kelola Mentor', 'view' => 'role.committee.mentor.index'];
+            $withDefaults(Route::get('/', 'index')->name('committee.mentor.index'), $defaults);
+            $withDefaults(Route::post('/', 'store')->name('committee.mentor.store'), $defaults);
+            $withDefaults(Route::put('/{user}', 'update')->name('committee.mentor.update'), $defaults);
+            $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mentor.destroy'), $defaults);
+        });
+
+        // ===== Kelompok (reuse GroupController, view komite) =====
+        Route::controller(\App\Http\Controllers\Admin\GroupController::class)->prefix('kelompok')->group(function () use ($withDefaults) {
+            $defaults = ['title' => 'Kelola Kelompok', 'view' => 'role.committee.kelompok.index'];
+            $withDefaults(Route::get('/', 'index')->name('committee.master.index'), $defaults);
+            Route::post('/{group}/anggota', 'addMember')->name('committee.kelompok.anggota.store');
+            Route::delete('/{group}/anggota/{student}', 'removeMember')->name('committee.kelompok.anggota.destroy');
+        });
+
+        // ===== Jadwal, Informasi, Modul PKKMB, Materi, Evaluasi (reuse DataMasterController, dibatasi per tipe) =====
+        Route::controller(\App\Http\Controllers\Admin\DataMasterController::class)->group(function () use ($withDefaults) {
+            $sections = [
+                'data-master' => ['path' => 'jadwal',      'types' => ['jadwal'],                          'title' => 'Kelola Jadwal',      'view' => 'role.committee.jadwal.index'],
+                'informasi'   => ['path' => 'informasi',   'types' => ['informasi'],                       'title' => 'Kelola Informasi',   'view' => 'role.committee.informasi.index'],
+                'modul-pkkmb' => ['path' => 'modul-pkkmb', 'types' => ['modul'],                            'title' => 'Kelola Modul PKKMB', 'view' => 'role.committee.modul-pkkmb.index'],
+                'materi'      => ['path' => 'materi',      'types' => ['topik'],                            'title' => 'Kelola Materi',      'view' => 'role.committee.materi.index'],
+                'evaluasi'    => ['path' => 'evaluasi',    'types' => ['ujian', 'kategori_evaluasi', 'soal'], 'title' => 'Kelola Evaluasi',   'view' => 'role.committee.evaluasi.index'],
+                'absensi'     => ['path' => 'absensi',     'types' => ['jadwal_absensi'],                  'title' => 'Kelola Jadwal Absensi', 'view' => 'role.committee.absensi.index'],
+            ];
+
+            foreach ($sections as $key => $sec) {
+                $defaults = ['onlyTypes' => $sec['types'], 'title' => $sec['title'], 'view' => $sec['view']];
+                $withDefaults(Route::get("/{$sec['path']}", 'index')->name("committee.{$key}.index"), $defaults);
+                $withDefaults(Route::get("/{$sec['path']}/{type}/items", 'items')->name("committee.{$key}.items"), $defaults);
+                $withDefaults(Route::post("/{$sec['path']}/{type}", 'store')->name("committee.{$key}.store"), $defaults);
+                $withDefaults(Route::put("/{$sec['path']}/{type}/{id}", 'update')->name("committee.{$key}.update"), $defaults);
+                $withDefaults(Route::delete("/{$sec['path']}/{type}/{id}", 'destroy')->name("committee.{$key}.destroy"), $defaults);
+            }
+        });
+    });
 });

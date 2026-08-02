@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AttendanceTemplate;
 use App\Models\Exam;
 use App\Models\Group;
 use App\Models\Information;
@@ -46,6 +47,27 @@ class DataMasterController extends Controller
                     ['key' => 'mentor_id', 'label' => 'Mentor', 'type' => 'select', 'required' => false, 'options_key' => 'mentors', 'filter_by' => 'program_study_filter'],
                     ['key' => 'advisor_id', 'label' => 'Advisor', 'type' => 'select', 'required' => false, 'options_key' => 'advisors'],
                     ['key' => 'max_member', 'label' => 'Maks. Anggota', 'type' => 'number', 'required' => true],
+                ],
+            ],
+            'jadwal_absensi' => [
+                'model' => AttendanceTemplate::class,
+                'label' => 'Jadwal Absensi (Hari & Sesi)',
+                'display' => 'attendance_date',
+                'icon' => 'calendar-clock',
+                'chip' => 'bg-teal-50 text-teal-600',
+                'list_cols' => [
+                    'day_name' => 'Hari',
+                    'session_name' => 'Sesi',
+                    'attendance_date' => 'Tanggal',
+                    'time_begin' => 'Jam Mulai',
+                    'time_end' => 'Jam Selesai',
+                ],
+                'fields' => [
+                    ['key' => 'day_name', 'label' => 'Nama Hari', 'type' => 'text', 'required' => true],
+                    ['key' => 'session_name', 'label' => 'Nama Sesi', 'type' => 'text', 'required' => true],
+                    ['key' => 'attendance_date', 'label' => 'Tanggal', 'type' => 'date', 'required' => true],
+                    ['key' => 'time_begin', 'label' => 'Jam Mulai', 'type' => 'time', 'required' => true],
+                    ['key' => 'time_end', 'label' => 'Jam Selesai', 'type' => 'time', 'required' => true],
                 ],
             ],
             'modul' => [

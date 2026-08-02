@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faculty;
+use App\Models\Group;
+use App\Models\Member;
 use App\Models\ProgramStudy;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -22,9 +24,6 @@ class UserController extends Controller
 
     public const ROLES_WITH_ACADEMIC_FIELDS = ['STUDENT', 'MENTOR'];
 
-    // Hanya mahasiswa & mentor yang punya NPM
-    public const ROLES_WITH_NIM = ['STUDENT', 'MENTOR'];
-
     protected function lockedRole(Request $request): string
     {
         $role = $request->route('roleKey');
@@ -37,9 +36,14 @@ class UserController extends Controller
         return in_array($role, self::ROLES_WITH_ACADEMIC_FIELDS, true);
     }
 
-    protected function hasNim(string $role): bool
+    protected function hasGroupField(string $role): bool
     {
-        return in_array($role, self::ROLES_WITH_NIM, true);
+        return $role === 'STUDENT';
+    }
+
+    protected function hasNpmField(string $role): bool
+    {
+        return $role === 'STUDENT';
     }
 
     public function index(Request $request)
@@ -54,32 +58,43 @@ class UserController extends Controller
                 'email',
                 'role_name',
                 'status',
-                'npm',
                 'phone_no',
                 'faculty_name',
                 'program_study_name',
                 'gender',
+                'npm',
             ]);
 
+        // dikirim ke FE buat isi dropdown Fakultas -> Prodi (nested by faculty)
         $faculties = Faculty::with(['programStudies' => fn($q) => $q->orderBy('name')])
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        $data = ['title' => 'KELOLA ' . self::ROLES[$role]];
+        $groups = [];
+        if ($this->hasGroupField($role)) {
+            $groups = Group::orderBy('name')->get(['id', 'code', 'name', 'max_member']);
 
-        // Nama view bisa di-override lewat route default 'view' (mis. untuk area committee),
-        // supaya controller ini tetap satu untuk semua role/area tanpa duplikasi logic.
-        // Kalau tidak di-set di route, fallback ke view admin (perilaku lama, tidak berubah).
+            // tempel kelompok saat ini (kalau ada) ke tiap mahasiswa, buat prefill form edit
+            $memberMap = Member::whereIn('student_id', $users->pluck('id'))->pluck('group_id', 'student_id');
+            $users->each(function ($u) use ($memberMap) {
+                $u->group_id = $memberMap[$u->id] ?? null;
+            });
+        }
+
+        $data = ['title' => $request->route('title') ?? ('KELOLA ' . self::ROLES[$role])];
         $view = $request->route('view') ?? 'role.admin.user.index';
 
         return view($view, [
             'data' => $data,
             'users' => $users,
             'faculties' => $faculties,
+            'groups' => $groups,
             'lockedRole' => $role,
             'roleLabel' => self::ROLES[$role],
             'showAcademic' => $this->hasAcademicFields($role),
-            'showNim' => $this->hasNim($role),
+            'showGroup' => $this->hasGroupField($role),
+            'showNpm' => $this->hasNpmField($role),
+            'showNim' => $this->hasNpmField($role), // alias — beberapa view (punya Panitia) pakai nama ini
         ]);
     }
 
@@ -101,23 +116,44 @@ class UserController extends Controller
         ];
     }
 
-    protected function rulesNim(?int $ignoreUserId = null): array
+    protected function rulesGroup(): array
     {
         return [
-            'npm' => [
-                'required',
-                'string',
-                'max:20',
-                Rule::unique('users', 'npm')->ignore($ignoreUserId),
-            ],
+            'group_id' => ['nullable', 'exists:groups,id'],
         ];
+    }
+
+    protected function rulesNpm(?int $ignoreId = null): array
+    {
+        $unique = Rule::unique('users', 'npm')->ignore($ignoreId);
+
+        return [
+            'npm' => ['nullable', 'string', 'max:30', $unique],
+        ];
+    }
+
+    protected function syncGroupMembership(User $user, ?int $groupId, int $actorId): void
+    {
+        if ($groupId) {
+            Member::updateOrCreate(
+                ['student_id' => $user->id],
+                [
+                    'group_id' => $groupId,
+                    'created_by_id' => $actorId,
+                    'updated_by_id' => $actorId,
+                ]
+            );
+        } else {
+            Member::where('student_id', $user->id)->delete();
+        }
     }
 
     public function store(Request $request)
     {
         $role = $this->lockedRole($request);
         $academic = $this->hasAcademicFields($role);
-        $nim = $this->hasNim($role);
+        $groupField = $this->hasGroupField($role);
+        $npmField = $this->hasNpmField($role);
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
@@ -126,21 +162,21 @@ class UserController extends Controller
             'status' => ['required', Rule::in(['aktif', 'nonaktif'])],
         ];
 
-        if ($nim) {
-            $rules += $this->rulesNim();
-        }
-
         if ($academic) {
             $rules += $this->rulesAcademic();
+        }
+        if ($groupField) {
+            $rules += $this->rulesGroup();
+        }
+        if ($npmField) {
+            $rules += $this->rulesNpm();
         }
 
         $validated = $request->validate($rules, [
             'email.unique' => 'Email sudah digunakan.',
-            'npm.unique' => 'NPM sudah digunakan.',
+            'npm.unique' => 'NPM sudah dipakai mahasiswa lain.',
         ]);
-
         $user = User::create([
-            'npm' => $validated['npm'] ?? null,
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
@@ -150,9 +186,15 @@ class UserController extends Controller
             'faculty_name' => $validated['faculty_name'] ?? null,
             'program_study_name' => $validated['program_study_name'] ?? null,
             'gender' => $validated['gender'] ?? null,
+            'npm' => $validated['npm'] ?? null,
             'created_by_id' => $request->user()->id,
             'updated_by_id' => $request->user()->id,
         ]);
+
+        if ($groupField) {
+            $this->syncGroupMembership($user, $validated['group_id'] ?? null, $request->user()->id);
+            $user->group_id = $validated['group_id'] ?? null;
+        }
 
         return response()->json([
             'message' => 'Pengguna baru berhasil ditambahkan.',
@@ -162,11 +204,12 @@ class UserController extends Controller
                 'email',
                 'role_name',
                 'status',
-                'npm',
                 'phone_no',
                 'faculty_name',
                 'program_study_name',
                 'gender',
+                'npm',
+                'group_id',
             ]),
         ], 201);
     }
@@ -175,7 +218,8 @@ class UserController extends Controller
     {
         $role = $this->lockedRole($request);
         $academic = $this->hasAcademicFields($role);
-        $nim = $this->hasNim($role);
+        $groupField = $this->hasGroupField($role);
+        $npmField = $this->hasNpmField($role);
 
         abort_unless($user->role_name === $role, 404);
 
@@ -186,27 +230,25 @@ class UserController extends Controller
             'status' => ['required', Rule::in(['aktif', 'nonaktif'])],
         ];
 
-        if ($nim) {
-            $rules += $this->rulesNim($user->id);
-        }
-
         if ($academic) {
             $rules += $this->rulesAcademic();
+        }
+        if ($groupField) {
+            $rules += $this->rulesGroup();
+        }
+        if ($npmField) {
+            $rules += $this->rulesNpm($user->id);
         }
 
         $validated = $request->validate($rules, [
             'email.unique' => 'Email sudah digunakan.',
-            'npm.unique' => 'NPM sudah digunakan.',
+            'npm.unique' => 'NPM sudah dipakai mahasiswa lain.',
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->status = $validated['status'];
         $user->updated_by_id = $request->user()->id;
-
-        if ($nim) {
-            $user->npm = $validated['npm'];
-        }
 
         if ($academic) {
             $user->phone_no = $validated['phone_no'];
@@ -215,16 +257,24 @@ class UserController extends Controller
             $user->gender = $validated['gender'];
         }
 
+        if ($npmField) {
+            $user->npm = $validated['npm'] ?? null;
+        }
+
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
         $user->save();
 
+        if ($groupField) {
+            $this->syncGroupMembership($user, $validated['group_id'] ?? null, $request->user()->id);
+            $user->group_id = $validated['group_id'] ?? null;
+        }
+
         return response()->json([
             'message' => 'Data pengguna berhasil diperbarui.',
             'user' => $user->only([
                 'id',
-                'npm',
                 'name',
                 'email',
                 'role_name',
@@ -233,6 +283,8 @@ class UserController extends Controller
                 'faculty_name',
                 'program_study_name',
                 'gender',
+                'npm',
+                'group_id',
             ]),
         ]);
     }

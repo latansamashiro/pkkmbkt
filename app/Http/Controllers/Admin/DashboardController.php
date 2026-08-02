@@ -24,7 +24,7 @@ class DashboardController extends Controller
             'ADVISOR'     => view('role.advisor.dashboard'),
             'MENTOR'      => view('role.mentor.dashboard'),
             'STUDENT'     => view('role.student.dashboard'),
-            'COMMITTEE'   => view('role.committee.dashboard'),
+            'COMMITTEE'   => app(\App\Http\Controllers\Committee\DashboardController::class)->index(),
             default       => abort(403, 'Role akun tidak dikenali: "' . auth()->user()->role_name . '"'),
         };
     }

@@ -34,15 +34,15 @@
             <span class="ic"><i data-lucide="layout-dashboard"></i></span>
             <span>Home</span>
         </a>
-        <a href="#">
+        <a href="{{ route('committee.master.index') }}">
             <span class="ic"><i data-lucide="users"></i></span>
             <span>Kelompok</span>
         </a>
-        <a href="#" class="home">
+        <a href="{{ route('committee.data-master.index') }}" class="home">
             <span class="ic"><i data-lucide="calendar"></i></span>
             <span>Jadwal</span>
         </a>
-        <a href="#">
+        <a href="{{ route('committee.absensi.index') }}">
             <span class="ic"><i data-lucide="calendar-check"></i></span>
             <span>Absensi</span>
         </a>
