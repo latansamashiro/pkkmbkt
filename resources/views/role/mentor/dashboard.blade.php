@@ -898,7 +898,7 @@
         </span>
 
         <nav class="sidebar-nav" aria-label="Navigasi utama">
-          <a href="#">
+          <a href="{{ route('role.mentor.modul') }}">
             <svg
                 class="ic"
                 viewBox="0 0 24 24"
@@ -913,7 +913,7 @@
             </svg>
             <span class="label">Modul PKKMB</span>
             </a>
-          <a href="#">
+          <a href="{{ route('role.mentor.leaderboard') }}">
             <svg
               class="ic"
               viewBox="0 0 24 24"
@@ -948,7 +948,7 @@
             <span class="label">Beranda</span>
           </a>
           
-          <a href="#">
+          <a href="{{ route('role.mentor.info') }}">
             <svg
               class="ic"
               viewBox="0 0 24 24"
@@ -966,7 +966,7 @@
             </svg>
             <span class="label">Info</span>
           </a>
-          <a href="#">
+          <a href="{{ route('role.mentor.profil') }}">
             <svg
               class="ic"
               viewBox="0 0 24 24"
@@ -1134,7 +1134,7 @@
                 <h3 class="section-title">Menu Utama</h3>
               </div>
               <div class="menu-grid">
-                <a class="menu-card" href="#">
+                <a class="menu-card" href="{{ route('role.mentor.modul') }}">
                   <span class="menu-chip chip-navy">
                     <svg
                       class="ic"
@@ -1159,7 +1159,7 @@
                   >
                 </a>
 
-                <a class="menu-card" href="#">
+                <a class="menu-card" href="{{ route('role.mentor.absensi') }}">
                   <span class="menu-chip chip-teal">
                     <svg
                       class="ic"
@@ -1183,7 +1183,7 @@
                   >
                 </a>
 
-                <a class="menu-card" href="#">
+                <a class="menu-card" href="{{ route('role.mentor.jadwal') }}">
                   <span class="menu-chip chip-lime">
                     <svg
                       class="ic"
@@ -1209,7 +1209,7 @@
                   >
                 </a>
 
-                <a class="menu-card" href="#">
+                <a class="menu-card" href="{{ route('role.mentor.info') }}">
                   <span class="menu-chip chip-teal">
                     <svg
                       class="ic"
@@ -1232,7 +1232,7 @@
                   >
                 </a>
 
-                <a class="menu-card" href="#">
+                <a class="menu-card" href="{{ route('role.mentor.leaderboard') }}">
                   <span class="menu-chip chip-lime">
                     <svg
                       class="ic"
@@ -1255,7 +1255,7 @@
                   >
                 </a>
 
-               <a class="menu-card" href="#">
+               <a class="menu-card" href="{{ route('role.mentor.keaktifan') }}">
                 <span class="menu-chip chip-teal">
                     <svg
                     class="ic"
@@ -1278,7 +1278,7 @@
                 </span>
                 </a>
 
-                <a class="menu-card" href="#">
+                <a class="menu-card" href="{{ route('role.mentor.evaluasi') }}">
                   <span class="menu-chip chip-navy">
                     <svg
                       class="ic"
@@ -1301,7 +1301,7 @@
                     >Memantau Hasil Evaluasi dan Progres Mahasiswa Baru</span>
                 </a>
 
-                 <a class="menu-card" href="#">
+                 <a class="menu-card" href="{{ route('role.mentor.monitoring-tugas') }}">
                   <span class="menu-chip chip-navy">
                     <svg
                       class="ic"
@@ -1330,7 +1330,7 @@
             <section class="section">
               <div class="section-head">
                 <h3 class="section-title">Jadwal Hari Ini</h3>
-                <a href="#" class="section-link">
+                <a href="{{ route('role.mentor.jadwal') }}" class="section-link">
                   Lihat Semua
                   <svg
                     class="ic"
@@ -1346,7 +1346,7 @@
                 </a>
               </div>
 
-              <a class="schedule-card" href="#">
+              <a class="schedule-card" href="{{ route('role.mentor.jadwal') }}">
                 <span class="schedule-icon">
                   <svg
                     class="ic"
@@ -1436,7 +1436,7 @@
 
     <!-- ======= BOTTOM NAV (mobile only) ======= -->
     <nav class="bottom-nav" aria-label="Navigasi bawah">
-      <a href="#">
+      <a href="{{ route('role.mentor.modul') }}">
         <svg
           class="ic"
           viewBox="0 0 24 24"
@@ -1453,7 +1453,7 @@
         </svg>
         <span>Modul</span>
       </a>
-      <a href="#">
+      <a href="{{ route('role.mentor.leaderboard') }}">
         <svg
           class="ic"
           viewBox="0 0 24 24"
@@ -1487,7 +1487,7 @@
         </svg>
         <span>Beranda</span>
       </a>
-      <a href="#">
+      <a href="{{ route('role.mentor.info') }}">
         <svg
           class="ic"
           viewBox="0 0 24 24"
@@ -1505,7 +1505,7 @@
         </svg>
         <span>Info</span>
       </a>
-      <a href="#">
+      <a href="{{ route('role.mentor.profil') }}">
         <svg
           class="ic"
           viewBox="0 0 24 24"
