@@ -7,7 +7,6 @@ use App\Models\Group;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class GroupController extends Controller
 {
@@ -27,42 +26,18 @@ class GroupController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'program_study_name']);
 
+        // dipakai buat dropdown Mentor/Advisor di form Tambah/Edit Kelompok
+        // (form-nya submit ke endpoint Data Master yang sudah ada, type=kelompok)
+        $mentors = User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name']);
+        $advisors = User::where('role_name', 'ADVISOR')->orderBy('name')->get(['id', 'name']);
+
         // peta student_id -> group_id, biar FE tahu siapa sudah di kelompok mana
         $memberMap = Member::pluck('group_id', 'student_id');
 
         $data = ['title' => $request->route('title') ?? 'Kelola Kelompok'];
         $view = $request->route('view') ?? 'role.admin.kelompok.index';
 
-        return view($view, compact('data', 'groups', 'students', 'memberMap'));
-    }
-
-    /**
-     * AJAX: data buat modal "Kelola Anggota" — anggota kelompok ini + daftar
-     * mahasiswa yang masih available (belum tergabung kelompok manapun).
-     */
-    public function anggotaData(Group $group)
-    {
-        $group->loadCount('members');
-
-        $memberIds = Member::where('group_id', $group->id)->pluck('student_id');
-        $anggota = User::where('role_name', 'STUDENT')->whereIn('id', $memberIds)
-            ->orderBy('name')->get(['id', 'name', 'email']);
-
-        $terpakaiIds = Member::pluck('student_id');
-        $tersedia = User::where('role_name', 'STUDENT')->whereNotIn('id', $terpakaiIds)
-            ->orderBy('name')->get(['id', 'name', 'email', 'program_study_name']);
-
-        return response()->json([
-            'group' => [
-                'id' => $group->id,
-                'name' => $group->name,
-                'code' => $group->code,
-                'max_member' => $group->max_member,
-                'member_count' => $group->members_count,
-            ],
-            'members' => $anggota,
-            'available' => $tersedia,
-        ]);
+        return view($view, compact('data', 'groups', 'students', 'mentors', 'advisors', 'memberMap'));
     }
 
     /**
@@ -118,77 +93,6 @@ class GroupController extends Controller
 
         return response()->json([
             'message' => "{$student->name} dikeluarkan dari kelompok {$group->name}.",
-            'member_count' => $group->members()->count(),
-        ]);
-    }
-
-    /**
-     * Upload Excel/CSV berisi kolom "npm" di baris pertama (header).
-     * Mahasiswa yang NPM-nya cocok & belum punya kelompok langsung dimasukkan.
-     * Tidak membuat akun baru — hanya mencocokkan mahasiswa yang SUDAH ada di sistem
-     * (dari Kelola Mahasiswa Baru).
-     */
-    public function importMembers(Request $request, Group $group)
-    {
-        $request->validate([
-            'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
-        ]);
-
-        $rows = \Maatwebsite\Excel\Facades\Excel::toArray([], $request->file('file'))[0] ?? [];
-
-        if (empty($rows)) {
-            return response()->json(['message' => 'File kosong atau formatnya tidak terbaca.'], 422);
-        }
-
-        $header = array_map(fn($h) => strtolower(trim((string) $h)), $rows[0]);
-        $npmIdx = array_search('npm', $header);
-
-        if ($npmIdx === false) {
-            return response()->json(['message' => 'File harus punya kolom "npm" di baris pertama (header).'], 422);
-        }
-
-        $npms = collect($rows)->slice(1)
-            ->map(fn($row) => trim((string) ($row[$npmIdx] ?? '')))
-            ->filter()
-            ->unique()
-            ->values();
-
-        $students = User::where('role_name', 'STUDENT')->whereIn('npm', $npms)->get()->keyBy('npm');
-        $sudahPunyaKelompok = Member::pluck('student_id')->all();
-
-        $ditambahkan = [];
-        $dilewati = [];
-
-        foreach ($npms as $npm) {
-            $student = $students->get($npm);
-
-            if (!$student) {
-                $dilewati[] = "{$npm} (tidak ditemukan di Mahasiswa Baru)";
-                continue;
-            }
-            if (in_array($student->id, $sudahPunyaKelompok, true)) {
-                $dilewati[] = "{$student->name} (sudah punya kelompok)";
-                continue;
-            }
-            if ($group->members()->count() + count($ditambahkan) >= $group->max_member) {
-                $dilewati[] = "{$student->name} (kelompok sudah penuh)";
-                continue;
-            }
-
-            Member::create([
-                'group_id' => $group->id,
-                'student_id' => $student->id,
-                'created_by_id' => $request->user()->id,
-                'updated_by_id' => $request->user()->id,
-            ]);
-            $ditambahkan[] = $student->name;
-            $sudahPunyaKelompok[] = $student->id;
-        }
-
-        return response()->json([
-            'message' => count($ditambahkan) . ' mahasiswa berhasil ditambahkan' . (count($dilewati) ? ', ' . count($dilewati) . ' dilewati.' : '.'),
-            'ditambahkan' => $ditambahkan,
-            'dilewati' => $dilewati,
             'member_count' => $group->members()->count(),
         ]);
     }

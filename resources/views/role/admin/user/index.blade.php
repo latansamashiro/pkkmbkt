@@ -7,16 +7,89 @@
         }
     </script>
 
+    @php
+        // Import cuma ditampilkan kalau route-nya memang sudah didaftarkan
+        // untuk konteks ini (role + admin/panitia) — supaya aman dipakai ulang
+        // oleh halaman lain yang belum/tidak perlu fitur import.
+        $importBase = \Illuminate\Support\Str::beforeLast(request()->route()->getName(), '.index');
+        $showImport = \Illuminate\Support\Facades\Route::has("{$importBase}.import") && \Illuminate\Support\Facades\Route::has("{$importBase}.import-template");
+    @endphp
+
     <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
         <div>
             <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Administrasi</p>
             <h2 class="text-2xl font-extrabold text-slate-800 m-0">{{ $data['title'] }}</h2>
         </div>
-        <button id="btnTambah"
-            class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>Tambah {{ $roleLabel }}
-        </button>
+        <div class="flex items-center gap-2">
+            @if ($showImport)
+                <button id="btnImport"
+                    class="inline-flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                    <i data-lucide="upload" class="w-4 h-4"></i>Import Excel/CSV
+                </button>
+            @endif
+            <button id="btnTambah"
+                class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>Tambah {{ $roleLabel }}
+            </button>
+        </div>
     </div>
+
+    @if ($showImport)
+        <!-- ===== MODAL IMPORT EXCEL/CSV ===== -->
+        <div id="modalImport" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-6">
+                <div class="flex items-start justify-between gap-4 mb-1">
+                    <h3 class="text-lg font-extrabold text-slate-800 m-0">Import {{ $roleLabel }} dari Excel/CSV</h3>
+                    <button id="btnCloseImport" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 mt-1 mb-4">
+                    1) Download dulu templatenya, isi di Excel, simpan sebagai <b>CSV</b> (File &rarr; Save As &rarr; CSV UTF-8), lalu upload di sini.
+                    Baris yang bermasalah (email dobel, dll.) akan dilewati dan dilaporkan, tidak menggagalkan baris lain.
+                </p>
+
+                <a href="{{ route("{$importBase}.import-template") }}"
+                    class="inline-flex items-center gap-2 text-teal-600 font-bold text-sm mb-4 hover:underline">
+                    <i data-lucide="download" class="w-4 h-4"></i>Download Template CSV
+                </a>
+
+                <form id="formImport">
+                    <div id="importError" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3"></div>
+                    <input type="file" id="inputFileImport" accept=".csv,.txt" required
+                        class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                    <div class="flex items-center justify-end gap-3 mt-5">
+                        <button type="button" id="btnBatalImport" class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm px-4 py-2.5 rounded-xl transition">Batal</button>
+                        <button type="submit" id="btnProsesImport" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition disabled:opacity-60">Proses Import</button>
+                    </div>
+                </form>
+
+                <div id="importResult" class="hidden mt-5 pt-4 border-t border-slate-100">
+                    <p id="importSummary" class="text-sm font-bold text-slate-800 mb-3"></p>
+                    <div id="importBerhasilWrap" class="hidden mb-4">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-xs font-bold text-teal-600 m-0">Akun berhasil dibuat:</p>
+                            <button type="button" id="btnDownloadHasil"
+                                class="inline-flex items-center gap-1.5 text-xs font-bold text-teal-600 hover:underline">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i>Download Hasil (CSV)
+                            </button>
+                        </div>
+                        <div class="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                            <table class="w-full text-xs">
+                                <thead><tr class="bg-slate-50"><th class="text-left px-3 py-2">Nama</th><th class="text-left px-3 py-2">Email</th><th class="text-left px-3 py-2">Password</th><th class="text-left px-3 py-2">Kelompok</th></tr></thead>
+                                <tbody id="importBerhasilList"></tbody>
+                            </table>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1.5">Catat/kirim password ini ke mahasiswa &mdash; tidak ditampilkan lagi setelah modal ditutup. Kalau lupa, klik "Download Hasil (CSV)" dulu sebelum menutup ini.</p>
+                    </div>
+                    <div id="importGagalWrap" class="hidden">
+                        <p class="text-xs font-bold text-rose-500 mb-1.5">Baris bermasalah:</p>
+                        <ul id="importGagalList" class="text-xs text-rose-600 list-disc pl-4 space-y-1"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
         <div class="flex items-center gap-2.5 p-4 border-b border-slate-200 flex-wrap">
@@ -419,6 +492,103 @@
             function tutupForm() { $modalForm.addClass("hidden").removeClass("flex"); editingId = null; $("#formPengguna")[0].reset(); }
 
             $("#btnTambah").on("click", () => bukaForm(null));
+
+            @if ($showImport)
+            // ================== IMPORT EXCEL/CSV ==================
+            const $modalImport = $("#modalImport");
+            let lastImportBerhasil = [];
+            if ($modalImport.length) {
+                function bukaImport() {
+                    $("#importError").addClass("hidden");
+                    $("#importResult").addClass("hidden");
+                    $("#formImport")[0].reset();
+                    $modalImport.removeClass("hidden").addClass("flex");
+                }
+                function tutupImport() { $modalImport.addClass("hidden").removeClass("flex"); }
+
+                $("#btnImport").on("click", bukaImport);
+                $("#btnCloseImport").on("click", tutupImport);
+                $("#btnBatalImport").on("click", tutupImport);
+                $modalImport.on("click", function (e) { if (e.target === this) tutupImport(); });
+
+                $("#formImport").on("submit", function (e) {
+                    e.preventDefault();
+                    const file = document.getElementById("inputFileImport").files[0];
+                    if (!file) return;
+
+                    const fd = new FormData();
+                    fd.append("file", file);
+
+                    const $btn = $("#btnProsesImport");
+                    $btn.prop("disabled", true);
+                    $("#importError").addClass("hidden");
+                    $("#importResult").addClass("hidden");
+
+                    $.ajax({
+                        url: "{{ route("{$importBase}.import") }}",
+                        method: "POST",
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
+                    }).done(function (result) {
+                        lastImportBerhasil = result.berhasil || [];
+
+                        // masukkan akun baru ke tabel tanpa reload halaman
+                        (result.berhasil || []).forEach((b) => {
+                            penggunaList.push({
+                                id: b.id, nama: b.nama, email: b.email, status: "aktif",
+                                phone_no: null, faculty_name: null, program_study_name: null, gender: null,
+                            });
+                        });
+                        if (typeof renderTabel === "function") renderTabel();
+
+                        $("#importSummary").text(result.message);
+                        const $bWrap = $("#importBerhasilWrap").toggleClass("hidden", !(result.berhasil && result.berhasil.length));
+                        const $bList = $("#importBerhasilList").empty();
+                        (result.berhasil || []).forEach((b) => {
+                            $bList.append(`<tr class="border-t border-slate-100"><td class="px-3 py-1.5">${b.nama}</td><td class="px-3 py-1.5">${b.email}</td><td class="px-3 py-1.5 font-mono">${b.password}</td><td class="px-3 py-1.5">${b.kelompok || "-"}</td></tr>`);
+                        });
+                        const $gWrap = $("#importGagalWrap").toggleClass("hidden", !(result.gagal && result.gagal.length));
+                        const $gList = $("#importGagalList").empty();
+                        (result.gagal || []).forEach((g) => $gList.append(`<li>${g}</li>`));
+
+                        $("#importResult").removeClass("hidden");
+                        $("#formImport")[0].reset();
+                        tampilkanToast(result.message);
+                    }).fail(function (xhr) {
+                        const result = xhr.responseJSON || {};
+                        $("#importError").text(result.message || "Gagal memproses file.").removeClass("hidden");
+                    }).always(function () {
+                        $btn.prop("disabled", false);
+                    });
+                });
+
+                $("#btnDownloadHasil").on("click", function () {
+                    if (!lastImportBerhasil.length) return;
+
+                    const baris = [["Nama", "Email", "Password", "Kelompok"]];
+                    lastImportBerhasil.forEach((b) => {
+                        baris.push([b.nama, b.email, b.password, b.kelompok || "-"]);
+                    });
+
+                    const csv = "\uFEFF" + baris
+                        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+                        .join("\r\n");
+
+                    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                    const url = URL.createObjectURL(blob);
+                    const tanggal = new Date().toISOString().slice(0, 10);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `hasil_import_{{ \Illuminate\Support\Str::slug($roleLabel) }}_${tanggal}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+            }
+            @endif
             $("#btnCloseForm").on("click", tutupForm);
             $("#btnBatalForm").on("click", tutupForm);
             $modalForm.on("click", function (e) { if (e.target === this) tutupForm(); });

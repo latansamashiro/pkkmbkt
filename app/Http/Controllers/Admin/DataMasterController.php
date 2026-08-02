@@ -45,7 +45,7 @@ class DataMasterController extends Controller
 
         $dibuat = [];
         foreach (self::SESI_ABSENSI_FIXED as $sesi) {
-            $row = \App\Models\AttendanceTemplate::firstOrCreate(
+            $row = \App\Models\AttendanceTemplate::withTrashed()->firstOrCreate(
                 [
                     'attendance_date' => $validated['attendance_date'],
                     'session_name' => $sesi['session_name'],
@@ -58,6 +58,9 @@ class DataMasterController extends Controller
                     'updated_by_id' => $request->user()->id,
                 ]
             );
+            if ($row->trashed()) {
+                $row->restore(); // sesi ini pernah dihapus & dibuat ulang -> hidupkan lagi, bukan bikin baris baru
+            }
             $dibuat[] = $row;
         }
 
@@ -286,8 +289,8 @@ class DataMasterController extends Controller
     protected function optionSources(): array
     {
         return [
-            'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name', 'program_study_name'])
-                ->mapWithKeys(fn($u) => [$u->id => $u->name . ($u->program_study_name ? ' — ' . $u->program_study_name : '')]),
+            'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name'])
+                ->mapWithKeys(fn($u) => [$u->id => $u->name]),
             'advisors' => User::where('role_name', 'ADVISOR')->orderBy('name')->get(['id', 'name'])
                 ->mapWithKeys(fn($u) => [$u->id => $u->name]),
             'program_studies' => ProgramStudy::orderBy('name')->get(['name'])
@@ -299,15 +302,11 @@ class DataMasterController extends Controller
 
     protected function optionMetaSources(): array
     {
-    return [
-        'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name', 'program_study_name'])
-            ->map(fn($u) => [
-                'value' => $u->id,
-                'label' => $u->name . ($u->program_study_name ? ' — ' . $u->program_study_name : ''),
-                'filter_value' => $u->program_study_name,
-            ])
-            ->values(),
-    ];
+        return [
+            'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name', 'program_study_name'])
+                ->map(fn($u) => ['value' => $u->id, 'label' => $u->name, 'filter_value' => $u->program_study_name])
+                ->values(),
+        ];
     }
 
     /**
@@ -461,7 +460,7 @@ class DataMasterController extends Controller
         if ($type === 'jadwal_absensi' && !empty($validated['attendance_date'])) {
             $validated['day_name'] = \Carbon\Carbon::parse($validated['attendance_date'])->locale('id')->translatedFormat('l');
 
-            $sudahAda = \App\Models\AttendanceTemplate::where('attendance_date', $validated['attendance_date'])
+            $sudahAda = \App\Models\AttendanceTemplate::withTrashed()->where('attendance_date', $validated['attendance_date'])
                 ->where('session_name', $validated['session_name'])
                 ->exists();
             abort_if($sudahAda, 422, "{$validated['session_name']} untuk tanggal itu sudah ada, tidak boleh dobel.");
@@ -513,7 +512,7 @@ class DataMasterController extends Controller
         if ($type === 'jadwal_absensi' && !empty($validated['attendance_date'])) {
             $validated['day_name'] = \Carbon\Carbon::parse($validated['attendance_date'])->locale('id')->translatedFormat('l');
 
-            $sudahAda = \App\Models\AttendanceTemplate::where('attendance_date', $validated['attendance_date'])
+            $sudahAda = \App\Models\AttendanceTemplate::withTrashed()->where('attendance_date', $validated['attendance_date'])
                 ->where('session_name', $validated['session_name'])
                 ->where('id', '!=', $id)
                 ->exists();

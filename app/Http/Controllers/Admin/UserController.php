@@ -301,4 +301,182 @@ class UserController extends Controller
         $user->delete();
         return response()->json(['message' => 'Pengguna berhasil dihapus.']);
     }
+
+    /**
+     * Download template CSV — kolomnya menyesuaikan role (STUDENT dapat
+     * kolom NPM & Kode Kelompok, role lain tidak).
+     */
+    public function importTemplate(Request $request)
+    {
+        $role = $this->lockedRole($request);
+
+        $header = ['Nama', 'Email', 'Password'];
+        if ($this->hasNpmField($role)) {
+            $header[] = 'NPM';
+        }
+        $header[] = 'No HP';
+        $header[] = 'Jenis Kelamin (laki-laki/perempuan)';
+        if ($this->hasAcademicFields($role)) {
+            $header[] = 'Fakultas';
+            $header[] = 'Program Studi';
+        }
+        if ($this->hasGroupField($role)) {
+            $header[] = 'Kode Kelompok';
+        }
+
+        $contoh = ['NAZRUL IBRAHIM', 'nazrul@contoh.com', ''];
+        if ($this->hasNpmField($role)) {
+            $contoh[] = '525241019';
+        }
+        $contoh[] = '081234567890';
+        $contoh[] = 'laki-laki';
+        if ($this->hasAcademicFields($role)) {
+            $contoh[] = 'FAKULTAS TEKNOLOGI INFORMASI';
+            $contoh[] = 'TEKNIK INFORMATIKA';
+        }
+        if ($this->hasGroupField($role)) {
+            $contoh[] = 'KLP-01';
+        }
+
+        $namaFile = 'template_import_' . strtolower(str_replace(' ', '_', self::ROLES[$role])) . '.csv';
+
+        $callback = function () use ($header, $contoh) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF"); // BOM biar Excel baca UTF-8 dengan benar
+            fputcsv($out, $header);
+            fputcsv($out, $contoh);
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$namaFile}\"",
+        ]);
+    }
+
+    /**
+     * Proses upload CSV — bikin banyak akun sekaligus. Baris yang gagal
+     * (misal email/NPM sudah dipakai) dilewati, tidak menggagalkan baris lain,
+     * lalu dilaporkan satu per satu di akhir.
+     */
+    public function import(Request $request)
+    {
+        $role = $this->lockedRole($request);
+        $academic = $this->hasAcademicFields($role);
+        $groupField = $this->hasGroupField($role);
+        $npmField = $this->hasNpmField($role);
+
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
+        ]);
+
+        $path = $request->file('file')->getRealPath();
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return response()->json(['message' => 'Gagal membaca file.'], 422);
+        }
+
+        // buang BOM UTF-8 kalau ada, biar kolom pertama (Nama) tidak kebaca aneh
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($handle);
+        }
+
+        $header = fgetcsv($handle);
+        if (!$header) {
+            return response()->json(['message' => 'File kosong atau formatnya tidak terbaca.'], 422);
+        }
+        $header = array_map(fn($h) => strtolower(trim($h)), $header);
+
+        $kolom = function (array $row, string $cari) use ($header) {
+            foreach ($header as $i => $h) {
+                if (str_contains($h, strtolower($cari))) {
+                    return trim($row[$i] ?? '');
+                }
+            }
+            return null;
+        };
+
+        $berhasil = [];
+        $gagal = [];
+        $baris = 1;
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $baris++;
+            if (count(array_filter($row, fn($v) => trim((string) $v) !== '')) === 0) {
+                continue; // baris kosong, lewati diam-diam
+            }
+
+            $nama = $kolom($row, 'nama');
+            $email = $kolom($row, 'email');
+            $password = $kolom($row, 'password');
+            $npm = $npmField ? $kolom($row, 'npm') : null;
+            $phone = $kolom($row, 'hp') ?? $kolom($row, 'telepon');
+            $genderRaw = strtolower((string) $kolom($row, 'kelamin'));
+            $gender = str_contains($genderRaw, 'perempuan') ? 'perempuan' : (str_contains($genderRaw, 'laki') ? 'laki-laki' : null);
+            $fakultas = $academic ? $kolom($row, 'fakultas') : null;
+            $prodi = $academic ? $kolom($row, 'program studi') : null;
+            $kodeKelompok = $groupField ? $kolom($row, 'kelompok') : null;
+
+            if (!$nama || !$email) {
+                $gagal[] = "Baris {$baris}: Nama dan Email wajib diisi.";
+                continue;
+            }
+            if (User::withTrashed()->where('email', $email)->exists()) {
+                $gagal[] = "Baris {$baris} ({$email}): Email sudah dipakai (termasuk akun yang pernah dihapus).";
+                continue;
+            }
+            if ($npm && User::withTrashed()->where('npm', $npm)->exists()) {
+                $gagal[] = "Baris {$baris} ({$email}): NPM sudah dipakai (termasuk akun yang pernah dihapus).";
+                continue;
+            }
+
+            $group = null;
+            if ($kodeKelompok) {
+                $group = \App\Models\Group::where('code', $kodeKelompok)->first();
+                if (!$group) {
+                    $gagal[] = "Baris {$baris} ({$email}): Kode Kelompok \"{$kodeKelompok}\" tidak ditemukan, akun tetap dibuat tanpa kelompok.";
+                } elseif ($group->members()->count() >= $group->max_member) {
+                    $gagal[] = "Baris {$baris} ({$email}): Kelompok \"{$kodeKelompok}\" sudah penuh, akun tetap dibuat tanpa kelompok.";
+                    $group = null;
+                }
+            }
+
+            $passwordAsli = $password ?: \Illuminate\Support\Str::random(8);
+
+            $user = User::create([
+                'name' => $nama,
+                'email' => $email,
+                'password' => Hash::make($passwordAsli),
+                'role_name' => $role,
+                'status' => 'aktif',
+                'phone_no' => $phone ?: null,
+                'faculty_name' => $fakultas ?: null,
+                'program_study_name' => $prodi ?: null,
+                'gender' => $gender,
+                'npm' => $npm ?: null,
+                'created_by_id' => $request->user()->id,
+                'updated_by_id' => $request->user()->id,
+            ]);
+
+            if ($group) {
+                $this->syncGroupMembership($user, $group->id, $request->user()->id);
+            }
+
+            $berhasil[] = [
+                'id' => $user->id,
+                'nama' => $user->name,
+                'email' => $user->email,
+                'password' => $passwordAsli,
+                'kelompok' => $group->name ?? null,
+            ];
+        }
+        fclose($handle);
+
+        return response()->json([
+            'message' => count($berhasil) . ' akun berhasil dibuat' . (count($gagal) ? ', ' . count($gagal) . ' baris gagal/bermasalah.' : '.'),
+            'berhasil' => $berhasil,
+            'gagal' => $gagal,
+        ]);
+    }
 }
