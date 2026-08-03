@@ -70,6 +70,14 @@
                     <option value="ada">Sudah Ada Mentor</option>
                     <option value="belum">Belum Ada Mentor</option>
                 </select>
+                <select id="filterProdi" class="sm:w-52 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                    <option value="">Semua Program Studi</option>
+                    @foreach ($faculties as $f)
+                        @foreach ($f->programStudies as $p)
+                            <option value="{{ $p->name }}">{{ $p->name }}</option>
+                        @endforeach
+                    @endforeach
+                </select>
             </div>
 
             <div class="overflow-x-auto">
@@ -104,18 +112,18 @@
                 <p id="kelompokFormError" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2"></p>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5">Kode Kelompok</label>
-                    <input type="text" id="inputKode" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                    <input type="text" id="inputKode" required oninput="this.value = this.value.toUpperCase()" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5">Nama Kelompok</label>
-                    <input type="text" id="inputNamaKelompok" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                    <input type="text" id="inputNamaKelompok" required oninput="this.value = this.value.toUpperCase()" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5">Mentor</label>
                     <select id="inputMentorId" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
                         <option value="">Belum ada</option>
                         @foreach ($mentors as $m)
-                            <option value="{{ $m->id }}">{{ $m->name }}</option>
+                            <option value="{{ $m->id }}">{{ $m->name }}{{ $m->program_study_name ? ' — ' . $m->program_study_name : '' }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -251,11 +259,13 @@
             function renderTable() {
                 const keyword = ($("#searchKelompok").val() || "").toLowerCase().trim();
                 const filterMentor = $("#filterMentor").val() || "";
+                const filterProdi = $("#filterProdi").val() || ""; // tambahan
 
                 const tampil = groupList.filter((g) => {
                     if (keyword && !((g.name || "").toLowerCase().includes(keyword) || (g.mentor || "").toLowerCase().includes(keyword) || (g.code || "").toLowerCase().includes(keyword))) return false;
                     if (filterMentor === "ada" && !g.mentor_id) return false;
                     if (filterMentor === "belum" && g.mentor_id) return false;
+                    if (filterProdi && !studentList.some((s) => s.group_id === g.id && s.prodi === filterProdi)) return false; // tambahan
                     return true;
                 });
 
@@ -305,6 +315,7 @@
 
             $("#searchKelompok").on("keyup", renderTable);
             $("#filterMentor").on("change", renderTable);
+            $("#filterProdi").on("change", renderTable); // tambahan
 
             // ================== TAMBAH / EDIT KELOMPOK (reuse endpoint Data Master, type=kelompok) ==================
             const $modalKelompok = $("#modalKelompok");
@@ -361,8 +372,8 @@
                     const mapped = {
                         id: d.id, code: d.code, name: d.name,
                         mentor_id: d.mentor_id, advisor_id: d.advisor_id,
-                        mentor: $("#inputMentorId option:selected").text() === "Belum ada" ? null : $("#inputMentorId option:selected").text(),
-                        advisor: $("#inputAdvisorId option:selected").text() === "Belum ada" ? null : $("#inputAdvisorId option:selected").text(),
+                        mentor: $("#inputMentorId option:selected").text() === "Belum ada" ? null : $("#inputMentorId option:selected").text().split(" — ")[0],
+                        advisor: $("#inputAdvisorId option:selected").text() === "Belum ada" ? null : $("#inputAdvisorId option:selected").text().split(" — ")[0],
                         max_member: d.max_member,
                         member_count: editingGroupId ? (groupList.find(g => g.id === editingGroupId)?.member_count || 0) : 0,
                     };

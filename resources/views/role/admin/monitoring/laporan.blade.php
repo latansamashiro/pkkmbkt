@@ -1,4 +1,8 @@
-@extends('layouts.admin.main')
+@extends(request()->routeIs('committee.*') ? 'layouts.committee.main' : 'layouts.admin.main')
+@php
+    // dipakai buat bikin nama route dinamis (admin.monitoring.* atau committee.monitoring.*)
+    $monBase = \Illuminate\Support\Str::before(request()->route()->getName(), '.monitoring') . '.monitoring';
+@endphp
 @section('content')
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -55,16 +59,16 @@
 
                         if (($l['group_id'] ?? null)) {
                             if ($l['jenis'] === 'Absensi') {
-                                $lihatUrl = route('admin.monitoring.absensi.detail', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]);
+                                $lihatUrl = route($monBase.'.absensi.detail', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]);
                                 if ($l['submitted'] ?? false) {
-                                    $downloadUrl = route('admin.monitoring.absensi.export-pdf', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]);
+                                    $downloadUrl = route($monBase.'.absensi.export-pdf', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]);
                                 }
                             } elseif ($l['jenis'] === 'Evaluasi') {
-                                $lihatUrl = route('admin.monitoring.evaluasi.detail', $l['group_id']);
+                                $lihatUrl = route($monBase.'.evaluasi.detail', $l['group_id']);
                             } elseif ($l['jenis'] === 'Keaktifan') {
-                                $lihatUrl = route('admin.monitoring.keaktifan.detail', $l['group_id']);
+                                $lihatUrl = route($monBase.'.keaktifan.detail', $l['group_id']);
                             } elseif ($l['jenis'] === 'Pelanggaran') {
-                                $lihatUrl = route('admin.monitoring.pelanggaran.detail', $l['group_id']);
+                                $lihatUrl = route($monBase.'.pelanggaran.detail', $l['group_id']);
                             }
                         }
                     @endphp

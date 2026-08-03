@@ -29,21 +29,21 @@ class GroupController extends Controller
 
         // dipakai buat dropdown Mentor/Advisor di form Tambah/Edit Kelompok
         // (form-nya submit ke endpoint Data Master yang sudah ada, type=kelompok)
-        $mentors = User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name']);
+        $mentors = User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name', 'program_study_name']);
         $advisors = User::where('role_name', 'ADVISOR')->orderBy('name')->get(['id', 'name']);
 
-        // peta student_id -> group_id, biar FE tahu siapa sudah di kelompok mana
-        $memberMap = Member::pluck('group_id', 'student_id');
-
-        // dipakai buat dropdown filter Program Studi
+        // dipakai buat dropdown "Filter Program Studi" di tabel kelompok
         $faculties = Faculty::with(['programStudies' => fn($q) => $q->orderBy('name')])
             ->orderBy('name')
             ->get(['id', 'name']);
 
+        // peta student_id -> group_id, biar FE tahu siapa sudah di kelompok mana
+        $memberMap = Member::pluck('group_id', 'student_id');
+
         $data = ['title' => $request->route('title') ?? 'Kelola Kelompok'];
         $view = $request->route('view') ?? 'role.admin.kelompok.index';
 
-        return view($view, compact('data', 'groups', 'students', 'mentors', 'advisors', 'memberMap', 'faculties'));
+        return view($view, compact('data', 'groups', 'students', 'mentors', 'advisors', 'faculties', 'memberMap'));
     }
 
     /**

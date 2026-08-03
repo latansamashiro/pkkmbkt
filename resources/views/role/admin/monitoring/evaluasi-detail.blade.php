@@ -1,4 +1,8 @@
-@extends('layouts.admin.main')
+@extends(request()->routeIs('committee.*') ? 'layouts.committee.main' : 'layouts.admin.main')
+@php
+    // dipakai buat bikin nama route dinamis (admin.monitoring.* atau committee.monitoring.*)
+    $monBase = \Illuminate\Support\Str::before(request()->route()->getName(), '.monitoring') . '.monitoring';
+@endphp
 @section('content')
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -8,7 +12,7 @@
 </script>
 
 <div class="mb-5">
-    <a href="{{ route('admin.monitoring.evaluasi') }}" class="text-sm font-semibold text-teal-600 inline-flex items-center gap-1 mb-3">
+    <a href="{{ route($monBase.'.evaluasi') }}" class="text-sm font-semibold text-teal-600 inline-flex items-center gap-1 mb-3">
         <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
     </a>
     <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Detail Evaluasi</p>

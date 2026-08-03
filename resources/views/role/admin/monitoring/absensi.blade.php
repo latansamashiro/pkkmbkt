@@ -1,4 +1,8 @@
-@extends('layouts.admin.main')
+@extends(request()->routeIs('committee.*') ? 'layouts.committee.main' : 'layouts.admin.main')
+@php
+    // dipakai buat bikin nama route dinamis (admin.monitoring.* atau committee.monitoring.*)
+    $monBase = \Illuminate\Support\Str::before(request()->route()->getName(), '.monitoring') . '.monitoring';
+@endphp
 @section('content')
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -45,7 +49,7 @@
                         </td>
                         <td class="px-3.5 py-3 text-sm text-slate-600 border-b border-slate-200">{{ $l['status'] }}</td>
                         <td class="px-3.5 py-3 border-b border-slate-200">
-                            <a href="{{ route('admin.monitoring.absensi.detail', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]) }}" class="text-teal-600 hover:text-teal-700">
+                            <a href="{{ route($monBase.'.absensi.detail', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]) }}" class="text-teal-600 hover:text-teal-700">
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </a>
                         </td>
