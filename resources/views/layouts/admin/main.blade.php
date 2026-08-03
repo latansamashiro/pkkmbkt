@@ -89,6 +89,61 @@
         })();
     </script>
 
+    <!-- ======= MODAL KONFIRMASI LOGOUT ======= -->
+    <div id="logoutModal" class="logout-modal-backdrop"
+        style="display:none; position:fixed; inset:0; z-index:100; background:rgba(21,33,89,.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px;">
+        <div class="logout-modal-box"
+            style="background:#fff; border-radius:28px; max-width:340px; width:100%; padding:28px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,.25);">
+            <div
+                style="width:56px; height:56px; border-radius:9999px; background:#fef2f2; color:#dc2626; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                <span class="ic" style="width:26px;height:26px;"><i data-lucide="log-out"></i></span>
+            </div>
+            <h3 style="font-family:'Lora',serif; font-size:18px; font-weight:700; color:#1b2238; margin:0 0 8px;">
+                Yakin ingin keluar?</h3>
+            <p style="font-size:13px; color:#5b6175; line-height:1.6; margin:0 0 20px;">
+                Kamu akan keluar dari akun ini dan harus masuk kembali untuk mengakses dashboard.</p>
+            <div style="display:flex; gap:10px;">
+                <button type="button" id="btnLogoutCancel"
+                    style="flex:1; padding:12px; border-radius:12px; border:1px solid #e1e5f1; background:#f2f4fa; color:#1b2238; font-weight:700; font-size:13.5px; cursor:pointer;">Tidak</button>
+                <button type="button" id="btnLogoutConfirm"
+                    style="flex:1; padding:12px; border-radius:12px; border:none; background:#dc2626; color:#fff; font-weight:800; font-size:13.5px; cursor:pointer;">Ya,
+                    Keluar</button>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ route('logout') }}" id="logoutForm" style="display:none;">
+        @csrf
+    </form>
+
+    <script>
+        // ===== Konfirmasi logout (tombol Keluar di sidebar) =====
+        (function () {
+            const modal = document.getElementById("logoutModal");
+            const btnSidebar = document.getElementById("btnLogoutSidebar");
+            const btnCancel = document.getElementById("btnLogoutCancel");
+            const btnConfirm = document.getElementById("btnLogoutConfirm");
+            const logoutForm = document.getElementById("logoutForm");
+
+            function bukaModal(e) {
+                if (e) e.preventDefault();
+                modal.style.display = "flex";
+            }
+            function tutupModal() {
+                modal.style.display = "none";
+            }
+
+            if (btnSidebar) btnSidebar.addEventListener("click", bukaModal);
+            if (btnCancel) btnCancel.addEventListener("click", tutupModal);
+            if (btnConfirm) btnConfirm.addEventListener("click", () => logoutForm.submit());
+            if (modal) {
+                modal.addEventListener("click", (e) => {
+                    if (e.target === modal) tutupModal();
+                });
+            }
+        })();
+    </script>
+
     @stack('scripts')
 </body>
 

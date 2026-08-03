@@ -70,13 +70,11 @@
         </a>
     </nav>
 
-    <form method="POST" action="{{ route('logout') }}" class="sidebar-logout"
-        style="border:none; padding:0; margin:10px 10px 0;">
-        @csrf
-        <button type="submit"
+    <div class="sidebar-logout" style="border:none; padding:0; margin:10px 10px 0;">
+        <button type="button" id="btnLogoutSidebar"
             style="all:unset; display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px 10px; border-radius:var(--radius-sm); background:rgba(224,102,90,0.14); color:#f3a49c; font-weight:800; font-size:12.5px; cursor:pointer;">
             <span class="ic"><i data-lucide="log-out"></i></span>
             <span class="label">Keluar</span>
         </button>
-    </form>
+    </div>
 </aside>
