@@ -165,9 +165,9 @@ class MonitoringController extends Controller
     $paged = $laporan->forPage($page, $perPage)->values();
     $totalPage = max(1, ceil($laporan->count() / $perPage));
 
-    $data = ['title' => 'Monitoring Laporan'];
+    $data = ['title' => $request->route('title') ?? 'Monitoring Laporan'];
 
-    return view('role.admin.monitoring.laporan', [
+    return view($request->route('view') ?? 'role.admin.monitoring.laporan', [
         'data'      => $data,
         'laporan'   => $paged,
         'total'     => $laporan->count(),
@@ -208,8 +208,8 @@ public function absensi(Request $request)
         )->values();
     }
 
-    return view('role.admin.monitoring.absensi', [
-        'data'    => ['title' => 'Monitoring Absensi'],
+    return view($request->route('view') ?? 'role.admin.monitoring.absensi', [
+        'data'    => ['title' => $request->route('title') ?? 'Monitoring Absensi'],
         'laporan' => $laporan,
         'filters' => compact('tanggal', 'cari'),
     ]);
@@ -355,14 +355,14 @@ public function pelanggaran(Request $request)
     return $this->poinListing($request, 'pelanggaran');
 }
 
-public function keaktifanDetail($groupId)
+public function keaktifanDetail(Request $request, $groupId)
 {
-    return $this->poinDetail($groupId, 'keaktifan');
+    return $this->poinDetail($request, $groupId, 'keaktifan');
 }
 
-public function pelanggaranDetail($groupId)
+public function pelanggaranDetail(Request $request, $groupId)
 {
-    return $this->poinDetail($groupId, 'pelanggaran');
+    return $this->poinDetail($request, $groupId, 'pelanggaran');
 }
 
 protected function poinListing(Request $request, string $tipe)
@@ -390,15 +390,15 @@ protected function poinListing(Request $request, string $tipe)
         ->filter(fn ($g) => $g['update'] !== null) // sembunyiin kelompok yang belum ada record
         ->values();
 
-    return view("role.admin.monitoring.{$tipe}", [
-        'data'    => ['title' => 'Monitoring ' . ucfirst($tipe)],
+    return view($request->route('view') ?? "role.admin.monitoring.{$tipe}", [
+        'data'    => ['title' => $request->route('title') ?? 'Monitoring ' . ucfirst($tipe)],
         'laporan' => $groups,
         'filters' => compact('cari'),
         'tipe'    => $tipe,
     ]);
 }
 
-protected function poinDetail($groupId, string $tipe)
+protected function poinDetail(Request $request, $groupId, string $tipe)
 {
     $group = Group::with('mentor')->findOrFail($groupId);
     $isKeaktifan = $tipe === 'keaktifan';
@@ -423,7 +423,7 @@ protected function poinDetail($groupId, string $tipe)
         ->filter(fn ($r) => $r['update'] !== null)
         ->values();
 
-    return view("role.admin.monitoring.{$tipe}-detail", compact('group', 'rows', 'tipe'));
+    return view($request->route('view') ?? "role.admin.monitoring.{$tipe}-detail", compact('group', 'rows', 'tipe'));
 }
 
 public function evaluasi(Request $request)
@@ -460,14 +460,14 @@ public function evaluasi(Request $request)
         ->filter(fn ($g) => $g['tanggal'] !== null) // sembunyiin kelompok yg belum ada evaluasi sama sekali
         ->values();
 
-    return view('role.admin.monitoring.evaluasi', [
-        'data'    => ['title' => 'Monitoring Evaluasi'],
+    return view($request->route('view') ?? 'role.admin.monitoring.evaluasi', [
+        'data'    => ['title' => $request->route('title') ?? 'Monitoring Evaluasi'],
         'laporan' => $groups,
         'filters' => compact('cari'),
     ]);
 }
 
-public function evaluasiDetail($groupId)
+public function evaluasiDetail(Request $request, $groupId)
 {
     $group = Group::with('mentor')->findOrFail($groupId);
 
@@ -500,7 +500,7 @@ public function evaluasiDetail($groupId)
             ];
         });
 
-    return view('role.admin.monitoring.evaluasi-detail', compact('group', 'categories', 'rows'));
+    return view($request->route('view') ?? 'role.admin.monitoring.evaluasi-detail', compact('group', 'categories', 'rows'));
 }
 
 }

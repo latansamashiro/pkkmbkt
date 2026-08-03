@@ -1,4 +1,8 @@
-@extends('layouts.admin.main')
+@extends(request()->routeIs('committee.*') ? 'layouts.committee.main' : 'layouts.admin.main')
+@php
+    // dipakai buat bikin nama route dinamis (admin.monitoring.* atau committee.monitoring.*)
+    $monBase = \Illuminate\Support\Str::before(request()->route()->getName(), '.monitoring') . '.monitoring';
+@endphp
 @section('content')
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -9,7 +13,7 @@
 
 <div class="mb-5 flex items-start justify-between flex-wrap gap-3">
     <div>
-        <a href="{{ route('admin.monitoring.absensi') }}" class="text-sm font-semibold text-teal-600 inline-flex items-center gap-1 mb-3">
+        <a href="{{ route($monBase.'.absensi') }}" class="text-sm font-semibold text-teal-600 inline-flex items-center gap-1 mb-3">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
         </a>
         <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Detail Absensi</p>
@@ -22,12 +26,12 @@
 
     @if ($adaSubmitted)
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.monitoring.absensi.export-pdf', ['groupId' => $group->id, 'tanggal' => $tanggal]) }}"
+            <a href="{{ route($monBase.'.absensi.export-pdf', ['groupId' => $group->id, 'tanggal' => $tanggal]) }}"
                 target="_blank"
                 class="inline-flex items-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-sm px-4 py-2.5 rounded-xl transition">
                 <i data-lucide="file-text" class="w-4 h-4"></i>Export PDF
             </a>
-            <a href="{{ route('admin.monitoring.absensi.export-excel', ['groupId' => $group->id, 'tanggal' => $tanggal]) }}"
+            <a href="{{ route($monBase.'.absensi.export-excel', ['groupId' => $group->id, 'tanggal' => $tanggal]) }}"
                 class="inline-flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>Export Excel
             </a>

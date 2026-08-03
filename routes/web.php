@@ -97,6 +97,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/monitoring/laporan', [MonitoringController::class, 'laporan'])->name('admin.monitoring.laporan');
         Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('admin.pengaturan.index');
         Route::get('/profil', [ProfilController::class, 'index'])->name('admin.profil.index');
+        Route::post('/profil', [ProfilController::class, 'updateProfile'])->name('admin.profil.update');
+        Route::post('/profil/password', [ProfilController::class, 'updatePassword'])->name('admin.profil.password');
         Route::get('/monitoring/absensi', [MonitoringController::class, 'absensi'])
             ->name('admin.monitoring.absensi');
         Route::get('/monitoring/absensi/{groupId}/{tanggal}', [MonitoringController::class, 'absensiDetail'])
@@ -181,6 +183,8 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::post('/', 'store')->name('committee.mahasiswa.store'), $defaults);
             $withDefaults(Route::put('/{user}', 'update')->name('committee.mahasiswa.update'), $defaults);
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mahasiswa.destroy'), $defaults);
+            $withDefaults(Route::get('/import/template', 'importTemplate')->name('committee.mahasiswa.import-template'), $defaults);
+            $withDefaults(Route::post('/import', 'import')->name('committee.mahasiswa.import'), $defaults);
         });
 
         // ===== Kelola Mentor (reuse UserController, view komite) =====
@@ -190,6 +194,8 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::post('/', 'store')->name('committee.mentor.store'), $defaults);
             $withDefaults(Route::put('/{user}', 'update')->name('committee.mentor.update'), $defaults);
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mentor.destroy'), $defaults);
+            $withDefaults(Route::get('/import/template', 'importTemplate')->name('committee.mentor.import-template'), $defaults);
+            $withDefaults(Route::post('/import', 'import')->name('committee.mentor.import'), $defaults);
         });
 
         // ===== Kelola Anggota per Kelompok (masih pakai GroupController, tapi
@@ -235,6 +241,34 @@ Route::middleware(['auth'])->group(function () {
 
             // Tambah 1 hari sekaligus (3 sesi fixed) khusus untuk jadwal absensi
             Route::post('/absensi-hari', 'jadwalAbsensiStoreHari')->name('committee.absensi.store-hari');
+        });
+
+        // ===== Monitoring (read-only, reuse MonitoringController & view yang sama dengan Admin —
+        // view-nya otomatis mendeteksi layout Panitia/Admin sendiri) =====
+        Route::controller(MonitoringController::class)->prefix('monitoring')->group(function () {
+            Route::get('/laporan', 'laporan')->name('committee.monitoring.laporan');
+
+            Route::get('/absensi', 'absensi')->name('committee.monitoring.absensi');
+            Route::get('/absensi/{groupId}/{tanggal}', 'absensiDetail')->name('committee.monitoring.absensi.detail');
+            Route::get('/absensi/{groupId}/{tanggal}/export-pdf', 'absensiExportPdf')->name('committee.monitoring.absensi.export-pdf');
+            Route::get('/absensi/{groupId}/{tanggal}/export-excel', 'absensiExportExcel')->name('committee.monitoring.absensi.export-excel');
+
+            Route::get('/keaktifan', 'keaktifan')->name('committee.monitoring.keaktifan');
+            Route::get('/keaktifan/{groupId}', 'keaktifanDetail')->name('committee.monitoring.keaktifan.detail');
+
+            Route::get('/pelanggaran', 'pelanggaran')->name('committee.monitoring.pelanggaran');
+            Route::get('/pelanggaran/{groupId}', 'pelanggaranDetail')->name('committee.monitoring.pelanggaran.detail');
+
+            Route::get('/evaluasi', 'evaluasi')->name('committee.monitoring.evaluasi');
+            Route::get('/evaluasi/{groupId}', 'evaluasiDetail')->name('committee.monitoring.evaluasi.detail');
+        });
+
+        // ===== Profil (reuse ProfilController, view sama seperti Admin — otomatis deteksi layout) =====
+        Route::controller(\App\Http\Controllers\Admin\ProfilController::class)->prefix('profil')->group(function () use ($withDefaults) {
+            $defaults = ['title' => 'Profil'];
+            $withDefaults(Route::get('/', 'index')->name('committee.profil.index'), $defaults);
+            Route::post('/', 'updateProfile')->name('committee.profil.update');
+            Route::post('/password', 'updatePassword')->name('committee.profil.password');
         });
     });
 });
