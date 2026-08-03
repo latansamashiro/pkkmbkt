@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Faculty;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\User;
@@ -34,10 +35,15 @@ class GroupController extends Controller
         // peta student_id -> group_id, biar FE tahu siapa sudah di kelompok mana
         $memberMap = Member::pluck('group_id', 'student_id');
 
+        // dipakai buat dropdown filter Program Studi
+        $faculties = Faculty::with(['programStudies' => fn($q) => $q->orderBy('name')])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         $data = ['title' => $request->route('title') ?? 'Kelola Kelompok'];
         $view = $request->route('view') ?? 'role.admin.kelompok.index';
 
-        return view($view, compact('data', 'groups', 'students', 'mentors', 'advisors', 'memberMap'));
+        return view($view, compact('data', 'groups', 'students', 'mentors', 'advisors', 'memberMap', 'faculties'));
     }
 
     /**

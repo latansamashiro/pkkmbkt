@@ -108,6 +108,18 @@
                 <option value="aktif">Aktif</option>
                 <option value="nonaktif">Nonaktif</option>
             </select>
+               @if ($showAcademic)
+            <select id="filterProdi"
+                class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
+                <option value="">Semua Program Studi</option>
+                @foreach ($faculties as $f)
+                    @foreach ($f->programStudies as $p)
+                        <option value="{{ $p->name }}">{{ $p->name }}</option>
+                    @endforeach
+                @endforeach
+            </select>
+            @endif
+
             <div
                 class="flex-1 min-w-[200px] flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5">
                 <i data-lucide="search" class="w-4 h-4 text-slate-400 shrink-0"></i>
@@ -359,18 +371,21 @@
             // Otomatis mengikuti halaman mana pun ini dipanggil (kelola-mahasiswa, kelola-mentor, dst).
             const URL_BASE = "{{ url()->current() }}";
 
-            const PER_PAGE = 5;
+            const PER_PAGE = 25;
             let currentPage = 1;
             let editingId = null;
 
             function filteredData() {
-                const status = $("#filterStatus").val();
-                const q = $("#searchPengguna").val().trim().toLowerCase();
-                return penggunaList.filter((p) =>
-                    (!status || p.status === status) &&
-                    (!q || p.nama.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
-                );
-            }
+            const status = $("#filterStatus").val();
+            const q = $("#searchPengguna").val().trim().toLowerCase();
+            const prodi = $("#filterProdi").val(); // tambahan
+
+            return penggunaList.filter((p) =>
+                (!status || p.status === status) &&
+                (!prodi || p.program_study_name === prodi) && // tambahan
+                (!q || p.nama.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
+            );
+        }
 
             function badgeClass(status) {
                 return status === "aktif" ? "bg-teal-50 text-teal-600" : "bg-rose-50 text-rose-500";
@@ -465,6 +480,7 @@
 
             $("#filterStatus").on("change", () => { currentPage = 1; renderTabel(); });
             $("#searchPengguna").on("keyup", () => { currentPage = 1; renderTabel(); });
+            $("#filterProdi").on("change", () => { currentPage = 1; renderTabel(); });
 
             const $modalForm = $("#modalForm");
             const $modalDetail = $("#modalDetail");
