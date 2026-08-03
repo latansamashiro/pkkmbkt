@@ -102,4 +102,128 @@ class GroupController extends Controller
             'member_count' => $group->members()->count(),
         ]);
     }
+
+    /**
+     * Data buat modal "Kelola Anggota" — info kelompok + anggota saat ini +
+     * daftar mahasiswa yang masih tersedia (belum punya kelompok manapun).
+     */
+    public function anggota(Group $group)
+    {
+        $group->loadCount('members');
+
+        $members = Member::with('student:id,name,email')
+            ->where('group_id', $group->id)
+            ->get()
+            ->map(fn($m) => $m->student?->only(['id', 'name', 'email']))
+            ->filter()
+            ->values();
+
+        $sudahPunyaKelompok = Member::pluck('student_id');
+        $available = User::where('role_name', 'STUDENT')
+            ->whereNotIn('id', $sudahPunyaKelompok)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'program_study_name']);
+
+        return response()->json([
+            'group' => [
+                'id' => $group->id,
+                'name' => $group->name,
+                'member_count' => $group->members_count,
+                'max_member' => $group->max_member,
+            ],
+            'members' => $members,
+            'available' => $available,
+        ]);
+    }
+
+    /**
+     * Tambah banyak mahasiswa sekaligus ke SATU kelompok dari file CSV.
+     * Kolom yang dibaca: NPM atau Email (salah satu boleh, dua-duanya juga boleh) —
+     * dipakai buat mencocokkan ke akun mahasiswa yang SUDAH ADA (bukan bikin akun baru).
+     */
+    public function importMembers(Request $request, Group $group)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
+        ]);
+
+        $path = $request->file('file')->getRealPath();
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return response()->json(['message' => 'Gagal membaca file.'], 422);
+        }
+
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($handle);
+        }
+
+        $header = fgetcsv($handle);
+        if (!$header) {
+            fclose($handle);
+            return response()->json(['message' => 'File kosong atau formatnya tidak terbaca.'], 422);
+        }
+        $header = array_map(fn($h) => strtolower(trim($h)), $header);
+
+        $kolom = function (array $row, string $cari) use ($header) {
+            foreach ($header as $i => $h) {
+                if (str_contains($h, strtolower($cari))) {
+                    return trim($row[$i] ?? '');
+                }
+            }
+            return null;
+        };
+
+        $ditambahkan = 0;
+        $gagal = [];
+        $baris = 1;
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $baris++;
+            if (count(array_filter($row, fn($v) => trim((string) $v) !== '')) === 0) {
+                continue;
+            }
+
+            $npm = $kolom($row, 'npm');
+            $email = $kolom($row, 'email');
+
+            $student = null;
+            if ($npm) {
+                $student = User::where('role_name', 'STUDENT')->where('npm', $npm)->first();
+            }
+            if (!$student && $email) {
+                $student = User::where('role_name', 'STUDENT')->where('email', $email)->first();
+            }
+
+            if (!$student) {
+                $gagal[] = "Baris {$baris}: mahasiswa dengan NPM/Email itu tidak ditemukan.";
+                continue;
+            }
+
+            $existing = Member::where('student_id', $student->id)->first();
+            if ($existing) {
+                $gagal[] = "Baris {$baris} ({$student->name}): sudah tergabung di kelompok lain.";
+                continue;
+            }
+
+            if ($group->members()->count() + $ditambahkan >= $group->max_member) {
+                $gagal[] = "Baris {$baris} ({$student->name}): kelompok sudah penuh.";
+                continue;
+            }
+
+            Member::create([
+                'group_id' => $group->id,
+                'student_id' => $student->id,
+                'created_by_id' => $request->user()->id,
+                'updated_by_id' => $request->user()->id,
+            ]);
+            $ditambahkan++;
+        }
+        fclose($handle);
+
+        $pesan = "{$ditambahkan} mahasiswa berhasil ditambahkan";
+        $pesan .= count($gagal) ? ', ' . count($gagal) . ' baris gagal/bermasalah.' : '.';
+
+        return response()->json(['message' => $pesan, 'gagal' => $gagal]);
+    }
 }
