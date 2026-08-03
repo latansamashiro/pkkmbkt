@@ -359,7 +359,7 @@
             // Otomatis mengikuti halaman mana pun ini dipanggil (kelola-mahasiswa, kelola-mentor, dst).
             const URL_BASE = "{{ url()->current() }}";
 
-            const PER_PAGE = 5;
+            const PER_PAGE = 25;
             let currentPage = 1;
             let editingId = null;
 

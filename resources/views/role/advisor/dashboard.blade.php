@@ -96,7 +96,7 @@
         <a href="{{ route('dashboard') }}" class="md:hidden">
           <img src="{{ asset('gambar/unilam.png') }}" alt="Universitas La Tansa Mashiro" class="h-10 w-auto" />
         </a>
-        <h1 class="hidden md:block font-display font-semibold text-lg text-[#152159]">Dashboard Pembimbing/Koordinator</h1>
+        <h1 class="hidden md:block font-display font-semibold text-lg text-[#152159]">Dashboard Pembimbing & Koordinator</h1>
 
         <div class="flex items-center gap-2.5">
           <a href="#" class="relative w-10 h-10 rounded-full bg-[#e6e9f6] text-[#1e3a8f] flex items-center justify-center hover:bg-[#e2f3f2] hover:text-[#0f8a8c] transition" aria-label="Masuk ke akun">

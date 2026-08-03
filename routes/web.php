@@ -124,7 +124,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.monitoring.evaluasi.detail');
     });
 
-    //Advisor
+    
     //Advisor
     Route::group(['prefix' => 'advisor', 'middleware' => ['accessrole:advisor']], function () {
         Route::controller(\App\Http\Controllers\Advisor\AdvisorController::class)->group(function () {
@@ -253,6 +253,9 @@ Route::middleware(['auth'])->group(function () {
                 $withDefaults(Route::post("/{$sec['path']}/{type}", 'store')->name("committee.{$key}.store"), $defaults);
                 $withDefaults(Route::put("/{$sec['path']}/{type}/{id}", 'update')->name("committee.{$key}.update"), $defaults);
                 $withDefaults(Route::delete("/{$sec['path']}/{type}/{id}", 'destroy')->name("committee.{$key}.destroy"), $defaults);
+                $withDefaults(Route::patch("/{$sec['path']}/{type}/{id}/toggle-publish", 'togglePublish')->name("committee.{$key}.toggle-publish"), $defaults);
+                  $withDefaults(Route::patch("/{$sec['path']}/{type}/{id}/toggle-important", 'toggleImportant')->name("committee.{$key}.toggle-important"), $defaults);
+
             }
 
             // Tambah 1 hari sekaligus (3 sesi fixed) khusus untuk jadwal absensi

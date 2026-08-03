@@ -147,9 +147,11 @@
                 const $tbody = $("#tabelSesi").empty();
                 items.forEach((it) => {
                     const st = statusSesi(it);
+                    // fallback "-" jaga-jaga kalau day_name kosong (mis. data lama tanpa migrasi ulang)
+                    const hari = it.day_name || "-";
                     $tbody.append(`
                         <tr class="border-b border-slate-100 last:border-0">
-                            <td class="px-4 py-3 text-sm font-semibold text-slate-800">${it.day_name}</td>
+                            <td class="px-4 py-3 text-sm font-semibold text-slate-800">${hari}</td>
                             <td class="px-4 py-3 text-sm text-slate-700">${it.session_name}</td>
                             <td class="px-4 py-3 text-sm text-slate-500">${it.attendance_date}</td>
                             <td class="px-4 py-3 text-sm text-slate-500">${String(it.time_begin).slice(0,5)} - ${String(it.time_end).slice(0,5)}</td>
@@ -243,6 +245,15 @@
                 $hariError.addClass("hidden");
                 const tanggal = $("#inputTanggalHari").val();
                 if (!tanggal) return;
+
+                // ===== Cegah input ulang tanggal yang sudah pernah dibuat (cek cepat di client) =====
+                // Validasi utama tetap ada di backend (route store-hari); ini cuma biar user
+                // langsung tahu tanpa nunggu round-trip ke server.
+                const sudahAda = allItems.some((it) => it.attendance_date === tanggal);
+                if (sudahAda) {
+                    $hariError.text("Tanggal ini sudah pernah ditambahkan. Silakan pilih tanggal lain.").removeClass("hidden");
+                    return;
+                }
 
                 const $btn = $("#btnSimpanTambahHari");
                 $btn.prop("disabled", true);

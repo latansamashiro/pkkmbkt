@@ -164,7 +164,7 @@
                     const aktif = it.id === activeId;
                     const isPublished = it.status === STATUS_AKTIF;
                     const baseCls = aktif
-                        ? "bg-teal-700 text-white"
+                        ? "bg-teal-600 text-white"
                         : "text-slate-700 hover:bg-slate-50";
                     const statusCls = aktif
                         ? (isPublished ? "text-teal-200" : "text-slate-300")
@@ -213,25 +213,28 @@
             }
 
             function ubahStatus(statusBaru) {
-                if (!activeId) return;
-                const it = allItems.find((x) => x.id === activeId);
-                if (!it || it.status === statusBaru) return; // sudah di status itu, tidak perlu apa-apa
+            if (!activeId) return;
+            const it = allItems.find((x) => x.id === activeId);
+            if (!it || it.status === statusBaru) return;
 
-                $.ajax({
-                    url: `${URL_BASE}/${CATEGORY.key}/${activeId}/toggle-publish`,
-                    method: "PATCH",
-                    headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
-                }).done(function (result) {
-                    const idx = allItems.findIndex((x) => x.id === activeId);
-                    if (idx > -1) allItems[idx] = result.data;
-                    tampilkanToast(result.message);
-                    renderBadgeStatus(result.data.status);
-                    renderDaftar();
-                }).fail(function (xhr) {
-                    const result = xhr.responseJSON || {};
-                    tampilkanToast(result.message || "Gagal memperbarui status.");
-                });
-            }
+            $.ajax({
+                url: `${URL_BASE}/${CATEGORY.key}/${activeId}/toggle-publish`,
+                method: "PATCH",
+                headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
+            }).done(function (result) {
+                const idx = allItems.findIndex((x) => x.id === activeId);
+                if (idx > -1) allItems[idx] = result.data;
+
+                // update UI dulu, baru toast — biar toast yang error nggak nge-block render
+                renderBadgeStatus(result.data.status);
+                renderDaftar();
+                tampilkanToast(result.message);
+            }).fail(function (xhr) {
+                console.error("toggle-publish gagal:", xhr.status, xhr.responseJSON);
+                const result = xhr.responseJSON || {};
+                tampilkanToast(result.message || "Gagal memperbarui status.");
+            });
+        }
 
             $("#btnStatusDraft").on("click", function () { ubahStatus(STATUS_DRAFT); });
             $("#btnStatusPublish").on("click", function () { ubahStatus(STATUS_AKTIF); });

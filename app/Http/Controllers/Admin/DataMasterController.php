@@ -33,13 +33,19 @@ class DataMasterController extends Controller
     /**
      * Tambah satu HARI presensi sekaligus — otomatis membuat 3 sesi fixed
      * (08.00-10.00, 13.00-15.00, 16.00-18.00) untuk tanggal yang dipilih.
-     * Kalau salah satu sesi di tanggal itu sudah ada, dilewati saja (tidak dobel).
+     * Menolak kalau tanggal ini sudah pernah ditambahkan sebelumnya.
      */
     public function jadwalAbsensiStoreHari(Request $request)
     {
         $validated = $request->validate([
             'attendance_date' => ['required', 'date'],
         ]);
+
+        // Cegah input ulang tanggal yang sudah pernah dibuat sesinya
+        $sudahAda = \App\Models\AttendanceTemplate::withTrashed()
+            ->where('attendance_date', $validated['attendance_date'])
+            ->exists();
+        abort_if($sudahAda, 422, 'Tanggal ini sudah pernah ditambahkan. Silakan pilih tanggal lain.');
 
         $dayName = \Carbon\Carbon::parse($validated['attendance_date'])->locale('id')->translatedFormat('l');
 
@@ -255,8 +261,8 @@ class DataMasterController extends Controller
                     ['key' => 'urutan', 'label' => 'Urutan Tampil', 'type' => 'number', 'required' => true, 'unique' => 'evaluation_categories,urutan'],
                 ],
             ],
-                        // ===== 2) Tambahkan entri 'soal' di dalam types(), taruh persis setelah entri 'ujian' =====
-            
+            // ===== 2) Tambahkan entri 'soal' di dalam types(), taruh persis setelah entri 'ujian' =====
+
             'soal' => [
                 'model' => ExamDetail::class,
                 'label' => 'Bank Soal',
@@ -273,8 +279,8 @@ class DataMasterController extends Controller
                     ['key' => 'option_c', 'label' => 'Opsi C', 'type' => 'text', 'required' => true],
                     ['key' => 'option_d', 'label' => 'Opsi D', 'type' => 'text', 'required' => true],
                     ['key' => 'key', 'label' => 'Kunci Jawaban', 'type' => 'select', 'required' => true, 'options' => ['A' => 'A', 'B' => 'B', 'C' => 'C', 'D' => 'D']],
-                    ],
                 ],
+            ],
         ];
     }
 
@@ -374,36 +380,42 @@ class DataMasterController extends Controller
     {
         $this->assertTypeAllowed($request, $type);
         $cfg = $this->config($type);
-    
+
         $query = $cfg['model']::query();
         if ($type === 'kelompok') {
             $query->with(['mentor:id,name', 'advisor:id,name'])->withCount('members');
         }
- 
-    if (!empty($cfg['scope_field'])) {
-        $scopeValue = $request->query($cfg['scope_field']);
-        abort_if(!$scopeValue, 422, "Parameter {$cfg['scope_field']} wajib diisi.");
-        $query->where($cfg['scope_field'], $scopeValue);
+
+        if (!empty($cfg['scope_field'])) {
+            $scopeValue = $request->query($cfg['scope_field']);
+            abort_if(!$scopeValue, 422, "Parameter {$cfg['scope_field']} wajib diisi.");
+            $query->where($cfg['scope_field'], $scopeValue);
         }
- 
-    $rows = $query->orderBy($cfg['display'])->get()
-        ->map(function ($row) use ($cfg, $type) {
-            $data = ['id' => $row->id];
-            foreach ($cfg['fields'] as $f) {
-                $value = $row->{$f['key']};
-                if ($f['type'] === 'date' && $value) {
-                    $value = \Carbon\Carbon::parse($value)->format('Y-m-d');
+
+        $rows = $query->orderBy($cfg['display'])->get()
+            ->map(function ($row) use ($cfg, $type) {
+                $data = ['id' => $row->id];
+                foreach ($cfg['fields'] as $f) {
+                    $value = $row->{$f['key']};
+                    if ($f['type'] === 'date' && $value) {
+                        $value = \Carbon\Carbon::parse($value)->format('Y-m-d');
+                    }
+                    $data[$f['key']] = $value;
                 }
-                $data[$f['key']] = $value;
-            }
-            if ($type === 'kelompok') {
-                $data['mentor_name'] = $row->mentor->name ?? null;
-                $data['advisor_name'] = $row->advisor->name ?? null;
-                $data['member_count'] = $row->members_count;
-            }
-            return $data;
-        });
- 
+                if ($type === 'kelompok') {
+                    $data['mentor_name'] = $row->mentor->name ?? null;
+                    $data['advisor_name'] = $row->advisor->name ?? null;
+                    $data['member_count'] = $row->members_count;
+                }
+                // day_name bukan field yang bisa diedit user, jadi sengaja tidak
+                // dimasukkan ke 'fields' (biar tidak ikut muncul di form Edit),
+                // tapi tetap perlu dikirim ke tabel supaya tidak jadi undefined.
+                if ($type === 'jadwal_absensi') {
+                    $data['day_name'] = $row->day_name;
+                }
+                return $data;
+            });
+
         return response()->json(['data' => $rows]);
     }
 
@@ -445,25 +457,26 @@ class DataMasterController extends Controller
         return $rules;
     }
 
-   public function store(Request $request, string $type)
-{
-    $this->assertTypeAllowed($request, $type);
-    $cfg = $this->config($type);
- 
-    $validator = Validator::make($request->all(), $this->rulesFor($cfg, null), $this->messagesFor($cfg));
-    $validated = $validator->validate();
- 
-    foreach ($cfg['fields'] as $f) {
-        if ($f['type'] === 'checkbox') {
-            $validated[$f['key']] = (bool) ($validated[$f['key']] ?? false);
+    public function store(Request $request, string $type)
+    {
+        $this->assertTypeAllowed($request, $type);
+        $cfg = $this->config($type);
+
+        $validator = Validator::make($request->all(), $this->rulesFor($cfg, null), $this->messagesFor($cfg));
+        $validated = $validator->validate();
+
+        foreach ($cfg['fields'] as $f) {
+            if ($f['type'] === 'checkbox') {
+                $validated[$f['key']] = (bool) ($validated[$f['key']] ?? false);
+            }
+            if ($f['type'] === 'time' && !empty($validated[$f['key']])) {
+                $validated[$f['key']] = \Carbon\Carbon::createFromFormat(
+                    strlen($validated[$f['key']]) === 5 ? 'H:i' : 'H:i:s',
+                    $validated[$f['key']]
+                )->format('H:i:s');
+            }
         }
-        if ($f['type'] === 'time' && !empty($validated[$f['key']])) {
-            $validated[$f['key']] = \Carbon\Carbon::createFromFormat(
-                strlen($validated[$f['key']]) === 5 ? 'H:i' : 'H:i:s',
-                $validated[$f['key']]
-            )->format('H:i:s');
-        }
-    }
+
         // "Nama Hari" tidak diisi manual — otomatis dari tanggal yang dipilih.
         if ($type === 'jadwal_absensi' && !empty($validated['attendance_date'])) {
             $validated['day_name'] = \Carbon\Carbon::parse($validated['attendance_date'])->locale('id')->translatedFormat('l');
@@ -478,22 +491,20 @@ class DataMasterController extends Controller
             abort_if(!$scopeValue, 422, "Parameter {$cfg['scope_field']} wajib diisi.");
             $validated[$cfg['scope_field']] = $scopeValue;
         }
-    
+
         if ($request->user()) {
             $validated['created_by_id'] = $request->user()->id;
             $validated['updated_by_id'] = $request->user()->id;
         }
-    
+
         $row = $cfg['model']::create($validated);
-    
+
         return response()->json([
             'message' => 'Data berhasil ditambahkan.',
             'data' => $row,
         ], 201);
     }
 
-
-       
     public function update(Request $request, string $type, int $id)
     {
         $this->assertTypeAllowed($request, $type);
