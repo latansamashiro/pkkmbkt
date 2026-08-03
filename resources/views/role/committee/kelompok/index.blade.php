@@ -1,353 +1,355 @@
 @extends('layouts.committee.main')
 @section('content')
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false } // jangan reset style global, biar tidak bentrok dengan CSS halaman lain
+        }
+    </script>
+    <style>
+        .kk-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 999px; }
+        .kk-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .kk-badge.active { background: #e2f3f2; color: #0f8a8c; }
+        .kk-badge.inactive { background: #fbeae8; color: #e0665a; }
+        .kk-row-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; color: #5b6175; background: transparent; border: none; cursor: pointer; transition: background .15s, color .15s; }
+        .kk-row-btn:hover { background: #eef0f8; color: #152159; }
+        .kk-row-btn.danger:hover { background: #fbeae8; color: #e0665a; }
+        .kk-progress-track { width: 100%; height: 6px; border-radius: 99px; background: #eef0f8; overflow: hidden; }
+        .kk-progress-fill { height: 100%; border-radius: 99px; background: #16a0a1; }
+        .kk-progress-fill.low { background: #e0665a; }
+    </style>
 
-    <div class="page-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
         <div>
-            <p class="eyebrow" style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin:0;">Kelola Data</p>
-            <h2 style="font-size:26px;font-weight:800;margin:0;color:#152159;">Kelompok</h2>
+            <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Kelola Data</p>
+            <h2 class="text-2xl font-extrabold text-slate-800 m-0">{{ $data['title'] }}</h2>
         </div>
-        <button id="btnTambah" style="display:inline-flex;align-items:center;gap:8px;background:var(--navy-900,#152159);color:#fff;font-weight:800;font-size:13px;padding:12px 20px;border:none;border-radius:999px;cursor:pointer;">
-            <i data-lucide="plus" class="w-4 h-4"></i> Tambah Kelompok
+        <button id="btnTambahKelompok"
+            class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>Tambah Kelompok
         </button>
     </div>
 
-    <!-- STAT CARDS -->
-    <div id="statCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px;"></div>
-
-    <!-- SEARCH + FILTER -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <div style="flex:1;min-width:240px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;">
-            <i data-lucide="search" class="w-4 h-4" style="color:#94a3b8;flex-shrink:0;"></i>
-            <input type="text" id="searchKelompok" placeholder="Cari nama kelompok atau mentor..." style="border:none;background:transparent;font-size:13px;width:100%;outline:none;" />
+    <!-- Mini stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+            <span class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0"><i data-lucide="users-round" class="w-5 h-5"></i></span>
+            <div><p class="text-xl font-extrabold text-slate-800 m-0">{{ $groups->count() }}</p><p class="text-xs text-slate-400 m-0">Total Kelompok</p></div>
         </div>
-        <select id="filterMentor" class="inp" style="min-width:170px;">
-            <option value="">Semua Mentor</option>
-        </select>
-    </div>
-
-    <!-- TABEL -->
-    <div class="card" style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
-        <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;">
-                <thead>
-                    <tr>
-                        <th class="th-cell">Kelompok</th>
-                        <th class="th-cell">Mentor</th>
-                        <th class="th-cell">Advisor</th>
-                        <th class="th-cell">Anggota</th>
-                        <th class="th-cell">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelKelompok"></tbody>
-            </table>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+            <span class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i data-lucide="user-round" class="w-5 h-5"></i></span>
+            <div><p class="text-xl font-extrabold text-slate-800 m-0">{{ $groups->count() ? round($groups->avg('members_count'), 1) : 0 }}</p><p class="text-xs text-slate-400 m-0">Rata-rata Anggota</p></div>
         </div>
-        <p id="listLoading" style="display:none;text-align:center;font-size:13px;color:#94a3b8;padding:20px 0;">Memuat data...</p>
-    </div>
-
-    <!-- MODAL TAMBAH / EDIT -->
-    <div id="modalForm" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px;z-index:50;">
-        <div style="background:#fff;border-radius:16px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;padding:24px;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;">
-                <h3 id="modalFormTitle" style="font-size:17px;font-weight:800;margin:0;">Tambah Kelompok</h3>
-                <button id="btnCloseForm" aria-label="Tutup" style="all:unset;cursor:pointer;color:#94a3b8;"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+            <span class="w-11 h-11 rounded-xl bg-lime-50 text-lime-600 flex items-center justify-center shrink-0"><i data-lucide="trending-up" class="w-5 h-5"></i></span>
+            <div>
+                <p class="text-xl font-extrabold text-slate-800 m-0">{{ $groups->count() ? round($groups->avg(fn($g) => $g->max_member ? ($g->members_count / $g->max_member * 100) : 0)) : 0 }}%</p>
+                <p class="text-xs text-slate-400 m-0">Kapasitas Rata-rata</p>
             </div>
-            <form id="formItem">
-                <p id="formError" style="display:none;font-size:12px;font-weight:700;color:#e11d48;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:8px 12px;margin-bottom:12px;"></p>
-                <div id="formFields" style="display:grid;gap:14px;"></div>
-                <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:22px;">
-                    <button type="button" id="btnBatalForm" style="border:1px solid #e2e8f0;background:#fff;color:#334155;font-weight:800;font-size:13px;padding:10px 16px;border-radius:10px;cursor:pointer;">Batal</button>
-                    <button type="submit" id="btnSimpanForm" style="background:var(--navy-900,#152159);color:#fff;font-weight:800;font-size:13px;padding:10px 16px;border:none;border-radius:10px;cursor:pointer;">Simpan</button>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3">
+            <span class="w-11 h-11 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0"><i data-lucide="user-x" class="w-5 h-5"></i></span>
+            <div><p class="text-xl font-extrabold text-slate-800 m-0">{{ $groups->whereNull('mentor_id')->count() }}</p><p class="text-xs text-slate-400 m-0">Belum Ada Mentor</p></div>
+        </div>
+    </div>
+
+    @if ($groups->isEmpty())
+        <div class="bg-white border border-slate-200 rounded-2xl p-8 text-center">
+            <p class="text-sm text-slate-500 m-0">Belum ada kelompok. Klik "Tambah Kelompok" di atas untuk membuat yang pertama.</p>
+        </div>
+    @else
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+            <div class="p-4 flex flex-col sm:flex-row gap-3 border-b border-slate-100">
+                <div class="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                    <input type="text" id="searchKelompok" placeholder="Cari nama kelompok atau mentor..."
+                        class="border-none bg-transparent text-sm text-slate-800 w-full focus:outline-none" />
+                </div>
+                <select id="filterMentor" class="sm:w-52 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                    <option value="">Semua Mentor</option>
+                    <option value="ada">Sudah Ada Mentor</option>
+                    <option value="belum">Belum Ada Mentor</option>
+                </select>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200">
+                            <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Kelompok</th>
+                            <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Mentor</th>
+                            <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Anggota</th>
+                            <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Kapasitas</th>
+                            <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Status</th>
+                            <th class="text-right text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelKelompok"></tbody>
+                </table>
+                <p id="kelompokKosong" class="hidden text-center text-sm text-slate-400 py-10">Tidak ada kelompok yang cocok dengan pencarian/filter.</p>
+            </div>
+        </div>
+    @endif
+
+    <!-- ===== MODAL TAMBAH / EDIT KELOMPOK ===== -->
+    <div id="modalKelompok" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6">
+            <div class="flex items-start justify-between gap-4 mb-5">
+                <h3 id="modalKelompokTitle" class="text-lg font-extrabold text-slate-800 m-0">Tambah Kelompok</h3>
+                <button id="btnCloseKelompok" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="formKelompok" class="grid grid-cols-1 gap-4">
+                <p id="kelompokFormError" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2"></p>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Kode Kelompok</label>
+                    <input type="text" id="inputKode" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Nama Kelompok</label>
+                    <input type="text" id="inputNamaKelompok" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Mentor</label>
+                    <select id="inputMentorId" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                        <option value="">Belum ada</option>
+                        @foreach ($mentors as $m)
+                            <option value="{{ $m->id }}">{{ $m->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Advisor</label>
+                    <select id="inputAdvisorId" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                        <option value="">Belum ada</option>
+                        @foreach ($advisors as $a)
+                            <option value="{{ $a->id }}">{{ $a->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Maks. Anggota</label>
+                    <input type="number" id="inputMaxMember" min="1" required class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600" />
+                </div>
+                <div class="flex items-center justify-end gap-3 mt-2">
+                    <button type="button" id="btnBatalKelompok" class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm px-4 py-2.5 rounded-xl transition">Batal</button>
+                    <button type="submit" id="btnSimpanKelompok" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition disabled:opacity-60">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL DETAIL -->
-    <div id="modalDetail" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px;z-index:50;">
-        <div style="background:#fff;border-radius:16px;width:100%;max-width:420px;padding:24px;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;">
-                <h3 style="font-size:17px;font-weight:800;margin:0;">Detail Kelompok</h3>
-                <button id="btnCloseDetail" aria-label="Tutup" style="all:unset;cursor:pointer;color:#94a3b8;"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <!-- ===== MODAL DETAIL (lihat anggota & info, read-only) ===== -->
+    <div id="modalDetail" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto p-6">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                    <h3 id="modalDetailTitle" class="text-lg font-extrabold text-slate-800 m-0">-</h3>
+                    <p id="modalDetailSub" class="text-xs text-slate-400 m-0 mt-1">-</p>
+                </div>
+                <button id="btnCloseDetail" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
-            <div id="detailBody" style="border-top:1px solid #f1f5f9;"></div>
+            <div id="detailAnggotaList" class="divide-y divide-slate-100"></div>
+            <p id="detailAnggotaKosong" class="hidden text-center text-sm text-slate-400 py-6">Belum ada anggota di kelompok ini.</p>
         </div>
     </div>
 
-    <!-- MODAL KELOLA ANGGOTA -->
-    <div id="modalAnggota" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px;z-index:50;">
-        <div style="background:#fff;border-radius:16px;width:100%;max-width:680px;max-height:88vh;overflow-y:auto;padding:24px;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:4px;">
+    <!-- ===== MODAL KELOLA ANGGOTA ===== -->
+    <div id="modalAnggota" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6">
+            <div class="flex items-start justify-between gap-4 mb-1">
                 <div>
-                    <h3 id="modalAnggotaTitle" style="font-size:17px;font-weight:800;margin:0;">-</h3>
-                    <p id="modalAnggotaSub" style="font-size:12px;color:#94a3b8;margin:4px 0 0;">-</p>
+                    <h3 id="modalAnggotaTitle" class="text-lg font-extrabold text-slate-800 m-0">-</h3>
+                    <p id="modalAnggotaSub" class="text-xs text-slate-400 m-0 mt-1">-</p>
                 </div>
-                <button id="btnCloseAnggota" aria-label="Tutup" style="all:unset;cursor:pointer;color:#94a3b8;"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-
-            <div id="anggotaError" style="display:none;margin-top:12px;font-size:12px;font-weight:700;color:#e11d48;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:8px 12px;"></div>
-            <div id="anggotaInfo" style="display:none;margin-top:12px;font-size:12px;font-weight:700;color:#0d9488;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:8px 12px;"></div>
-
-            <!-- Upload Excel -->
-            <div style="margin-top:16px;border:1px dashed #cbd5e1;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#f8fafc;">
-                <div style="width:38px;height:38px;border-radius:10px;background:#eef2ff;color:#4338ca;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i data-lucide="file-up" class="w-4 h-4"></i>
-                </div>
-                <div style="flex:1;min-width:180px;">
-                    <p style="font-size:12px;font-weight:800;margin:0;color:#334155;">Upload dari Excel/CSV</p>
-                    <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">Baris pertama header, wajib ada kolom <b>npm</b>. Mahasiswa harus sudah terdaftar di Mahasiswa Baru.</p>
-                </div>
-                <input type="file" id="inputExcelAnggota" accept=".xlsx,.xls,.csv" style="font-size:12px;" />
-                <button id="btnUploadExcel" style="display:inline-flex;align-items:center;gap:6px;background:#1e293b;color:#fff;font-weight:800;font-size:12px;padding:8px 14px;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;">
-                    <i data-lucide="upload" class="w-4 h-4"></i> Import
+                <button id="btnCloseAnggota" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- Tambah manual dari daftar mahasiswa -->
-            <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;">
-                <div style="flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;">
-                    <i data-lucide="search" class="w-4 h-4" style="color:#94a3b8;flex-shrink:0;"></i>
-                    <input type="text" id="searchMahasiswaBaru" placeholder="Cari nama / email mahasiswa..." style="border:none;background:transparent;font-size:13px;width:100%;outline:none;" />
+            <div id="anggotaError" class="hidden mt-3 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2"></div>
+
+            <!-- Tambah anggota -->
+            <div class="mt-4 flex flex-col sm:flex-row gap-2">
+                <div class="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                    <input type="text" id="searchMahasiswaBaru" placeholder="Cari nama / email mahasiswa..."
+                        class="border-none bg-transparent text-sm text-slate-800 w-full focus:outline-none" />
                 </div>
-                <select id="filterProdiBaru" class="inp" style="max-width:220px;">
+                <select id="filterProdiBaru"
+                    class="sm:w-52 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
                     <option value="">Semua Program Studi</option>
                 </select>
             </div>
-            <div style="margin-top:8px;display:flex;align-items:flex-start;gap:8px;">
-                <select id="selectMahasiswaBaru" size="6" class="inp" style="flex:1;"></select>
-                <button id="btnTambahAnggota" style="display:inline-flex;align-items:center;gap:8px;background:var(--navy-900,#152159);color:#fff;font-weight:800;font-size:13px;padding:10px 16px;border:none;border-radius:10px;cursor:pointer;white-space:nowrap;">
-                    <i data-lucide="user-plus" class="w-4 h-4"></i> Tambah
+            <div class="mt-2 flex items-center gap-2">
+                <select id="selectMahasiswaBaru" size="6"
+                    class="flex-1 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                </select>
+                <button id="btnTambahAnggota"
+                    class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition shrink-0 self-start">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>Tambah
                 </button>
             </div>
-            <p style="font-size:11px;color:#94a3b8;margin:6px 0 16px;">
-                Hanya menampilkan mahasiswa yang belum tergabung di kelompok manapun. Pilih satu nama, lalu klik Tambah.
+            <p class="text-[11px] text-slate-400 mt-1.5 mb-4">
+                Hanya menampilkan mahasiswa yang belum tergabung di kelompok manapun. Pilih satu nama di daftar, lalu klik Tambah.
             </p>
 
-            <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
-                <table style="width:100%;border-collapse:collapse;">
+            <!-- Daftar anggota -->
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <table class="w-full">
                     <thead>
-                        <tr>
-                            <th class="th-cell">Nama</th>
-                            <th class="th-cell">Email</th>
-                            <th class="th-cell" style="text-align:right;">Aksi</th>
+                        <tr class="bg-slate-50 border-b border-slate-200">
+                            <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-2.5">Nama</th>
+                            <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-2.5">Email</th>
+                            <th class="text-right text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-2.5">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabelAnggota"></tbody>
                 </table>
-                <p id="anggotaKosong" style="display:none;text-align:center;font-size:13px;color:#94a3b8;padding:20px 0;">Belum ada anggota di kelompok ini.</p>
+                <p id="anggotaKosong" class="hidden text-center text-sm text-slate-400 py-6">Belum ada anggota di kelompok ini.</p>
             </div>
         </div>
     </div>
-
-    <style>
-        .th-cell{text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;padding:12px 16px;background:#f8fafc;white-space:nowrap;}
-        td.td-cell{padding:14px 16px;font-size:13px;border-bottom:1px solid #eef1f6;vertical-align:middle;}
-        .inp{border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;font-size:13px;outline:none;cursor:pointer;width:100%;}
-        input.inp{cursor:text;}
-        .lbl{display:block;font-size:12px;font-weight:800;color:#64748b;margin-bottom:6px;}
-        .btn-icon{all:unset;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#94a3b8;cursor:pointer;}
-        .btn-icon:hover{background:#f1f5f9;color:#334155;}
-        .stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px;}
-        .stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-        .detail-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px;}
-        .detail-lbl{font-size:11px;font-weight:800;color:#94a3b8;}
-    </style>
-
 @endsection
+
+@php
+    $groupsJson = $groups->map(fn($g) => [
+        'id' => $g->id,
+        'code' => $g->code,
+        'name' => $g->name,
+        'mentor' => $g->mentor?->name,
+        'mentor_id' => $g->mentor_id,
+        'advisor' => $g->advisor?->name,
+        'advisor_id' => $g->advisor_id,
+        'max_member' => $g->max_member,
+        'member_count' => $g->members_count,
+    ]);
+    $studentsJson = $students->map(fn($s) => [
+        'id' => $s->id,
+        'name' => $s->name,
+        'email' => $s->email,
+        'prodi' => $s->program_study_name,
+        'group_id' => $memberMap[$s->id] ?? null,
+    ]);
+@endphp
 
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         $(function () {
-            const CATEGORY = @json(collect($categories)->firstWhere('key', 'kelompok'));
-            const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-            const URL_BASE = "{{ url()->current() }}";
+            const CSRF_TOKEN = "{{ csrf_token() }}";
+            const DATA_MASTER_URL = "{{ route('committee.master.index') }}"; // .../data-master -> tambah "/kelompok" di belakangnya
+            let groupList = @json($groupsJson);
+            let studentList = @json($studentsJson);
+            let activeGroupId = null;
+            let editingGroupId = null;
 
-            let items = [];
-            let editingId = null;
+            // ================== TABEL KELOMPOK ==================
+            function renderTable() {
+                const keyword = ($("#searchKelompok").val() || "").toLowerCase().trim();
+                const filterMentor = $("#filterMentor").val() || "";
 
-            function muatData() {
-                $("#listLoading").show();
-                $.get(`${URL_BASE}/kelompok/items`)
-                    .done(function (res) {
-                        items = res.data || [];
-                        isiFilterMentor();
-                        renderStats();
-                        renderTabel();
-                    })
-                    .fail(function () {
-                        items = [];
-                        renderTabel();
-                        tampilkanToast("Gagal memuat data kelompok.");
-                    })
-                    .always(function () { $("#listLoading").hide(); });
-            }
-
-            function renderStats() {
-                const total = items.length;
-                const rataAnggota = total ? Math.round(items.reduce((a, b) => a + (b.member_count || 0), 0) / total) : 0;
-                const belumAdaMentor = items.filter((it) => !it.mentor_name).length;
-
-                $("#statCards").html(`
-                    <div class="stat-card">
-                        <span class="stat-icon" style="background:#eef2ff;color:#4338ca;"><i data-lucide="users-round" class="w-5 h-5"></i></span>
-                        <div><p style="font-size:22px;font-weight:800;margin:0;">${total}</p><p style="font-size:12px;color:#94a3b8;margin:0;">Total Kelompok</p></div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-icon" style="background:#ecfdf5;color:#0d9488;"><i data-lucide="user" class="w-5 h-5"></i></span>
-                        <div><p style="font-size:22px;font-weight:800;margin:0;">${rataAnggota}</p><p style="font-size:12px;color:#94a3b8;margin:0;">Rata-rata Anggota</p></div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-icon" style="background:#fff1f2;color:#e11d48;"><i data-lucide="user-x" class="w-5 h-5"></i></span>
-                        <div><p style="font-size:22px;font-weight:800;margin:0;">${belumAdaMentor}</p><p style="font-size:12px;color:#94a3b8;margin:0;">Belum Ada Mentor</p></div>
-                    </div>
-                `);
-                lucide.createIcons();
-            }
-
-            function isiFilterMentor() {
-                const mentors = [...new Set(items.filter((it) => it.mentor_name).map((it) => it.mentor_name))].sort();
-                const current = $("#filterMentor").val() || "";
-                $("#filterMentor").html('<option value="">Semua Mentor</option>' + mentors.map((m) => `<option value="${m}">${m}</option>`).join(""));
-                $("#filterMentor").val(current);
-            }
-
-            function filteredData() {
-                const q = $("#searchKelompok").val().trim().toLowerCase();
-                const mentor = $("#filterMentor").val();
-                return items.filter((it) =>
-                    (!mentor || it.mentor_name === mentor) &&
-                    (!q || (it.name || "").toLowerCase().includes(q) || (it.mentor_name || "").toLowerCase().includes(q) || (it.code || "").toLowerCase().includes(q))
-                );
-            }
-
-            function renderTabel() {
-                const data = filteredData();
-                if (data.length === 0) {
-                    $("#tabelKelompok").html(`<tr><td colspan="5" style="text-align:center;padding:30px 0;color:#94a3b8;font-size:13px;">Tidak ada data kelompok.</td></tr>`);
-                    return;
-                }
-                const html = data.map((it) => `
-                    <tr>
-                        <td class="td-cell">
-                            <p style="font-weight:800;margin:0;color:#1e293b;">${it.name}</p>
-                            <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${it.code}</p>
-                        </td>
-                        <td class="td-cell">${it.mentor_name ? it.mentor_name : `<span style="font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;background:#f1f5f9;color:#94a3b8;">Belum ada</span>`}</td>
-                        <td class="td-cell">${it.advisor_name || "-"}</td>
-                        <td class="td-cell">${it.member_count ?? 0} / ${it.max_member} maba</td>
-                        <td class="td-cell">
-                            <div style="display:flex;align-items:center;gap:2px;">
-                                <button data-aksi="anggota" data-id="${it.id}" aria-label="Kelola Anggota" class="btn-icon" title="Kelola Anggota"><i data-lucide="users" class="w-4 h-4"></i></button>
-                                <button data-aksi="lihat" data-id="${it.id}" aria-label="Detail" class="btn-icon"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                                <button data-aksi="edit" data-id="${it.id}" aria-label="Edit" class="btn-icon"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                                <button data-aksi="hapus" data-id="${it.id}" aria-label="Hapus" class="btn-icon" style="color:#f43f5e;"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join("");
-                $("#tabelKelompok").html(html);
-                lucide.createIcons();
-                $('[data-aksi="lihat"]').on("click", function () { bukaDetail(Number($(this).data("id"))); });
-                $('[data-aksi="edit"]').on("click", function () { bukaForm(Number($(this).data("id"))); });
-                $('[data-aksi="hapus"]').on("click", function () { hapusItem(Number($(this).data("id"))); });
-                $('[data-aksi="anggota"]').on("click", function () { bukaAnggota(Number($(this).data("id"))); });
-            }
-
-            $("#searchKelompok").on("keyup", renderTabel);
-            $("#filterMentor").on("change", renderTabel);
-
-            // ===== Form dinamis dari CATEGORY.fields (sama seperti dipakai Admin Data Master) =====
-            function inputHtml(f, value) {
-                const id = `field_${f.name}`;
-                const req = f.required ? "required" : "";
-                const val = value ?? "";
-                if (f.type === "select") {
-                    const opts = Object.entries(f.options || {}).map(([ov, ol]) =>
-                        `<option value="${ov}" ${String(val) === String(ov) ? "selected" : ""}>${ol}</option>`
-                    ).join("");
-                    return `<select id="${id}" ${req} class="inp"><option value="">Pilih ${f.label}</option>${opts}</select>`;
-                }
-                return `<input type="${f.type}" id="${id}" value="${val}" ${req} class="inp" />`;
-            }
-
-            function applyDependentFilters(changedFieldName, changedValue) {
-                const dependents = CATEGORY.fields.filter((f) => f.filter_by === changedFieldName);
-                dependents.forEach((dep) => {
-                    const meta = dep.options_meta || [];
-                    const filtered = changedValue ? meta.filter((m) => String(m.filter_value) === String(changedValue)) : meta;
-                    const $el = $(`#field_${dep.name}`);
-                    const currentVal = $el.val();
-                    const opts = filtered.map((m) => `<option value="${m.value}" ${String(currentVal) === String(m.value) ? "selected" : ""}>${m.label}</option>`).join("");
-                    $el.html(`<option value="">Pilih ${dep.label}</option>${opts}`);
-                    if (!filtered.some((m) => String(m.value) === String(currentVal))) $el.val("");
-                });
-            }
-
-            function buildFormFields(data) {
-                const html = CATEGORY.fields.map((f) =>
-                    `<div><label for="field_${f.name}" class="lbl">${f.label}</label>${inputHtml(f, data ? data[f.name] : "")}</div>`
-                ).join("");
-                $("#formFields").html(html);
-
-                // Kalau lagi edit, cari tahu prodi si mentor yang sudah tersimpan,
-                // biar dropdown Program Studi otomatis ke-set (bukan kosong / "Pilih Fakultas").
-                CATEGORY.fields.forEach((f) => {
-                    if (f.filter_by && data && data[f.name]) {
-                        const meta = f.options_meta || [];
-                        const selectedMeta = meta.find((m) => String(m.value) === String(data[f.name]));
-                        if (selectedMeta && selectedMeta.filter_value) {
-                            $(`#field_${f.filter_by}`).val(selectedMeta.filter_value);
-                        }
-                    }
+                const tampil = groupList.filter((g) => {
+                    if (keyword && !((g.name || "").toLowerCase().includes(keyword) || (g.mentor || "").toLowerCase().includes(keyword) || (g.code || "").toLowerCase().includes(keyword))) return false;
+                    if (filterMentor === "ada" && !g.mentor_id) return false;
+                    if (filterMentor === "belum" && g.mentor_id) return false;
+                    return true;
                 });
 
-                CATEGORY.fields.forEach((f) => {
-                    const hasDependents = CATEGORY.fields.some((d) => d.filter_by === f.name);
-                    if (hasDependents) {
-                        applyDependentFilters(f.name, $(`#field_${f.name}`).val() || "");
-                        $(`#field_${f.name}`).on("change", function () { applyDependentFilters(f.name, $(this).val()); });
-                    }
+                $("#kelompokKosong").toggleClass("hidden", tampil.length > 0);
+                const $tbody = $("#tabelKelompok").empty();
+
+                tampil.forEach((g) => {
+                    const persen = g.max_member ? Math.round((g.member_count / g.max_member) * 100) : 0;
+                    const statusAktif = !!g.mentor_id;
+
+                    $tbody.append(`
+                        <tr class="border-b border-slate-100 last:border-0">
+                            <td class="px-4 py-3">
+                                <p class="text-sm font-bold text-slate-800 m-0">${g.name}</p>
+                                <p class="text-xs text-slate-400 m-0">${g.code}</p>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-slate-600">${g.mentor || '<span class="text-slate-400 italic">Belum ada</span>'}</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">${g.member_count} mahasiswa</td>
+                            <td class="px-4 py-3" style="min-width:140px">
+                                <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                                    <span>Kapasitas</span><span>${persen}%</span>
+                                </div>
+                                <div class="kk-progress-track"><div class="kk-progress-fill ${persen < 50 ? 'low' : ''}" style="width:${Math.min(persen,100)}%"></div></div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="kk-badge ${statusAktif ? 'active' : 'inactive'}"><span class="dot"></span>${statusAktif ? 'Aktif' : 'Perlu Tindak'}</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center justify-end gap-1">
+                                    <button class="kk-row-btn btn-detail" data-id="${g.id}" aria-label="Lihat anggota & progress"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                    <button class="kk-row-btn btn-edit" data-id="${g.id}" aria-label="Edit kelompok"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                    <button class="kk-row-btn btn-kelola-anggota" data-id="${g.id}" aria-label="Kelola anggota"><i data-lucide="user-plus" class="w-4 h-4"></i></button>
+                                    <button class="kk-row-btn btn-edit" data-id="${g.id}" aria-label="Tentukan mentor"><i data-lucide="user-round-cog" class="w-4 h-4"></i></button>
+                                    <button class="kk-row-btn danger btn-hapus" data-id="${g.id}" aria-label="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
                 });
+
+                if (window.lucide) lucide.createIcons();
+                $(".btn-detail").off("click").on("click", function () { bukaDetail(Number($(this).data("id"))); });
+                $(".btn-edit").off("click").on("click", function () { bukaFormKelompok(Number($(this).data("id"))); });
+                $(".btn-kelola-anggota").off("click").on("click", function () { bukaModalAnggota(Number($(this).data("id"))); });
+                $(".btn-hapus").off("click").on("click", function () { hapusKelompok(Number($(this).data("id"))); });
             }
 
-            function collectFormValues() {
-                const payload = {};
-                CATEGORY.fields.forEach((f) => {
-                    if (f.virtual) return;
-                    const $el = $(`#field_${f.name}`);
-                    payload[f.name] = f.type === "number" ? $el.val() : ($el.val() || "").toUpperCase ? ($el.val() || "") : $el.val();
-                });
-                return payload;
+            $("#searchKelompok").on("keyup", renderTable);
+            $("#filterMentor").on("change", renderTable);
+
+            // ================== TAMBAH / EDIT KELOMPOK (reuse endpoint Data Master, type=kelompok) ==================
+            const $modalKelompok = $("#modalKelompok");
+            const $kelompokFormError = $("#kelompokFormError");
+
+            function bukaFormKelompok(id) {
+                editingGroupId = id || null;
+                $kelompokFormError.addClass("hidden");
+                const g = id ? groupList.find((x) => x.id === id) : null;
+
+                $("#modalKelompokTitle").text(id ? "Edit Kelompok" : "Tambah Kelompok");
+                $("#inputKode").val(g ? g.code : "");
+                $("#inputNamaKelompok").val(g ? g.name : "");
+                $("#inputMentorId").val(g && g.mentor_id ? g.mentor_id : "");
+                $("#inputAdvisorId").val(g && g.advisor_id ? g.advisor_id : "");
+                $("#inputMaxMember").val(g ? g.max_member : "");
+
+                $modalKelompok.removeClass("hidden").addClass("flex");
             }
+            function tutupFormKelompok() { $modalKelompok.addClass("hidden").removeClass("flex"); editingGroupId = null; }
 
-            const $modalForm = $("#modalForm");
-            const $modalDetail = $("#modalDetail");
-            const $formError = $("#formError");
+            $("#btnTambahKelompok").on("click", () => bukaFormKelompok(null));
+            $("#btnCloseKelompok").on("click", tutupFormKelompok);
+            $("#btnBatalKelompok").on("click", tutupFormKelompok);
+            $modalKelompok.on("click", function (e) { if (e.target === this) tutupFormKelompok(); });
 
-            function bukaForm(id) {
-                editingId = id || null;
-                $formError.hide();
-                const data = id ? items.find((x) => x.id === id) : null;
-                $("#modalFormTitle").text(id ? "Edit Kelompok" : "Tambah Kelompok");
-                buildFormFields(data);
-                $modalForm.css("display", "flex");
-            }
-            function tutupForm() { $modalForm.css("display", "none"); editingId = null; }
-
-            $("#btnTambah").on("click", () => bukaForm(null));
-            $("#btnCloseForm").on("click", tutupForm);
-            $("#btnBatalForm").on("click", tutupForm);
-            $modalForm.on("click", function (e) { if (e.target === this) tutupForm(); });
-
-            $("#formItem").on("submit", function (e) {
+            $("#formKelompok").on("submit", function (e) {
                 e.preventDefault();
-                $formError.hide();
-                const payload = collectFormValues();
-                const $btnSimpan = $("#btnSimpanForm");
-                $btnSimpan.prop("disabled", true);
+                $kelompokFormError.addClass("hidden");
 
-                const url = editingId ? `${URL_BASE}/kelompok/${editingId}` : `${URL_BASE}/kelompok`;
-                const method = editingId ? "PUT" : "POST";
+                const payload = {
+                    code: $("#inputKode").val().trim(),
+                    name: $("#inputNamaKelompok").val().trim(),
+                    mentor_id: $("#inputMentorId").val() || null,
+                    advisor_id: $("#inputAdvisorId").val() || null,
+                    max_member: $("#inputMaxMember").val(),
+                };
+
+                const url = editingGroupId
+                    ? `${DATA_MASTER_URL}/kelompok/${editingGroupId}`
+                    : `${DATA_MASTER_URL}/kelompok`;
+                const method = editingGroupId ? "PUT" : "POST";
+
+                const $btn = $("#btnSimpanKelompok");
+                $btn.prop("disabled", true);
 
                 $.ajax({
                     url, method,
@@ -355,118 +357,134 @@
                     headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
                     data: JSON.stringify(payload),
                 }).done(function (result) {
-                    tampilkanToast(result.message);
-                    tutupForm();
-                    muatData();
+                    const d = result.data;
+                    const mapped = {
+                        id: d.id, code: d.code, name: d.name,
+                        mentor_id: d.mentor_id, advisor_id: d.advisor_id,
+                        mentor: $("#inputMentorId option:selected").text() === "Belum ada" ? null : $("#inputMentorId option:selected").text(),
+                        advisor: $("#inputAdvisorId option:selected").text() === "Belum ada" ? null : $("#inputAdvisorId option:selected").text(),
+                        max_member: d.max_member,
+                        member_count: editingGroupId ? (groupList.find(g => g.id === editingGroupId)?.member_count || 0) : 0,
+                    };
+                    if (editingGroupId) {
+                        const idx = groupList.findIndex((g) => g.id === editingGroupId);
+                        if (idx > -1) groupList[idx] = mapped;
+                    } else {
+                        groupList.push(mapped);
+                    }
+                    tampilkanToast(result.message || "Kelompok tersimpan.");
+                    tutupFormKelompok();
+                    renderTable();
                 }).fail(function (xhr) {
                     const result = xhr.responseJSON || {};
-                    if (result.errors) $formError.text(Object.values(result.errors).flat().join(" "));
-                    else $formError.text(result.message || "Terjadi kesalahan, silakan coba lagi.");
-                    $formError.show();
-                }).always(function () { $btnSimpan.prop("disabled", false); });
+                    if (result.errors) {
+                        $kelompokFormError.text(Object.values(result.errors).flat().join(" "));
+                    } else {
+                        $kelompokFormError.text(result.message || "Terjadi kesalahan, silakan coba lagi.");
+                    }
+                    $kelompokFormError.removeClass("hidden");
+                }).always(function () {
+                    $btn.prop("disabled", false);
+                });
             });
 
-            function bukaDetail(id) {
-                const it = items.find((x) => x.id === id);
-                if (!it) return;
-                $("#detailBody").html(`
-                    <div class="detail-row"><span class="detail-lbl">Kode</span><span>${it.code}</span></div>
-                    <div class="detail-row"><span class="detail-lbl">Nama</span><span>${it.name}</span></div>
-                    <div class="detail-row"><span class="detail-lbl">Mentor</span><span>${it.mentor_name || "-"}</span></div>
-                    <div class="detail-row"><span class="detail-lbl">Advisor</span><span>${it.advisor_name || "-"}</span></div>
-                    <div class="detail-row"><span class="detail-lbl">Anggota</span><span>${it.member_count ?? 0} / ${it.max_member}</span></div>
-                `);
-                $modalDetail.css("display", "flex");
-            }
-            $("#btnCloseDetail").on("click", () => $modalDetail.css("display", "none"));
-            $modalDetail.on("click", function (e) { if (e.target === this) $modalDetail.css("display", "none"); });
-
-            function hapusItem(id) {
-                const it = items.find((x) => x.id === id);
-                if (!it) return;
-                if (!confirm(`Hapus kelompok "${it.name}"?`)) return;
+            function hapusKelompok(id) {
+                const g = groupList.find((x) => x.id === id);
+                if (!g) return;
+                if (!confirm(`Hapus kelompok "${g.name}"? Anggota di dalamnya juga akan lepas dari kelompok ini.`)) return;
 
                 $.ajax({
-                    url: `${URL_BASE}/kelompok/${id}`,
+                    url: `${DATA_MASTER_URL}/kelompok/${id}`,
                     method: "DELETE",
                     headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
                 }).done(function (result) {
-                    tampilkanToast(result.message);
-                    muatData();
+                    groupList = groupList.filter((x) => x.id !== id);
+                    studentList.forEach((s) => { if (s.group_id === id) s.group_id = null; });
+                    tampilkanToast(result.message || "Kelompok dihapus.");
+                    renderTable();
                 }).fail(function (xhr) {
-                    tampilkanToast((xhr.responseJSON && xhr.responseJSON.message) || "Gagal menghapus data.");
+                    tampilkanToast((xhr.responseJSON && xhr.responseJSON.message) || "Gagal menghapus kelompok.");
                 });
             }
 
-            // ===== Modal Kelola Anggota =====
-            const $modalAnggota = $("#modalAnggota");
-            let activeGroupId = null;
-            let anggotaMembers = [];
-            let anggotaAvailable = [];
+            // ================== DETAIL (read-only) ==================
+            const $modalDetail = $("#modalDetail");
+            function bukaDetail(groupId) {
+                const g = groupList.find((x) => x.id === groupId);
+                if (!g) return;
+                $("#modalDetailTitle").text(g.name);
+                $("#modalDetailSub").text(`${g.code} • Mentor: ${g.mentor || 'Belum ada'} • ${g.member_count}/${g.max_member} anggota`);
 
-            function bukaAnggota(id) {
-                activeGroupId = id;
-                $("#anggotaError").hide();
-                $("#anggotaInfo").hide();
-                $("#searchMahasiswaBaru").val("");
-                $("#inputExcelAnggota").val("");
-                $("#modalAnggotaTitle").text("Memuat...");
-                $modalAnggota.css("display", "flex");
-                muatAnggota();
+                const anggota = studentList.filter((s) => s.group_id === groupId);
+                const $list = $("#detailAnggotaList").empty();
+                $("#detailAnggotaKosong").toggleClass("hidden", anggota.length > 0);
+                anggota.forEach((s) => {
+                    $list.append(`
+                        <div class="py-2.5 flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800 m-0">${s.name}</p>
+                                <p class="text-xs text-slate-400 m-0">${s.prodi || '-'}</p>
+                            </div>
+                            <span class="text-xs text-slate-400">${s.email}</span>
+                        </div>
+                    `);
+                });
+                $modalDetail.removeClass("hidden").addClass("flex");
             }
-            function tutupAnggota() { $modalAnggota.css("display", "none"); activeGroupId = null; }
-            $("#btnCloseAnggota").on("click", tutupAnggota);
-            $modalAnggota.on("click", function (e) { if (e.target === this) tutupAnggota(); });
+            $("#btnCloseDetail").on("click", () => $modalDetail.addClass("hidden").removeClass("flex"));
+            $modalDetail.on("click", function (e) { if (e.target === this) $modalDetail.addClass("hidden").removeClass("flex"); });
 
-            function muatAnggota() {
-                $.get(`${URL_BASE}/kelompok/${activeGroupId}/anggota`)
-                    .done(function (res) {
-                        $("#modalAnggotaTitle").text(`Kelola Anggota — ${res.group.name}`);
-                        $("#modalAnggotaSub").text(`${res.group.member_count}/${res.group.max_member} anggota`);
-                        anggotaMembers = res.members || [];
-                        anggotaAvailable = res.available || [];
-                        renderTabelAnggota();
-                        isiFilterProdi();
-                        renderPilihanMahasiswa();
-                        // sinkron jumlah anggota di tabel kelompok utama tanpa reload seluruh data
-                        const it = items.find((x) => x.id === activeGroupId);
-                        if (it) { it.member_count = res.group.member_count; renderTabel(); renderStats(); }
-                    })
-                    .fail(function () {
-                        tampilkanToast("Gagal memuat data anggota.");
-                        tutupAnggota();
-                    });
-            }
+            // ================== KELOLA ANGGOTA (sudah ada sebelumnya, tidak diubah logic-nya) ==================
+            function renderAnggota() {
+                const group = groupList.find((g) => g.id === activeGroupId);
+                if (!group) return;
 
-            function renderTabelAnggota() {
-                $("#anggotaKosong").toggle(anggotaMembers.length === 0);
-                const html = anggotaMembers.map((s) => `
-                    <tr style="border-bottom:1px solid #f1f5f9;">
-                        <td style="padding:10px 14px;font-size:13px;font-weight:700;">${s.name}</td>
-                        <td style="padding:10px 14px;font-size:13px;color:#64748b;">${s.email}</td>
-                        <td style="padding:10px 14px;text-align:right;">
-                            <button data-id="${s.id}" class="btn-keluarkan" style="all:unset;color:#f43f5e;font-size:12px;font-weight:800;cursor:pointer;">Keluarkan</button>
-                        </td>
-                    </tr>
-                `).join("");
-                $("#tabelAnggota").html(html);
-                $(".btn-keluarkan").on("click", function () { keluarkanAnggota(Number($(this).data("id"))); });
+                $("#modalAnggotaTitle").text(`Kelola Anggota — ${group.name}`);
+                $("#modalAnggotaSub").text(`${group.member_count}/${group.max_member} anggota`);
+
+                const anggota = studentList.filter((s) => s.group_id === activeGroupId);
+                const $tbody = $("#tabelAnggota").empty();
+                $("#anggotaKosong").toggleClass("hidden", anggota.length > 0);
+
+                anggota.forEach((s) => {
+                    $tbody.append(`
+                        <tr class="border-b border-slate-100 last:border-0" data-student-id="${s.id}">
+                            <td class="px-4 py-2.5 text-sm font-semibold text-slate-800">${s.name}</td>
+                            <td class="px-4 py-2.5 text-sm text-slate-500">${s.email}</td>
+                            <td class="px-4 py-2.5 text-right">
+                                <button data-id="${s.id}" class="btn-keluarkan text-rose-500 hover:text-rose-700 text-xs font-bold">Keluarkan</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                isiFilterProdi();
+                renderPilihanMahasiswa();
+
+                $(".btn-keluarkan").on("click", function () {
+                    keluarkanAnggota(Number($(this).data("id")));
+                });
             }
 
             function isiFilterProdi() {
                 const $filter = $("#filterProdiBaru");
-                const current = $filter.val() || "";
-                const daftarProdi = [...new Set(anggotaAvailable.map((s) => s.program_study_name || "Tanpa Program Studi"))].sort();
-                $filter.html('<option value="">Semua Program Studi</option>' + daftarProdi.map((p) => `<option value="${p}">${p}</option>`).join(""));
-                $filter.val(current);
+                const prodiTerpakai = $filter.val() || "";
+                const daftarProdi = [...new Set(
+                    studentList.filter((s) => !s.group_id).map((s) => s.prodi || "Tanpa Program Studi")
+                )].sort();
+
+                $filter.html('<option value="">Semua Program Studi</option>' +
+                    daftarProdi.map((p) => `<option value="${p}">${p}</option>`).join(""));
+                $filter.val(prodiTerpakai);
             }
 
             function renderPilihanMahasiswa() {
                 const keyword = ($("#searchMahasiswaBaru").val() || "").toLowerCase().trim();
                 const prodiFilter = $("#filterProdiBaru").val() || "";
 
-                const tersedia = anggotaAvailable.filter((s) => {
-                    const prodi = s.program_study_name || "Tanpa Program Studi";
+                const tersedia = studentList.filter((s) => {
+                    if (s.group_id) return false;
+                    const prodi = s.prodi || "Tanpa Program Studi";
                     if (prodiFilter && prodi !== prodiFilter) return false;
                     if (keyword && !(s.name.toLowerCase().includes(keyword) || s.email.toLowerCase().includes(keyword))) return false;
                     return true;
@@ -474,7 +492,7 @@
 
                 const grup = {};
                 tersedia.forEach((s) => {
-                    const prodi = s.program_study_name || "Tanpa Program Studi";
+                    const prodi = s.prodi || "Tanpa Program Studi";
                     (grup[prodi] = grup[prodi] || []).push(s);
                 });
 
@@ -487,29 +505,56 @@
                 }
 
                 prodiUrut.forEach((prodi) => {
-                    const $grp = $(`<optgroup label="${prodi} (${grup[prodi].length})"></optgroup>`);
-                    grup[prodi].forEach((s) => $grp.append(`<option value="${s.id}">${s.name} — ${s.email}</option>`));
-                    $select.append($grp);
+                    const $group = $(`<optgroup label="${prodi} (${grup[prodi].length})"></optgroup>`);
+                    grup[prodi].forEach((s) => {
+                        $group.append(`<option value="${s.id}">${s.name} — ${s.email}</option>`);
+                    });
+                    $select.append($group);
                 });
             }
 
             $("#searchMahasiswaBaru").on("keyup", renderPilihanMahasiswa);
             $("#filterProdiBaru").on("change", renderPilihanMahasiswa);
 
+            function bukaModalAnggota(groupId) {
+                activeGroupId = groupId;
+                $("#anggotaError").addClass("hidden");
+                $("#searchMahasiswaBaru").val("");
+                renderAnggota();
+                $("#modalAnggota").removeClass("hidden").addClass("flex");
+            }
+            function tutupModalAnggota() {
+                $("#modalAnggota").addClass("hidden").removeClass("flex");
+                activeGroupId = null;
+            }
+            $("#btnCloseAnggota").on("click", tutupModalAnggota);
+            $("#modalAnggota").on("click", function (e) { if (e.target === this) tutupModalAnggota(); });
+
+            function tampilkanErrorAnggota(pesan) {
+                $("#anggotaError").text(pesan).removeClass("hidden");
+            }
+
             $("#btnTambahAnggota").on("click", function () {
                 const studentId = $("#selectMahasiswaBaru").val();
                 if (!studentId || !activeGroupId) return;
-                $("#anggotaError").hide();
+                $("#anggotaError").addClass("hidden");
 
                 $.ajax({
-                    url: `${URL_BASE}/kelompok/${activeGroupId}/anggota`,
+                    url: `{{ route('committee.master.index') }}/kelompok/${activeGroupId}/anggota`,
                     method: "POST",
                     headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
                     data: { student_id: studentId },
-                }).done(function () {
-                    muatAnggota();
+                }).done(function (result) {
+                    const idx = studentList.findIndex((s) => s.id === result.student.id);
+                    if (idx > -1) studentList[idx].group_id = activeGroupId;
+
+                    const g = groupList.find((g) => g.id === activeGroupId);
+                    if (g) g.member_count = result.member_count;
+
+                    renderTable();
+                    renderAnggota();
                 }).fail(function (xhr) {
-                    $("#anggotaError").text((xhr.responseJSON && xhr.responseJSON.message) || "Gagal menambahkan anggota.").show();
+                    tampilkanErrorAnggota((xhr.responseJSON && xhr.responseJSON.message) || "Gagal menambahkan anggota.");
                 });
             });
 
@@ -518,50 +563,24 @@
                 if (!confirm("Keluarkan mahasiswa ini dari kelompok?")) return;
 
                 $.ajax({
-                    url: `${URL_BASE}/kelompok/${activeGroupId}/anggota/${studentId}`,
+                    url: `{{ route('committee.master.index') }}/kelompok/${activeGroupId}/anggota/${studentId}`,
                     method: "DELETE",
                     headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
-                }).done(function () {
-                    muatAnggota();
+                }).done(function (result) {
+                    const idx = studentList.findIndex((s) => s.id === studentId);
+                    if (idx > -1) studentList[idx].group_id = null;
+
+                    const g = groupList.find((g) => g.id === activeGroupId);
+                    if (g) g.member_count = result.member_count;
+
+                    renderTable();
+                    renderAnggota();
                 }).fail(function (xhr) {
-                    $("#anggotaError").text((xhr.responseJSON && xhr.responseJSON.message) || "Gagal mengeluarkan anggota.").show();
+                    tampilkanErrorAnggota((xhr.responseJSON && xhr.responseJSON.message) || "Gagal mengeluarkan anggota.");
                 });
             }
 
-            $("#btnUploadExcel").on("click", function () {
-                const file = $("#inputExcelAnggota")[0].files[0];
-                if (!file || !activeGroupId) {
-                    $("#anggotaError").text("Pilih file Excel/CSV dulu.").show();
-                    return;
-                }
-                $("#anggotaError").hide();
-                $("#anggotaInfo").hide();
-
-                const formData = new FormData();
-                formData.append("file", file);
-
-                const $btn = $(this);
-                $btn.prop("disabled", true);
-
-                $.ajax({
-                    url: `${URL_BASE}/kelompok/${activeGroupId}/anggota/import`,
-                    method: "POST",
-                    headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                }).done(function (result) {
-                    $("#anggotaInfo").text(result.message).show();
-                    $("#inputExcelAnggota").val("");
-                    muatAnggota();
-                }).fail(function (xhr) {
-                    $("#anggotaError").text((xhr.responseJSON && xhr.responseJSON.message) || "Gagal mengimpor file.").show();
-                }).always(function () {
-                    $btn.prop("disabled", false);
-                });
-            });
-
-            muatData();
+            renderTable();
         });
     </script>
 @endpush

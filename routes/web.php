@@ -192,15 +192,23 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mentor.destroy'), $defaults);
         });
 
-        // ===== Kelompok (reuse GroupController, view komite) =====
-        Route::controller(\App\Http\Controllers\Admin\GroupController::class)->prefix('kelompok')->group(function () use ($withDefaults) {
-            $defaults = ['title' => 'Kelola Kelompok', 'view' => 'role.committee.kelompok.index'];
-            $withDefaults(Route::get('/', 'index')->name('committee.master.index'), $defaults);
+        // ===== Kelola Anggota per Kelompok (masih pakai GroupController, tapi
+        // path-nya dicocokkan ke URL yang dipakai view baru: /kelompok/kelompok/{id}/anggota...) =====
+        Route::controller(\App\Http\Controllers\Admin\GroupController::class)->prefix('kelompok/kelompok')->group(function () {
+            Route::get('/{group}/anggota', 'anggota')->name('committee.kelompok.anggota.index');
             Route::post('/{group}/anggota', 'addMember')->name('committee.kelompok.anggota.store');
             Route::delete('/{group}/anggota/{student}', 'removeMember')->name('committee.kelompok.anggota.destroy');
+            Route::post('/{group}/anggota/import', 'importMembers')->name('committee.kelompok.anggota.import');
         });
 
-        // ===== Jadwal, Informasi, Modul PKKMB, Materi, Evaluasi (reuse DataMasterController, dibatasi per tipe) =====
+        // Halaman daftar Kelompok itu sendiri (sama seperti Admin): pakai GroupController::index()
+        // supaya data kelompok+mahasiswa langsung tersedia di halaman (bukan lewat AJAX terpisah).
+        $withDefaults(
+            Route::get('/kelompok', [\App\Http\Controllers\Admin\GroupController::class, 'index'])->name('committee.master.index'),
+            ['title' => 'Kelola Kelompok', 'view' => 'role.committee.kelompok.index']
+        );
+
+        // ===== Jadwal, Informasi, Modul PKKMB, Materi, Evaluasi, Kelompok (reuse DataMasterController, dibatasi per tipe) =====
         Route::controller(\App\Http\Controllers\Admin\DataMasterController::class)->group(function () use ($withDefaults) {
             $sections = [
                 'data-master' => ['path' => 'jadwal',      'types' => ['jadwal'],                          'title' => 'Kelola Jadwal',      'view' => 'role.committee.jadwal.index'],
@@ -209,11 +217,16 @@ Route::middleware(['auth'])->group(function () {
                 'materi'      => ['path' => 'materi',      'types' => ['topik'],                            'title' => 'Kelola Materi',      'view' => 'role.committee.materi.index'],
                 'evaluasi'    => ['path' => 'evaluasi',    'types' => ['ujian', 'kategori_evaluasi', 'soal'], 'title' => 'Kelola Evaluasi',   'view' => 'role.committee.evaluasi.index'],
                 'absensi'     => ['path' => 'absensi',     'types' => ['jadwal_absensi'],                  'title' => 'Kelola Jadwal Absensi', 'view' => 'role.committee.absensi.index'],
+                'master'      => ['path' => 'kelompok',    'types' => ['kelompok'],                        'title' => 'Kelola Kelompok',    'view' => 'role.committee.kelompok.index'],
             ];
 
             foreach ($sections as $key => $sec) {
                 $defaults = ['onlyTypes' => $sec['types'], 'title' => $sec['title'], 'view' => $sec['view']];
-                $withDefaults(Route::get("/{$sec['path']}", 'index')->name("committee.{$key}.index"), $defaults);
+                // 'master' (Kelompok) index-nya didaftarkan terpisah di atas (lewat GroupController) —
+                // di sini cuma daftarin items/store/update/destroy-nya saja buat 'master'.
+                if ($key !== 'master') {
+                    $withDefaults(Route::get("/{$sec['path']}", 'index')->name("committee.{$key}.index"), $defaults);
+                }
                 $withDefaults(Route::get("/{$sec['path']}/{type}/items", 'items')->name("committee.{$key}.items"), $defaults);
                 $withDefaults(Route::post("/{$sec['path']}/{type}", 'store')->name("committee.{$key}.store"), $defaults);
                 $withDefaults(Route::put("/{$sec['path']}/{type}/{id}", 'update')->name("committee.{$key}.update"), $defaults);

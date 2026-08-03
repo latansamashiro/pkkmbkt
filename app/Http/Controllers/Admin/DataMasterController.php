@@ -376,6 +376,9 @@ class DataMasterController extends Controller
         $cfg = $this->config($type);
     
         $query = $cfg['model']::query();
+        if ($type === 'kelompok') {
+            $query->with(['mentor:id,name', 'advisor:id,name'])->withCount('members');
+        }
  
     if (!empty($cfg['scope_field'])) {
         $scopeValue = $request->query($cfg['scope_field']);
@@ -384,7 +387,7 @@ class DataMasterController extends Controller
         }
  
     $rows = $query->orderBy($cfg['display'])->get()
-        ->map(function ($row) use ($cfg) {
+        ->map(function ($row) use ($cfg, $type) {
             $data = ['id' => $row->id];
             foreach ($cfg['fields'] as $f) {
                 $value = $row->{$f['key']};
@@ -392,6 +395,11 @@ class DataMasterController extends Controller
                     $value = \Carbon\Carbon::parse($value)->format('Y-m-d');
                 }
                 $data[$f['key']] = $value;
+            }
+            if ($type === 'kelompok') {
+                $data['mentor_name'] = $row->mentor->name ?? null;
+                $data['advisor_name'] = $row->advisor->name ?? null;
+                $data['member_count'] = $row->members_count;
             }
             return $data;
         });
