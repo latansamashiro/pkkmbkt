@@ -123,6 +123,22 @@ Route::middleware(['auth'])->group(function () {
     });
 
     //Advisor
+    //Advisor
+    Route::group(['prefix' => 'advisor', 'middleware' => ['accessrole:advisor']], function () {
+        Route::controller(\App\Http\Controllers\Advisor\AdvisorController::class)->group(function () {
+            Route::get('/kelompok-binaan', 'kelompokBinaan')->name('role.advisor.kelompok-binaan');
+            Route::get('/kelompok-binaan/{id}', 'kelompokBinaanDetail')->name('role.advisor.kelompok-binaan.detail');
+
+            Route::get('/profil', 'profil')->name('role.advisor.profil');
+            Route::post('/profil', 'updateProfile')->name('role.advisor.profil.update');
+            Route::post('/profil/password', 'updatePassword')->name('role.advisor.profil.password');
+
+            Route::get('/monitoring/absensi', 'absensi')->name('role.advisor.monitoring.absensi');
+            Route::get('/monitoring/absensi/{groupId}/{tanggal}', 'absensiDetail')->name('role.advisor.monitoring.absensi.detail');
+            Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-pdf', 'absensiExportPdf')->name('role.advisor.monitoring.absensi.export-pdf');
+            Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-excel', 'absensiExportExcel')->name('role.advisor.monitoring.absensi.export-excel');
+        });
+    });
 
     //Mentor
     Route::group(['prefix' => 'mentor', 'middleware' => ['accessrole:mentor']], function () {
