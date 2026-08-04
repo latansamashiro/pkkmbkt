@@ -86,13 +86,36 @@ class AdvisorController extends Controller
 
     public function absensi(Request $request)
     {
-        $tanggal = $request->query('tanggal', now()->toDateString());
+        $tanggal = $request->query('tanggal');
         $cari = $request->query('cari');
         $groupIds = $this->myGroups()->pluck('id');
 
-        // TODO: ganti dengan query asli dari Admin\MonitoringController::absensi(),
-        // ditambah ->whereIn('group_id', $groupIds)
-        $laporan = collect(); // isi: ['oleh_label' => ..., 'group_id' => ..., 'tanggal' => ..., 'status' => ...]
+        $query = \App\Models\Attendance::selectRaw('group_id, attendance_date, COUNT(*) as jumlah_tercatat')
+            ->whereIn('group_id', $groupIds)
+            ->groupBy('group_id', 'attendance_date')
+            ->orderByDesc('attendance_date');
+
+        if ($tanggal) {
+            $query->where('attendance_date', $tanggal);
+        }
+
+        $laporan = $query->get()->map(function ($row) {
+            $group = Group::with('mentor')->find($row->group_id);
+            $totalSesi = \App\Models\AttendanceTemplate::where('attendance_date', $row->attendance_date)->count();
+
+            return [
+                'group_id'   => $row->group_id,
+                'oleh_label' => ($group->mentor->name ?? '-') . ' — ' . ($group->name ?? '-'),
+                'tanggal'    => $row->attendance_date,
+                'status'     => "{$row->jumlah_tercatat}/{$totalSesi} sesi tercatat",
+            ];
+        });
+
+        if ($cari) {
+            $laporan = $laporan->filter(
+                fn ($r) => str_contains(strtolower($r['oleh_label']), strtolower($cari))
+            )->values();
+        }
 
         $filters = ['tanggal' => $tanggal, 'cari' => $cari];
 
@@ -101,28 +124,98 @@ class AdvisorController extends Controller
 
     public function absensiDetail(Request $request, $groupId, $tanggal)
     {
-        $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
-
-        // TODO: ganti dengan query asli dari Admin\MonitoringController::absensiDetail()
-        $sesiList = collect();
-        $matrix = collect();
-        $adaSubmitted = false;
+        [$group, $tanggal, $sesiList, $matrix, $adaSubmitted] = array_values(
+            $this->siapkanDataAbsensiDetail($groupId, $tanggal)
+        );
 
         return view('role.advisor.monitoring-absensi.detail', compact('group', 'tanggal', 'sesiList', 'matrix', 'adaSubmitted'));
     }
 
     public function absensiExportPdf($groupId, $tanggal)
     {
-        $group = $this->myGroups()->findOrFail($groupId);
-        // TODO: reuse App\Http\Controllers\Admin\MonitoringController::absensiExportPdf() logic
-        abort(501, 'Export PDF belum dihubungkan — sesuaikan dengan logika di Admin\\MonitoringController.');
+        [$group, $tanggal, $sesiList, $matrix, $adaSubmitted] = array_values(
+            $this->siapkanDataAbsensiDetail($groupId, $tanggal)
+        );
+        abort_unless($adaSubmitted, 403, 'Belum ada sesi yang disubmit untuk tanggal ini.');
+
+        return view('role.admin.monitoring.absensi-print', compact('group', 'tanggal', 'sesiList', 'matrix'));
     }
 
     public function absensiExportExcel($groupId, $tanggal)
     {
-        $group = $this->myGroups()->findOrFail($groupId);
-        // TODO: reuse App\Http\Controllers\Admin\MonitoringController::absensiExportExcel() logic
-        abort(501, 'Export Excel belum dihubungkan — sesuaikan dengan logika di Admin\\MonitoringController.');
+        [$group, $tanggal, $sesiList, $matrix, $adaSubmitted] = array_values(
+            $this->siapkanDataAbsensiDetail($groupId, $tanggal)
+        );
+        abort_unless($adaSubmitted, 403, 'Belum ada sesi yang disubmit untuk tanggal ini.');
+
+        $namaFile = 'absensi_' . \Illuminate\Support\Str::slug($group->name) . '_' . $tanggal . '.csv';
+
+        $callback = function () use ($sesiList, $matrix) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+
+            $header = ['No', 'Mahasiswa'];
+            foreach ($sesiList as $i => $sesi) {
+                $header[] = 'Sesi ' . ($i + 1) . ' (' . ($sesi->template->session_name ?? '-') . ')';
+            }
+            $header[] = 'Kehadiran (%)';
+            fputcsv($out, $header);
+
+            $labelStatus = ['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alfa' => 'Alfa'];
+            foreach ($matrix as $idx => $m) {
+                $row = [$idx + 1, $m['nama']];
+                foreach ($m['sesi'] as $status) {
+                    $row[] = $labelStatus[$status] ?? '-';
+                }
+                $row[] = $m['persen'] . '%';
+                fputcsv($out, $row);
+            }
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$namaFile}\"",
+        ]);
+    }
+
+    /**
+     * Helper bareng buat absensiDetail()/absensiExportPdf()/absensiExportExcel() —
+     * meniru App\Http\Controllers\Admin\MonitoringController::siapkanDataAbsensiDetail(),
+     * cuma findOrFail-nya lewat myGroups() supaya advisor tidak bisa intip
+     * kelompok yang bukan binaannya (404 kalau bukan).
+     */
+    protected function siapkanDataAbsensiDetail($groupId, $tanggal): array
+    {
+        $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
+
+        $sesiList = \App\Models\Attendance::with('template')
+            ->where('group_id', $groupId)
+            ->where('attendance_date', $tanggal)
+            ->get()
+            ->sortBy(fn ($a) => $a->template->time_begin ?? '')
+            ->values();
+
+        $adaSubmitted = $sesiList->contains(fn ($a) => $a->status === 'submitted');
+
+        $matrix = Member::where('group_id', $groupId)
+            ->with('student')
+            ->get()
+            ->map(function ($m) use ($sesiList) {
+                $sesiStatus = $sesiList->map(function ($sesi) use ($m) {
+                    $d = \App\Models\AttendanceDetail::where('attendance_id', $sesi->id)
+                        ->where('student_id', $m->student_id)
+                        ->first();
+                    return $d->status_presence ?? '-';
+                });
+
+                $hadir  = $sesiStatus->filter(fn ($s) => $s === 'hadir')->count();
+                $persen = $sesiList->count() ? round($hadir / $sesiList->count() * 100) : 0;
+
+                return ['nama' => $m->student->name ?? '-', 'sesi' => $sesiStatus, 'persen' => $persen];
+            });
+
+        return compact('group', 'tanggal', 'sesiList', 'matrix', 'adaSubmitted');
     }
 
     // ===== Monitoring Evaluasi (scoped ke kelompok binaan) =====

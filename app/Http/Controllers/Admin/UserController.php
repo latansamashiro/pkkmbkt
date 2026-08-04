@@ -432,10 +432,12 @@ class UserController extends Controller
             }
 
             $group = null;
+            $kodeBelumAda = null;
             if ($kodeKelompok) {
                 $group = \App\Models\Group::where('code', $kodeKelompok)->first();
                 if (!$group) {
-                    $gagal[] = "Baris {$baris} ({$email}): Kode Kelompok \"{$kodeKelompok}\" tidak ditemukan, akun tetap dibuat tanpa kelompok.";
+                    $kodeBelumAda = $kodeKelompok;
+                    $gagal[] = "Baris {$baris} ({$email}): Kode Kelompok \"{$kodeKelompok}\" belum ada — akun dibuat tanpa kelompok dulu, nanti OTOMATIS masuk begitu kelompok dengan kode itu dibuat.";
                 } elseif ($group->members()->count() >= $group->max_member) {
                     $gagal[] = "Baris {$baris} ({$email}): Kelompok \"{$kodeKelompok}\" sudah penuh, akun tetap dibuat tanpa kelompok.";
                     $group = null;
@@ -455,6 +457,7 @@ class UserController extends Controller
                 'program_study_name' => $prodi ?: null,
                 'gender' => $gender,
                 'npm' => $npm ?: null,
+                'pending_group_code' => $kodeBelumAda,
                 'created_by_id' => $request->user()->id,
                 'updated_by_id' => $request->user()->id,
             ]);

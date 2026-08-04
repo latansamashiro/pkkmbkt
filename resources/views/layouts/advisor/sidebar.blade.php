@@ -9,40 +9,51 @@
             <span class="label">Dashboard</span>
         </a>
 
-        <p class="sidebar-group-label">Kelola Data</p>
-        <a href="{{ route('role.advisor.kelompok-binaan') }}"
-            class="{{ request()->routeIs('role.advisor.kelompok-binaan*') ? 'active' : '' }}">
-            <span class="ic"><i data-lucide="users-round"></i></span>
-            <span class="label">Kelompok Binaan</span>
-        </a>
+        <button type="button" class="sidebar-group-toggle" data-group="kelola-data">
+            <span>Kelola Data</span>
+            <i data-lucide="chevron-down" class="chevron"></i>
+        </button>
+        <div class="sidebar-group-content" data-group-content="kelola-data">
+            <a href="{{ route('role.advisor.kelompok-binaan') }}"
+                class="{{ request()->routeIs('role.advisor.kelompok-binaan*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="users-round"></i></span>
+                <span class="label">Kelompok Binaan</span>
+            </a>
+        </div>
 
-        <p class="sidebar-group-label">Monitoring</p>
-        <a href="{{ route('role.advisor.monitoring.absensi') }}"
-            class="{{ request()->routeIs('role.advisor.monitoring.absensi*') ? 'active' : '' }}">
-            <span class="ic"><i data-lucide="calendar-check"></i></span>
-            <span class="label">Absensi</span>
-        </a>
-       <a href="{{ route('role.advisor.monitoring.evaluasi') }}"
-            class="{{ request()->routeIs('role.advisor.monitoring.evaluasi*') ? 'active' : '' }}">
-            <span class="ic"><i data-lucide="clipboard-check"></i></span>
-            <span class="label">Evaluasi</span>
-        </a>
-        <a href="{{ route('role.advisor.monitoring.keaktifan') }}"
-            class="{{ request()->routeIs('role.advisor.monitoring.keaktifan*') ? 'active' : '' }}">
-            <span class="ic"><i data-lucide="activity"></i></span>
-            <span class="label">Keaktifan</span>
-        </a>
-        <a href="{{ route('role.advisor.monitoring.pelanggaran') }}"
-            class="{{ request()->routeIs('role.advisor.monitoring.pelanggaran*') ? 'active' : '' }}">
-            <span class="ic"><i data-lucide="alert-triangle"></i></span>
-            <span class="label">Pelanggaran</span>
-        </a>
+        <button type="button" class="sidebar-group-toggle" data-group="monitoring">
+            <span>Monitoring</span>
+            <i data-lucide="chevron-down" class="chevron"></i>
+        </button>
+        <div class="sidebar-group-content" data-group-content="monitoring">
+            <a href="{{ route('role.advisor.monitoring.absensi') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.absensi*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="calendar-check"></i></span>
+                <span class="label">Absensi</span>
+            </a>
+            <a href="{{ route('role.advisor.monitoring.evaluasi') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.evaluasi*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="clipboard-check"></i></span>
+                <span class="label">Evaluasi</span>
+            </a>
+            <a href="{{ route('role.advisor.monitoring.keaktifan') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.keaktifan*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="activity"></i></span>
+                <span class="label">Keaktifan</span>
+            </a>
+            <a href="{{ route('role.advisor.monitoring.pelanggaran') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.pelanggaran*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="alert-triangle"></i></span>
+                <span class="label">Pelanggaran</span>
+            </a>
+            <a href="#" class="disabled" aria-disabled="true">
+                <span class="ic"><i data-lucide="trophy"></i></span>
+                <span class="label">Leaderboard</span>
+            </a>
+        </div>
+    </nav>
 
-        <p class="sidebar-group-label">Lainnya</p>
-        <a href="#" class="disabled" aria-disabled="true">
-            <span class="ic"><i data-lucide="trophy"></i></span>
-            <span class="label">Leaderboard</span>
-        </a>
+    <nav class="sidebar-nav" style="flex:none; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;" aria-label="Profil">
         <a href="{{ route('role.advisor.profil') }}"
             class="{{ request()->routeIs('role.advisor.profil*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="user-circle"></i></span>
@@ -60,3 +71,34 @@
         </button>
     </form>
 </aside>
+
+<script>
+    (function () {
+        // Buka/tutup tiap grup sidebar, dan ingat pilihannya per browser (localStorage)
+        // supaya tetap kebuka/tertutup pas pindah halaman (karena ini bukan SPA).
+        document.querySelectorAll(".sidebar-group-toggle").forEach(function (btn) {
+            var group = btn.dataset.group;
+            var content = document.querySelector('[data-group-content="' + group + '"]');
+            if (!content) return;
+
+            var savedState = localStorage.getItem("sidebarGroup:" + group);
+            // Kalau ada link yang lagi aktif di dalam grup ini, paksa terbuka
+            // biar user tidak bingung kenapa halaman aktifnya "hilang".
+            var adaAktif = content.querySelector("a.active") !== null;
+            // Defaultnya TERTUTUP (biar sidebar tidak kepanjangan pas awal buka),
+            // kecuali grup ini lagi aktif, atau user pernah buka manual sebelumnya.
+            var harusTertutup = adaAktif ? false : (savedState ? savedState === "collapsed" : true);
+
+            if (harusTertutup) {
+                btn.classList.add("collapsed");
+                content.classList.add("collapsed");
+            }
+
+            btn.addEventListener("click", function () {
+                var collapsed = btn.classList.toggle("collapsed");
+                content.classList.toggle("collapsed", collapsed);
+                localStorage.setItem("sidebarGroup:" + group, collapsed ? "collapsed" : "open");
+            });
+        });
+    })();
+</script>

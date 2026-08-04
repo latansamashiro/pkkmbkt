@@ -30,9 +30,7 @@
             <table class="w-full">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
-                        <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Hari</th>
-                        <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Sesi</th>
-                        <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Tanggal</th>
+                        <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Hari / Sesi</th>
                         <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Jam</th>
                         <th class="text-left text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Status</th>
                         <th class="text-right text-[11px] font-bold uppercase tracking-wide text-slate-400 px-4 py-3">Aksi</th>
@@ -144,32 +142,100 @@
                 );
                 $("#sesiEmpty").toggleClass("hidden", items.length > 0);
 
-                const $tbody = $("#tabelSesi").empty();
+                // kelompokkan per (tanggal) — satu hari = satu grup, isinya 3 sesi
+                const grup = {};
                 items.forEach((it) => {
-                    const st = statusSesi(it);
-                    // fallback "-" jaga-jaga kalau day_name kosong (mis. data lama tanpa migrasi ulang)
-                    const hari = it.day_name || "-";
+                    (grup[it.attendance_date] = grup[it.attendance_date] || []).push(it);
+                });
+
+                const $tbody = $("#tabelSesi").empty();
+
+                Object.keys(grup).sort().forEach((tanggal) => {
+                    const sesiHari = grup[tanggal];
+                    const dayName = sesiHari[0].day_name;
+                    const tanggalLabel = new Date(tanggal + "T00:00:00").toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+                    const groupKey = tanggal;
+                    const terbuka = localStorage.getItem("jadwalAbsensiHari:" + groupKey) === "buka";
+
                     $tbody.append(`
-                        <tr class="border-b border-slate-100 last:border-0">
-                            <td class="px-4 py-3 text-sm font-semibold text-slate-800">${hari}</td>
-                            <td class="px-4 py-3 text-sm text-slate-700">${it.session_name}</td>
-                            <td class="px-4 py-3 text-sm text-slate-500">${it.attendance_date}</td>
-                            <td class="px-4 py-3 text-sm text-slate-500">${String(it.time_begin).slice(0,5)} - ${String(it.time_end).slice(0,5)}</td>
-                            <td class="px-4 py-3"><span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${st.cls}">${st.label}</span></td>
-                            <td class="px-4 py-3 text-right whitespace-nowrap">
-                                <button data-aksi="edit" data-id="${it.id}" aria-label="Edit" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-                                <button data-aksi="hapus" data-id="${it.id}" aria-label="Hapus" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <tr class="hari-header cursor-pointer hover:bg-slate-50 border-b border-slate-100" data-day="${groupKey}">
+                            <td class="px-4 py-3" colspan="3">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 chevron-hari ${terbuka ? 'rotate-90' : ''}" style="transition:transform .15s"></i>
+                                    <span class="text-sm font-bold text-slate-800">${dayName}</span>
+                                    <span class="text-xs text-slate-400">${tanggalLabel}</span>
+                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">${sesiHari.length} sesi</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <button data-aksi="hapus-hari" data-tanggal="${groupKey}" aria-label="Hapus semua sesi hari ini" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
                             </td>
                         </tr>
                     `);
+
+                    sesiHari.forEach((it) => {
+                        const st = statusSesi(it);
+                        $tbody.append(`
+                            <tr class="sesi-row border-b border-slate-100 last:border-0 ${terbuka ? '' : 'hidden'}" data-day-of="${groupKey}">
+                                <td class="px-4 py-2.5 pl-11 text-sm text-slate-700">${it.session_name}</td>
+                                <td class="px-4 py-2.5 text-sm text-slate-500">${String(it.time_begin).slice(0,5)} - ${String(it.time_end).slice(0,5)}</td>
+                                <td class="px-4 py-2.5"><span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${st.cls}">${st.label}</span></td>
+                                <td class="px-4 py-2.5 text-right whitespace-nowrap">
+                                    <button data-aksi="edit" data-id="${it.id}" aria-label="Edit" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                    <button data-aksi="hapus" data-id="${it.id}" aria-label="Hapus" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                        `);
+                    });
                 });
+
                 lucide.createIcons();
                 pasangAksiTombol();
             }
 
             function pasangAksiTombol() {
-                $('[data-aksi="edit"]').off("click").on("click", function () { bukaForm(Number($(this).data("id"))); });
-                $('[data-aksi="hapus"]').off("click").on("click", function () { hapusItem(Number($(this).data("id"))); });
+                $(".hari-header").off("click").on("click", function (e) {
+                    if ($(e.target).closest('[data-aksi="hapus-hari"]').length) return; // jangan buka/tutup kalau yang diklik tombol hapus
+                    const day = $(this).data("day");
+                    const $rows = $(`.sesi-row[data-day-of="${day}"]`);
+                    const $chevron = $(this).find(".chevron-hari");
+                    const akanBuka = $rows.first().hasClass("hidden");
+
+                    $rows.toggleClass("hidden", !akanBuka);
+                    $chevron.toggleClass("rotate-90", akanBuka);
+                    localStorage.setItem("jadwalAbsensiHari:" + day, akanBuka ? "buka" : "tutup");
+                });
+                $('[data-aksi="edit"]').off("click").on("click", function (e) { e.stopPropagation(); bukaForm(Number($(this).data("id"))); });
+                $('[data-aksi="hapus"]').off("click").on("click", function (e) { e.stopPropagation(); hapusItem(Number($(this).data("id"))); });
+                $('[data-aksi="hapus-hari"]').off("click").on("click", function (e) { e.stopPropagation(); hapusSatuHari($(this).data("tanggal")); });
+            }
+
+            function hapusSatuHari(tanggal) {
+                const sesiHari = allItems.filter((x) => x.attendance_date === tanggal);
+                if (!sesiHari.length) return;
+                if (!confirm(`Hapus semua sesi (${sesiHari.length} sesi) di tanggal ${tanggal}? Sesi yang sudah punya data absensi tidak akan terhapus.`)) return;
+
+                let sisa = sesiHari.length;
+                let adaGagal = false;
+                sesiHari.forEach((it) => {
+                    $.ajax({
+                        url: `${URL_BASE}/${CATEGORY.key}/${it.id}`,
+                        method: "DELETE",
+                        headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
+                    }).done(function () {
+                        allItems = allItems.filter((x) => x.id !== it.id);
+                    }).fail(function () {
+                        adaGagal = true;
+                    }).always(function () {
+                        sisa--;
+                        if (sisa === 0) {
+                            renderTabel();
+                            tampilkanToast(adaGagal ? "Sebagian sesi terhapus, sebagian lagi gagal (sudah punya data absensi)." : "Semua sesi di hari itu berhasil dihapus.");
+                        }
+                    });
+                });
             }
 
             // ===== Modal form (dibangun dinamis dari CATEGORY.fields) =====
@@ -245,15 +311,6 @@
                 $hariError.addClass("hidden");
                 const tanggal = $("#inputTanggalHari").val();
                 if (!tanggal) return;
-
-                // ===== Cegah input ulang tanggal yang sudah pernah dibuat (cek cepat di client) =====
-                // Validasi utama tetap ada di backend (route store-hari); ini cuma biar user
-                // langsung tahu tanpa nunggu round-trip ke server.
-                const sudahAda = allItems.some((it) => it.attendance_date === tanggal);
-                if (sudahAda) {
-                    $hariError.text("Tanggal ini sudah pernah ditambahkan. Silakan pilih tanggal lain.").removeClass("hidden");
-                    return;
-                }
 
                 const $btn = $("#btnSimpanTambahHari");
                 $btn.prop("disabled", true);

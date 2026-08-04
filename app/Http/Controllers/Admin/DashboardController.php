@@ -21,7 +21,7 @@ class DashboardController extends Controller
 
         return match ($role) {
             'SUPER-ADMIN' => $this->superAdmin(),
-            'ADVISOR'     => view('role.advisor.dashboard'),
+            'ADVISOR'     => app(\App\Http\Controllers\Advisor\AdvisorController::class)->dashboard(),
             'MENTOR'      => view('role.mentor.dashboard'),
             'STUDENT'     => view('role.student.dashboard'),
             'COMMITTEE'   => app(\App\Http\Controllers\Committee\DashboardController::class)->index(),
