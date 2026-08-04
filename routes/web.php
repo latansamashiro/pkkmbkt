@@ -139,6 +139,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/monitoring/absensi/{groupId}/{tanggal}', 'absensiDetail')->name('role.advisor.monitoring.absensi.detail');
             Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-pdf', 'absensiExportPdf')->name('role.advisor.monitoring.absensi.export-pdf');
             Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-excel', 'absensiExportExcel')->name('role.advisor.monitoring.absensi.export-excel');
+            Route::get('/monitoring/evaluasi', 'evaluasi')->name('role.advisor.monitoring.evaluasi');
+            Route::get('/monitoring/evaluasi/{groupId}', 'evaluasiDetail')->name('role.advisor.monitoring.evaluasi.detail');
+
+            Route::get('/monitoring/keaktifan', 'keaktifan')->name('role.advisor.monitoring.keaktifan');
+            Route::get('/monitoring/keaktifan/{groupId}', 'keaktifanDetail')->name('role.advisor.monitoring.keaktifan.detail');
+
+            Route::get('/monitoring/pelanggaran', 'pelanggaran')->name('role.advisor.monitoring.pelanggaran');
+            Route::get('/monitoring/pelanggaran/{groupId}', 'pelanggaranDetail')->name('role.advisor.monitoring.pelanggaran.detail');
         });
     });
 

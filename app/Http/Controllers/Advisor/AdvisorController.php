@@ -7,6 +7,10 @@ use App\Models\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Activity;
+use App\Models\Evaluation;
+use App\Models\EvaluationCategory;
+use App\Models\Member;
 
 /**
  * ASUMSI YANG PERLU DICEK:
@@ -119,6 +123,170 @@ class AdvisorController extends Controller
         $group = $this->myGroups()->findOrFail($groupId);
         // TODO: reuse App\Http\Controllers\Admin\MonitoringController::absensiExportExcel() logic
         abort(501, 'Export Excel belum dihubungkan — sesuaikan dengan logika di Admin\\MonitoringController.');
+    }
+
+    // ===== Monitoring Evaluasi (scoped ke kelompok binaan) =====
+
+    public function evaluasi(Request $request)
+    {
+        $cari = $request->query('cari');
+
+        $laporan = $this->myGroups()
+            ->with('mentor')
+            ->when($cari, fn ($q) => $q->where('name', 'like', "%{$cari}%"))
+            ->get()
+            ->map(function ($group) {
+                $totalAnggota = Member::where('group_id', $group->id)->count();
+                $studentIds = Member::where('group_id', $group->id)->pluck('student_id');
+
+                $sudahIsi = Evaluation::whereIn('student_id', $studentIds)
+                    ->whereNotNull('status')
+                    ->where('status', '!=', 'Belum Mengisi')
+                    ->count();
+
+                $tanggalTerakhir = Evaluation::whereIn('student_id', $studentIds)->max('updated_at');
+
+                $status = match (true) {
+                    $sudahIsi === 0 => 'Belum dimulai',
+                    $sudahIsi >= $totalAnggota && $totalAnggota > 0 => "Selesai {$sudahIsi}/{$totalAnggota}",
+                    default => "Berjalan {$sudahIsi}/{$totalAnggota}",
+                };
+
+                return [
+                    'group_id'   => $group->id,
+                    'oleh_label' => ($group->mentor->name ?? '-') . ' — ' . $group->name,
+                    'tanggal'    => $tanggalTerakhir,
+                    'status'     => $status,
+                ];
+            })
+            ->filter(fn ($g) => $g['tanggal'] !== null)
+            ->values();
+
+        $filters = compact('cari');
+
+        return view('role.advisor.monitoring-evaluasi.index', compact('laporan', 'filters'));
+    }
+
+    public function evaluasiDetail($groupId)
+    {
+        // findOrFail lewat myGroups() -> 404 kalau kelompok ini bukan binaan advisor ini
+        $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
+
+        $categories = EvaluationCategory::orderBy('urutan')->get();
+        $studentIds = Member::where('group_id', $groupId)->pluck('student_id');
+
+        $evaluations = Evaluation::whereIn('student_id', $studentIds)
+            ->with('details')
+            ->get()
+            ->keyBy('student_id');
+
+        $rows = Member::where('group_id', $groupId)
+            ->with('student')
+            ->get()
+            ->map(function ($m) use ($categories, $evaluations) {
+                $evaluation = $evaluations->get($m->student_id);
+                $detailByCategory = $evaluation ? $evaluation->details->keyBy('evaluation_category_id') : collect();
+
+                $nilai = $categories->mapWithKeys(
+                    fn ($cat) => [$cat->id => $detailByCategory->get($cat->id)?->value]
+                );
+
+                return [
+                    'nama'   => $m->student->name ?? '-',
+                    'nilai'  => $nilai,
+                    'rata'   => $evaluation?->rata_rata,
+                    'status' => $evaluation->status ?? 'Belum Mengisi',
+                ];
+            });
+
+        return view('role.advisor.monitoring-evaluasi.detail', compact('group', 'categories', 'rows'));
+    }
+
+    // ===== Monitoring Keaktifan & Pelanggaran (scoped ke kelompok binaan) =====
+
+    public function keaktifan(Request $request)
+    {
+        return $this->poinListingAdvisor($request, 'keaktifan');
+    }
+
+    public function pelanggaran(Request $request)
+    {
+        return $this->poinListingAdvisor($request, 'pelanggaran');
+    }
+
+    public function keaktifanDetail($groupId)
+    {
+        return $this->poinDetailAdvisor($groupId, 'keaktifan');
+    }
+
+    public function pelanggaranDetail($groupId)
+    {
+        return $this->poinDetailAdvisor($groupId, 'pelanggaran');
+    }
+
+    protected function poinListingAdvisor(Request $request, string $tipe)
+    {
+        $cari = $request->query('cari');
+        $isKeaktifan = $tipe === 'keaktifan';
+
+        $laporan = $this->myGroups()
+            ->when($cari, fn ($q) => $q->where('name', 'like', "%{$cari}%"))
+            ->get()
+            ->map(function ($group) use ($isKeaktifan) {
+                $studentIds = Member::where('group_id', $group->id)->pluck('student_id');
+
+                $query = Activity::whereIn('student_id', $studentIds)
+                    ->when($isKeaktifan, fn ($q) => $q->where('activity_value', '>', 0))
+                    ->when(!$isKeaktifan, fn ($q) => $q->where('activity_value', '<', 0));
+
+                return [
+                    'group_id' => $group->id,
+                    'kelompok' => $group->name,
+                    'poin'     => (clone $query)->sum('activity_value'),
+                    'update'   => (clone $query)->max('updated_at'),
+                ];
+            })
+            ->filter(fn ($g) => $g['update'] !== null)
+            ->values();
+
+        $filters = compact('cari');
+        $view = $tipe === 'keaktifan'
+            ? 'role.advisor.monitoring-keaktifan.index'
+            : 'role.advisor.monitoring-pelanggaran.index';
+
+        return view($view, compact('laporan', 'filters'));
+    }
+
+    protected function poinDetailAdvisor($groupId, string $tipe)
+    {
+        $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
+        $isKeaktifan = $tipe === 'keaktifan';
+
+        $rows = Member::where('group_id', $groupId)
+            ->with('student')
+            ->get()
+            ->map(function ($m) use ($isKeaktifan) {
+                $query = Activity::where('student_id', $m->student_id)
+                    ->when($isKeaktifan, fn ($q) => $q->where('activity_value', '>', 0))
+                    ->when(!$isKeaktifan, fn ($q) => $q->where('activity_value', '<', 0));
+
+                $terakhir = (clone $query)->orderByDesc('created_at')->first();
+
+                return [
+                    'nama'       => $m->student->name ?? '-',
+                    'poin'       => (clone $query)->sum('activity_value'),
+                    'update'     => $terakhir->updated_at ?? null,
+                    'keterangan' => $terakhir->description ?? '-',
+                ];
+            })
+            ->filter(fn ($r) => $r['update'] !== null)
+            ->values();
+
+        $view = $tipe === 'keaktifan'
+            ? 'role.advisor.monitoring-keaktifan.detail'
+            : 'role.advisor.monitoring-pelanggaran.detail';
+
+        return view($view, compact('group', 'rows', 'tipe'));
     }
 
     // ===== Profil =====

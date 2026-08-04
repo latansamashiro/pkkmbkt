@@ -22,15 +22,18 @@
             <span class="ic"><i data-lucide="calendar-check"></i></span>
             <span class="label">Absensi</span>
         </a>
-        <a href="#" class="disabled" aria-disabled="true">
+       <a href="{{ route('role.advisor.monitoring.evaluasi') }}"
+            class="{{ request()->routeIs('role.advisor.monitoring.evaluasi*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="clipboard-check"></i></span>
             <span class="label">Evaluasi</span>
         </a>
-        <a href="#" class="disabled" aria-disabled="true">
+        <a href="{{ route('role.advisor.monitoring.keaktifan') }}"
+            class="{{ request()->routeIs('role.advisor.monitoring.keaktifan*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="activity"></i></span>
             <span class="label">Keaktifan</span>
         </a>
-        <a href="#" class="disabled" aria-disabled="true">
+        <a href="{{ route('role.advisor.monitoring.pelanggaran') }}"
+            class="{{ request()->routeIs('role.advisor.monitoring.pelanggaran*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="alert-triangle"></i></span>
             <span class="label">Pelanggaran</span>
         </a>

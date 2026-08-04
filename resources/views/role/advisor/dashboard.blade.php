@@ -56,15 +56,18 @@
                 <span class="ic"><i data-lucide="calendar-check"></i></span>
                 <span class="label">Absensi</span>
             </a>
-            <a href="#" class="disabled" aria-disabled="true">
+            <a href="{{ route('role.advisor.monitoring.evaluasi') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.evaluasi*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="clipboard-check"></i></span>
                 <span class="label">Evaluasi</span>
             </a>
-            <a href="#" class="disabled" aria-disabled="true">
+            <a href="{{ route('role.advisor.monitoring.keaktifan') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.keaktifan*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="activity"></i></span>
                 <span class="label">Keaktifan</span>
             </a>
-            <a href="#" class="disabled" aria-disabled="true">
+            <a href="{{ route('role.advisor.monitoring.pelanggaran') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.pelanggaran*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="alert-triangle"></i></span>
                 <span class="label">Pelanggaran</span>
             </a>
@@ -229,7 +232,7 @@
                 <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Rekap kehadiran per sesi tiap kelompok binaan</span>
               </a>
 
-              <a href="#" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 opacity-50 cursor-not-allowed" aria-disabled="true">
+              <a href="{{ route('role.advisor.monitoring.evaluasi') }}" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 hover:-translate-y-1 hover:shadow-lg transition">
                 <span class="w-[46px] h-[46px] rounded-[14px] bg-[#e6e9f6] text-[#1e3a8f] flex items-center justify-center">
                   <svg class="w-[23px] h-[23px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="5" y="4" width="14" height="17" rx="2" />
@@ -240,10 +243,10 @@
                   </svg>
                 </span>
                 <span class="text-[12.5px] font-bold text-[#1b2238] leading-tight">Monitoring Evaluasi</span>
-                <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Segera hadir</span>
+                <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Progres evaluasi kelompok binaan</span>
               </a>
 
-              <a href="#" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 opacity-50 cursor-not-allowed" aria-disabled="true">
+              <a href="{{ route('role.advisor.monitoring.keaktifan') }}" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 hover:-translate-y-1 hover:shadow-lg transition">
                 <span class="w-[46px] h-[46px] rounded-[14px] bg-[#e2f3f2] text-[#0f8a8c] flex items-center justify-center">
                   <svg class="w-[23px] h-[23px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="6" y="4" width="12" height="16" rx="2"></rect>
@@ -253,10 +256,10 @@
                   </svg>
                 </span>
                 <span class="text-[12.5px] font-bold text-[#1b2238] leading-tight">Monitoring Keaktifan</span>
-                <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Segera hadir</span>
+                <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Poin keaktifan kelompok binaan</span>
               </a>
 
-              <a href="#" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 opacity-50 cursor-not-allowed" aria-disabled="true">
+              <a href="{{ route('role.advisor.monitoring.pelanggaran') }}" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 hover:-translate-y-1 hover:shadow-lg transition">
                 <span class="w-[46px] h-[46px] rounded-[14px] bg-[#e6e9f6] text-[#1e3a8f] flex items-center justify-center">
                   <svg class="w-[23px] h-[23px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 9v4" />
@@ -265,7 +268,7 @@
                   </svg>
                 </span>
                 <span class="text-[12.5px] font-bold text-[#1b2238] leading-tight">Monitoring Pelanggaran</span>
-                <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Segera hadir</span>
+                <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Poin pelanggaran kelompok binaan</span>
               </a>
 
               <a href="#" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 opacity-50 cursor-not-allowed" aria-disabled="true">
@@ -331,7 +334,7 @@
         <path d="M6 10v9.5a.5.5 0 0 0 .5.5H10v-6h4v6h3.5a.5.5 0 0 0 .5-.5V10" />
       </svg>
     </a>
-    <a href="#" class="flex flex-col items-center gap-1 text-[#8d92a6]/40 text-[10px] font-bold flex-1 py-1.5 cursor-not-allowed" aria-disabled="true">
+    <a href="{{ route('role.advisor.monitoring.evaluasi') }}" class="flex flex-col items-center gap-1 text-[#8d92a6] text-[10px] font-bold flex-1 py-1.5">
       <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <rect x="5" y="4" width="14" height="17" rx="2" />
         <path d="M9 3.5h6" />
