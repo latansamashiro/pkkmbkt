@@ -210,6 +210,11 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::post('/import', 'import')->name('committee.mahasiswa.import'), $defaults);
         });
 
+             Route::controller(\App\Http\Controllers\Committee\TaskAssignmentController::class)->prefix('tugas')->group(function () {
+            Route::get('/{task}/assign', 'show')->name('committee.tugas.assign.show');
+            Route::post('/{task}/assign', 'save')->name('committee.tugas.assign.save');
+            });
+
         // ===== Kelola Advisor (reuse UserController, view komite) =====
         Route::controller(\App\Http\Controllers\Admin\UserController::class)->prefix('committee/advisor')->group(function () use ($withDefaults) {
             $defaults = ['roleKey' => 'ADVISOR', 'title' => 'Kelola Advisor', 'view' => 'role.committee.advisor.index'];
@@ -256,6 +261,7 @@ Route::middleware(['auth'])->group(function () {
                 'evaluasi'    => ['path' => 'evaluasi',    'types' => ['ujian', 'kategori_evaluasi', 'soal'], 'title' => 'Kelola Evaluasi',   'view' => 'role.committee.evaluasi.index'],
                 'absensi'     => ['path' => 'absensi',     'types' => ['jadwal_absensi'],                  'title' => 'Kelola Jadwal Absensi', 'view' => 'role.committee.absensi.index'],
                 'master'      => ['path' => 'kelompok',    'types' => ['kelompok'],                        'title' => 'Kelola Kelompok',    'view' => 'role.committee.kelompok.index'],
+                'tugas' => ['path' => 'tugas', 'types' => ['tugas'], 'title' => 'Kelola Tugas', 'view' => 'role.committee.tugas.index'],
             ];
 
             foreach ($sections as $key => $sec) {

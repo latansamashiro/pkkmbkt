@@ -52,6 +52,10 @@
                 <span class="ic"><i data-lucide="presentation"></i></span>
                 <span class="label">Materi</span>
             </a>
+            <a href="{{ route('committee.tugas.index') }}" class="{{ request()->routeIs('committee.tugas.*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="clipboard-check"></i></span>
+                <span class="label">Kelola Tugas</span>
+            </a>
             <a href="{{ route('committee.evaluasi.index') }}" class="{{ request()->routeIs('committee.evaluasi.*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="clipboard-list"></i></span>
                 <span class="label">Evaluasi</span>

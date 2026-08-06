@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Models\Information;
 use App\Models\ModuleItem;
 use App\Models\Schedule;
+use App\Models\Task;
 use App\Models\Topic;
 use App\Models\User;
 use App\Models\ProgramStudy;
@@ -83,6 +84,9 @@ class DataMasterController extends Controller
      * - icon      : nama icon lucide untuk card
      * - chip      : class tailwind warna badge icon
      * - list_cols : kolom yang ditampilkan di tabel dalam modal (key => label)
+     * - admin_hidden : true kalau type ini TIDAK boleh muncul/diakses dari
+     *   context Admin (route tanpa 'onlyTypes'), khusus dipakai Committee
+     *   lewat route yang selalu titip 'onlyTypes'.
      * - fields    : skema field form (dipakai FE untuk build form otomatis)
      *   type: text | textarea | number | date | time | select | checkbox
      */
@@ -281,6 +285,38 @@ class DataMasterController extends Controller
                     ['key' => 'key', 'label' => 'Kunci Jawaban', 'type' => 'select', 'required' => true, 'options' => ['A' => 'A', 'B' => 'B', 'C' => 'C', 'D' => 'D']],
                 ],
             ],
+
+            // ===== Kelola Tugas — HANYA untuk Committee (lihat 'admin_hidden').
+            // Assign ke mahasiswa/kelompok (student_tasks/group_tasks) tidak
+            // lewat sini, tapi lewat TaskAssignmentController terpisah. =====
+            'tugas' => [
+            'model' => Task::class,
+            'label' => 'Data Tugas',
+            'display' => 'title',
+            'icon' => 'clipboard-check',
+            'chip' => 'bg-amber-50 text-amber-600',
+            'admin_hidden' => true,
+            'list_cols' => [
+                'title' => 'Judul',
+                'task_type' => 'Jenis Tugas',
+                'deadline' => 'Deadline',
+                'status' => 'Status',
+            ],
+            'fields' => [
+                ['key' => 'title', 'label' => 'Judul Tugas', 'type' => 'text', 'required' => true],
+                ['key' => 'description', 'label' => 'Deskripsi', 'type' => 'textarea', 'required' => false],
+                ['key' => 'task_type', 'label' => 'Jenis Tugas', 'type' => 'select', 'required' => true, 'options' => [
+                    'individu' => 'INDIVIDU',
+                    'kelompok' => 'KELOMPOK',
+                ]],
+                ['key' => 'deadline', 'label' => 'Deadline', 'type' => 'date', 'required' => true],
+                ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => [
+                    'aktif' => 'AKTIF',
+                    'draft' => 'DRAFT',
+                    'ditutup' => 'DITUTUP',
+                ]],
+            ],
+        ],
         ];
     }
 
@@ -319,13 +355,20 @@ class DataMasterController extends Controller
      * Cek apakah $type ini boleh diakses lewat route saat ini.
      * Route bisa titip default 'onlyTypes' => ['jadwal'] misalnya, untuk membatasi
      * area tertentu (mis. Committee) hanya boleh CRUD kategori tertentu saja.
+     *
+     * Kalau route TIDAK titip 'onlyTypes' (konteks Admin), type yang ditandai
+     * 'admin_hidden' (mis. 'tugas') otomatis ditolak juga.
      */
     protected function assertTypeAllowed(Request $request, string $type): void
     {
         $only = $request->route('onlyTypes');
-        if ($only && !in_array($type, $only, true)) {
-            abort(404);
+        if ($only) {
+            abort_if(!in_array($type, $only, true), 404);
+            return;
         }
+
+        $cfg = self::types()[$type] ?? null;
+        abort_if($cfg && !empty($cfg['admin_hidden']), 404);
     }
 
     public function index(Request $request)
@@ -336,6 +379,10 @@ class DataMasterController extends Controller
         $only = $request->route('onlyTypes');
         if ($only) {
             $types = array_intersect_key($types, array_flip($only));
+        } else {
+            // Tanpa onlyTypes = konteks umum (Admin) -> sembunyikan type yang
+            // ditandai admin_hidden (mis. 'tugas', khusus Committee).
+            $types = array_filter($types, fn ($cfg) => empty($cfg['admin_hidden']));
         }
 
         $sources = $this->optionSources();

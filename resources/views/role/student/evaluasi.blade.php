@@ -1,225 +1,163 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <title>Evaluasi | PKKMB-KT UNILAM 2026</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
 
-    <style>
-      /* ============ DESIGN TOKENS — IDENTIK HOMEPAGE/MATERI ============ */
-      :root {
-        --navy-900: #152159;
-        --navy-700: #1e3a8f;
-        --navy-600: #2a4bb0;
-        --teal-600: #0f8a8c;
-        --teal-500: #16a0a1;
-        --teal-tint: #e2f3f2;
-        --lime-500: #a9c73b;
-        --lime-tint: #f2f6e0;
-        --navy-tint: #e6e9f6;
-        --bg: #f2f4fa;
-        --surface: #ffffff;
-        --border: #e1e5f1;
-        --ink-900: #1b2238;
-        --ink-600: #5b6175;
-        --ink-400: #8d92a6;
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Evaluasi | PKKMB-KT UNILAM 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <style type="text/tailwindcss">
+    @theme {
+        --color-navy-900: #152159;
+        --color-navy-700: #1e3a8f;
+        --color-navy-600: #2a4bb0;
+        --color-teal-600: #0f8a8c;
+        --color-teal-500: #16a0a1;
+        --color-teal-tint: #e2f3f2;
+        --color-lime-500: #a9c73b;
+        --color-lime-tint: #f2f6e0;
+        --color-navy-tint: #e6e9f6;
+        --color-bg: #f2f4fa;
+        --color-surface: #ffffff;
+        --color-border: #e1e5f1;
+        --color-ink-900: #1b2238;
+        --color-ink-600: #5b6175;
+        --color-ink-400: #8d92a6;
+        --font-sans: "Plus Jakarta Sans", sans-serif;
+        --font-display: "Lora", serif;
+      }
+    </style>
+  <style type="text/tailwindcss">
+    :root {
+        --navy-900: var(--color-navy-900);
+        --navy-700: var(--color-navy-700);
+        --navy-600: var(--color-navy-600);
+        --teal-600: var(--color-teal-600);
+        --teal-500: var(--color-teal-500);
+        --teal-tint: var(--color-teal-tint);
+        --lime-500: var(--color-lime-500);
+        --lime-tint: var(--color-lime-tint);
+        --navy-tint: var(--color-navy-tint);
+        --bg: var(--color-bg);
+        --surface: var(--color-surface);
+        --border: var(--color-border);
+        --ink-900: var(--color-ink-900);
+        --ink-600: var(--color-ink-600);
+        --ink-400: var(--color-ink-400);
         --radius-lg: 28px;
         --radius-md: 18px;
         --radius-sm: 13px;
         --shadow-card:
           0 2px 14px rgba(21, 33, 89, 0.07), 0 1px 2px rgba(21, 33, 89, 0.05);
         --shadow-pop: 0 10px 24px rgba(21, 33, 89, 0.16);
-        --font-display: "Lora", serif;
-        --font-sans: "Plus Jakarta Sans", sans-serif;
         --bottomnav-h: 74px;
       }
-
       * {
-        box-sizing: border-box;
+        @apply box-border;
       }
       body {
-        font-family: var(--font-sans);
-        color: var(--ink-900);
-        margin: 0;
-        padding: 0;
-        background: var(--bg);
-        -webkit-font-smoothing: antialiased;
+        @apply font-sans text-ink-900 bg-bg m-0 p-0 antialiased;
       }
       .font-display {
-        font-family: var(--font-display);
+        @apply font-display;
       }
 
-      /* ============ NAVBAR — COPY EXACT DARI HOMEPAGE/MATERI ============ */
+      /* ============ NAVBAR ============ */
       .navbar {
-        position: sticky;
-        top: 0;
-        z-index: 40;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
+        @apply sticky top-0 z-40 flex items-center justify-between gap-4 bg-navy-900 border-b border-white/10;
         padding: 14px clamp(16px, 5vw, 48px);
-        background: var(--navy-900);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       }
       .navbar-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        z-index: 50;
-        text-decoration: none;
+        @apply flex items-center gap-2.5 z-50 no-underline;
       }
       .navbar-logo {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-display);
-        font-size: 9px;
-        font-weight: 700;
-        color: var(--navy-900);
-        text-align: center;
+        @apply w-[38px] h-[38px] rounded-full bg-white flex items-center justify-center flex-shrink-0 overflow-hidden;
         line-height: 1.25;
-        flex-shrink: 0;
-        overflow: hidden;
       }
       .navbar-logo img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+        @apply w-full h-full object-contain;
       }
       .navbar-brand-text strong {
-        display: block;
-        font-family: var(--font-display);
-        font-size: 14.5px;
-        color: #fff;
+        @apply block font-display text-[14.5px] text-white;
       }
       .navbar-brand-text span {
-        font-size: 10.5px;
-        color: #aeb6e0;
-        letter-spacing: 0.04em;
+        @apply text-[10.5px] text-[#aeb6e0] tracking-[0.04em];
       }
       .menu-toggle {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 24px;
-        height: 18px;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        z-index: 50;
-        padding: 0;
+        @apply flex flex-col justify-between w-6 h-[18px] bg-transparent border-none cursor-pointer z-50 p-0;
       }
       .menu-toggle span {
-        display: block;
-        width: 100%;
-        height: 2px;
-        background-color: #fff;
-        border-radius: 2px;
-        transition:
-          transform 0.3s ease,
-          opacity 0.3s ease;
+        @apply block w-full h-0.5 bg-white rounded;
+        transition: transform 0.3s ease, opacity 0.3s ease;
       }
       .menu-toggle.active span:nth-child(1) {
         transform: translateY(8px) rotate(45deg);
       }
       .menu-toggle.active span:nth-child(2) {
-        opacity: 0;
+        @apply opacity-0;
       }
       .menu-toggle.active span:nth-child(3) {
         transform: translateY(-8px) rotate(-45deg);
       }
       .navbar-links {
-        display: none;
+        @apply hidden;
       }
       .navbar-links.active {
         right: 0;
       }
       .navbar-links a {
-        color: #c7cce8;
-        font-size: 16px;
-        font-weight: 600;
-        transition: color 0.15s;
-        display: block;
-        text-decoration: none;
+        @apply text-[#c7cce8] text-base font-semibold block no-underline transition-colors;
       }
       .navbar-links a:hover,
       .navbar-links a.active {
-        color: #fff;
+        @apply text-white;
       }
       .navbar-links a.active {
-        border-left: 3px solid var(--lime-500);
-        padding-left: 8px;
+        @apply border-l-[3px] border-lime-500 pl-2;
       }
       @media (min-width: 768px) {
         .menu-toggle {
-          display: none;
+          @apply hidden;
         }
         .navbar-links {
-          position: static;
-          display: flex;
-          flex-direction: row;
-          width: auto;
-          height: auto;
-          background: transparent;
-          padding: 0;
-          gap: 28px;
-          box-shadow: none;
+          @apply static flex flex-row w-auto h-auto bg-transparent p-0 gap-7 shadow-none;
           transition: none;
         }
         .navbar-links a {
-          font-size: 13.5px;
+          @apply text-[13.5px];
         }
         .navbar-links a.active {
-          border-left: none;
-          border-bottom: 2px solid var(--lime-500);
-          padding-left: 0;
-          padding-bottom: 2px;
+          @apply border-l-0 border-b-2 border-lime-500 pl-0 pb-0.5;
         }
       }
 
       /* ============ HERO ============ */
       .hero-info {
-        position: relative;
+        @apply relative overflow-hidden;
         padding: clamp(40px, 7vw, 64px) clamp(16px, 5vw, 48px);
-        overflow: hidden;
       }
-      /* ►► SLIDESHOW LATAR HERO — sama seperti absensi/materi/denah.html.
-         Ganti/tambah gambar di array JS "heroSlideImages" di bawah. */
       .hero-slideshow {
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        overflow: hidden;
+        @apply absolute inset-0 z-0 overflow-hidden;
       }
       .hero-slide {
-        position: absolute;
-        inset: 0;
-        background-size: cover;
-        background-position: center;
-        opacity: 0;
+        @apply absolute inset-0 bg-cover bg-center opacity-0;
         transition: opacity 1.8s ease;
       }
       .hero-slide.active {
-        opacity: 1;
+        @apply opacity-100;
       }
       .hero-slideshow::after {
         content: "";
-        position: absolute;
-        inset: 0;
+        @apply absolute inset-0;
         background: linear-gradient(
           135deg,
           rgba(21, 33, 89, 0.94) 0%,
@@ -227,40 +165,21 @@
         );
       }
       .hero-info-inner {
-        position: relative;
-        z-index: 1;
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: flex-end;
+        @apply relative z-[1] max-w-[1200px] mx-auto flex flex-wrap justify-between items-end;
         gap: 32px;
       }
       .hero-info-left {
-        flex: 1;
+        @apply flex-1;
         min-width: 280px;
       }
       .hero-eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
+        @apply inline-flex items-center gap-[7px] text-[#c8e46a] text-[11px] font-bold rounded-full mb-4 tracking-[0.06em] uppercase;
         background: rgba(169, 199, 59, 0.15);
         border: 1px solid rgba(169, 199, 59, 0.35);
-        color: #c8e46a;
-        font-size: 11px;
-        font-weight: 700;
         padding: 5px 14px;
-        border-radius: 99px;
-        margin-bottom: 16px;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
       }
       .hero-eyebrow .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--lime-500);
+        @apply w-1.5 h-1.5 rounded-full bg-lime-500;
         animation: pulse 2s infinite;
       }
       @keyframes pulse {
@@ -275,57 +194,40 @@
         }
       }
       .hero-info h1 {
-        font-family: var(--font-display);
+        @apply font-display font-bold text-white leading-[1.2] mb-3 mt-0;
         font-size: clamp(24px, 4vw, 40px);
-        font-weight: 700;
-        color: #fff;
-        margin: 0 0 12px;
-        line-height: 1.2;
       }
       .hero-info-sub {
-        font-size: 14px;
-        color: rgba(255, 255, 255, 0.75);
-        line-height: 1.7;
+        @apply text-sm text-white/75 leading-[1.7] m-0;
         max-width: 460px;
-        margin: 0;
       }
       .hero-stats {
-        display: flex;
-        gap: 2px;
+        @apply flex gap-0.5 rounded-[18px] flex-shrink-0;
         background: rgba(255, 255, 255, 0.07);
         border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: var(--radius-md);
         padding: 20px 28px;
         backdrop-filter: blur(12px);
-        flex-shrink: 0;
       }
       .hero-stat {
-        text-align: center;
+        @apply text-center;
         padding: 0 20px;
         border-right: 1px solid rgba(255, 255, 255, 0.12);
       }
       .hero-stat:last-child {
-        border-right: none;
+        @apply border-r-0;
       }
       .hero-stat-val {
-        font-family: var(--font-display);
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--lime-500);
-        line-height: 1;
+        @apply font-display text-[28px] font-bold text-lime-500 leading-none;
       }
       .hero-stat-lbl {
+        @apply font-semibold mt-1 tracking-[0.04em];
         font-size: 10px;
         color: rgba(255, 255, 255, 0.55);
-        font-weight: 600;
-        margin-top: 4px;
-        letter-spacing: 0.04em;
       }
 
       /* ============ MAIN CONTENT ============ */
       .content-wrap {
-        max-width: 1200px;
-        margin: 0 auto;
+        @apply max-w-[1200px] mx-auto;
         padding: 40px clamp(16px, 5vw, 48px);
         padding-bottom: calc(var(--bottomnav-h) + 28px);
       }
@@ -337,15 +239,11 @@
 
       /* ============ SECTION HEADING ============ */
       .section-head {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
+        @apply flex items-center gap-2.5 mb-5;
       }
       .section-head-bar {
-        width: 4px;
+        @apply w-1 rounded-full;
         height: 22px;
-        border-radius: 99px;
         background: linear-gradient(
           to bottom,
           var(--teal-500),
@@ -353,56 +251,30 @@
         );
       }
       .section-head h2 {
-        font-family: var(--font-display);
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--ink-900);
-        margin: 0;
+        @apply font-display text-lg font-bold text-ink-900 m-0;
       }
       .section-head .count {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--ink-400);
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 99px;
+        @apply text-[11px] font-bold text-ink-400 bg-bg border border-border rounded-full ml-1;
         padding: 3px 10px;
-        margin-left: 4px;
       }
 
-      /* ============ KARTU KUIS (mirip kartu video di materi) ============ */
+      /* ============ KARTU KUIS ============ */
       .quiz-grid {
-        display: grid;
+        @apply grid gap-4;
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 16px;
       }
       .quiz-card {
-        background: var(--surface);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border);
-        overflow: hidden;
-        box-shadow: var(--shadow-card);
-        transition:
-          transform 0.2s,
-          box-shadow 0.2s;
-        display: flex;
-        flex-direction: column;
+        @apply bg-surface rounded-[18px] border border-border overflow-hidden shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] flex flex-col transition-all;
       }
       .quiz-card:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-pop);
+        @apply -translate-y-[3px] shadow-[0_10px_24px_rgba(21,33,89,0.16)];
       }
       .quiz-thumb {
+        @apply relative overflow-hidden flex items-center justify-center;
         height: 120px;
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
       .quiz-thumb-overlay {
-        position: absolute;
-        inset: 0;
+        @apply absolute inset-0;
         background: linear-gradient(
           to top,
           rgba(21, 33, 89, 0.45) 0%,
@@ -410,83 +282,51 @@
         );
       }
       .quiz-thumb-icon {
-        width: 46px;
-        height: 46px;
+        @apply w-[46px] h-[46px] opacity-95 relative z-[1];
         stroke: #fff;
         fill: none;
         stroke-width: 1.6;
-        opacity: 0.95;
-        position: relative;
-        z-index: 1;
       }
       .quiz-badge-count {
-        position: absolute;
+        @apply absolute text-white text-[10px] font-bold rounded-md z-[1];
         bottom: 8px;
         right: 10px;
         background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(6px);
-        color: #fff;
-        font-size: 10px;
-        font-weight: 700;
         padding: 3px 8px;
-        border-radius: 6px;
-        z-index: 1;
       }
       .quiz-body {
+        @apply flex flex-col flex-1 gap-2.5;
         padding: 14px 16px 16px;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        gap: 10px;
       }
       .quiz-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--ink-900);
-        line-height: 1.4;
+        @apply text-sm font-bold text-ink-900 leading-[1.4];
       }
       .quiz-desc {
-        font-size: 11.5px;
-        color: var(--ink-600);
-        line-height: 1.5;
+        @apply text-[11.5px] text-ink-600 leading-[1.5] overflow-hidden;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
-        overflow: hidden;
       }
       .quiz-meta-row {
-        display: flex;
-        gap: 14px;
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--ink-400);
+        @apply flex gap-3.5 text-[11px] font-semibold text-ink-400;
       }
       .quiz-meta-row span {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
+        @apply inline-flex items-center gap-1;
       }
       .quiz-meta-row svg {
-        width: 13px;
-        height: 13px;
+        @apply w-[13px] h-[13px];
         stroke: var(--ink-400);
         fill: none;
         stroke-width: 1.8;
       }
       .quiz-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 10.5px;
-        font-weight: 800;
-        padding: 3px 10px;
-        border-radius: 99px;
+        @apply inline-flex items-center gap-1.5 text-[10.5px] font-extrabold rounded-full;
         width: fit-content;
+        padding: 3px 10px;
       }
       .quiz-status.belum {
-        background: var(--bg);
-        color: var(--ink-400);
-        border: 1px solid var(--border);
+        @apply bg-bg text-ink-400 border border-border;
       }
       .quiz-status.lulus {
         background: #f0fdf4;
@@ -499,149 +339,80 @@
         border: 1px solid #fecaca;
       }
       .btn-mulai {
-        margin-top: auto;
-        display: block;
-        width: 100%;
-        text-align: center;
+        @apply mt-auto block w-full text-center rounded-[13px] text-[12.5px] font-bold bg-navy-tint text-navy-900 border-none cursor-pointer transition-colors;
         padding: 10px 0;
-        border-radius: var(--radius-sm);
-        font-size: 12.5px;
-        font-weight: 700;
-        background: var(--navy-tint);
-        color: var(--navy-900);
-        border: none;
-        cursor: pointer;
-        transition:
-          background 0.18s,
-          color 0.18s;
       }
       .btn-mulai:hover {
-        background: var(--navy-900);
-        color: #fff;
+        @apply bg-navy-900 text-white;
       }
 
-      /* ============ MODE KUIS (layar ngerjain soal ala Quizizz) ============ */
+      /* ============ MODE KUIS ============ */
       .quiz-runner {
-        position: fixed;
-        inset: 0;
-        z-index: 90;
+        @apply fixed inset-0 z-[90] hidden flex-col overflow-y-auto [&.open]:flex;
         background: linear-gradient(180deg, #eef1fb 0%, #f5f3ec 100%);
-        display: none;
-        flex-direction: column;
-        overflow-y: auto;
-      }
-      .quiz-runner.open {
-        display: flex;
       }
       .quiz-runner::before {
         content: "";
-        position: fixed;
+        @apply fixed rounded-full pointer-events-none z-0;
         width: 380px;
         height: 380px;
-        border-radius: 50%;
         background: rgba(22, 160, 161, 0.08);
         top: -140px;
         right: -100px;
-        pointer-events: none;
-        z-index: 0;
       }
       .quiz-runner::after {
         content: "";
-        position: fixed;
+        @apply fixed rounded-full pointer-events-none z-0;
         width: 300px;
         height: 300px;
-        border-radius: 50%;
         background: rgba(169, 199, 59, 0.1);
         bottom: -100px;
         left: -80px;
-        pointer-events: none;
-        z-index: 0;
       }
 
-      /* Bar atas: timer + progress + tombol keluar */
       .runner-topbar {
-        position: sticky;
-        top: 0;
+        @apply sticky top-0 flex items-center gap-4 z-[5];
         background: linear-gradient(120deg, var(--navy-900), var(--navy-700));
         padding: 14px clamp(16px, 5vw, 48px);
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        z-index: 5;
         box-shadow: 0 4px 18px rgba(21, 33, 89, 0.18);
       }
       .runner-exit {
+        @apply border-none text-white w-[34px] h-[34px] rounded-full text-lg cursor-pointer flex-shrink-0 flex items-center justify-center transition-all;
         background: rgba(255, 255, 255, 0.12);
-        border: none;
-        color: #fff;
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        font-size: 18px;
-        cursor: pointer;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.15s, transform 0.15s;
       }
       .runner-exit:hover {
+        @apply rotate-90;
         background: rgba(255, 255, 255, 0.25);
-        transform: rotate(90deg);
       }
       .runner-progress-track {
-        flex: 1;
-        height: 8px;
+        @apply flex-1 h-2 rounded-full overflow-hidden;
         background: rgba(255, 255, 255, 0.15);
-        border-radius: 99px;
-        overflow: hidden;
       }
       .runner-progress-fill {
-        height: 100%;
+        @apply h-full rounded-full;
         width: 0%;
-        border-radius: 99px;
         background: linear-gradient(90deg, var(--teal-500), var(--lime-500));
         transition: width 0.35s ease;
         box-shadow: 0 0 10px rgba(169, 199, 59, 0.6);
       }
       .runner-qcount {
-        font-size: 12px;
-        font-weight: 800;
-        color: #fff;
-        white-space: nowrap;
-        flex-shrink: 0;
+        @apply text-xs font-extrabold text-white whitespace-nowrap flex-shrink-0 rounded-full;
         background: rgba(255, 255, 255, 0.1);
         padding: 5px 12px;
-        border-radius: 99px;
       }
 
-      /* Lingkaran timer detik */
       .runner-timer {
-        flex-shrink: 0;
-        position: relative;
-        width: 46px;
-        height: 46px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.2s;
+        @apply flex-shrink-0 relative w-[46px] h-[46px] flex items-center justify-center transition-transform;
       }
       .runner-timer svg {
-        position: absolute;
-        inset: 0;
+        @apply absolute inset-0;
         transform: rotate(-90deg);
       }
       .runner-timer-num {
-        position: relative;
-        z-index: 1;
-        font-size: 15px;
-        font-weight: 800;
-        color: #fff;
-        font-family: var(--font-display);
+        @apply relative z-[1] text-[15px] font-extrabold text-white font-display;
       }
-      /* Saat waktu hampir habis (<=5 detik), angka jadi merah + berkedip + membesar */
       .runner-timer.danger {
-        transform: scale(1.1);
+        @apply scale-110;
       }
       .runner-timer.danger .runner-timer-num {
         color: #ff6b6b;
@@ -653,24 +424,13 @@
         }
       }
 
-      /* Isi soal */
       .runner-body {
-        flex: 1;
-        max-width: 760px;
-        width: 100%;
-        margin: 0 auto;
+        @apply flex-1 max-w-[760px] w-full mx-auto flex flex-col relative z-[1];
         padding: 36px clamp(16px, 5vw, 32px) 48px;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        z-index: 1;
       }
       .runner-question-card {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-pop);
+        @apply bg-surface rounded-[28px] shadow-[0_10px_24px_rgba(21,33,89,0.16)] mb-6;
         padding: clamp(24px, 4vw, 40px);
-        margin-bottom: 24px;
         animation: cardIn 0.4s ease;
       }
       @keyframes cardIn {
@@ -684,33 +444,17 @@
         }
       }
       .runner-kategori-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--teal-600);
-        background: var(--teal-tint);
-        padding: 5px 14px;
-        border-radius: 99px;
+        @apply inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.06em] uppercase text-teal-600 bg-teal-tint rounded-full mx-auto mb-5;
         width: fit-content;
-        margin: 0 auto 20px;
+        padding: 5px 14px;
       }
       .runner-question {
-        font-family: var(--font-display);
+        @apply font-display font-bold text-ink-900 leading-[1.45] text-center m-0;
         font-size: clamp(19px, 3.2vw, 26px);
-        font-weight: 700;
-        color: var(--ink-900);
-        line-height: 1.45;
-        text-align: center;
-        margin: 0;
       }
       .runner-options {
-        display: grid;
+        @apply grid gap-3;
         grid-template-columns: 1fr;
-        gap: 12px;
       }
       @media (min-width: 640px) {
         .runner-options {
@@ -718,201 +462,100 @@
         }
       }
       .runner-option {
-        display: flex;
-        align-items: center;
-        gap: 14px;
+        @apply flex items-center gap-3.5 rounded-[18px] bg-surface cursor-pointer text-left font-sans shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] relative;
         padding: 17px 18px;
         border: 2px solid var(--border);
-        border-radius: var(--radius-md);
-        background: var(--surface);
-        cursor: pointer;
-        transition:
-          border-color 0.16s,
-          background 0.16s,
-          transform 0.12s,
-          box-shadow 0.16s;
-        text-align: left;
-        font-family: var(--font-sans);
-        box-shadow: var(--shadow-card);
-        position: relative;
+        transition: border-color 0.16s, background 0.16s, transform 0.12s, box-shadow 0.16s;
       }
       .runner-option:hover:not(:disabled) {
-        border-color: var(--teal-500);
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-pop);
+        @apply border-teal-500 -translate-y-[3px] shadow-[0_10px_24px_rgba(21,33,89,0.16)];
       }
       .runner-option:disabled {
-        cursor: default;
+        @apply cursor-default;
       }
       .runner-option-letter {
-        width: 32px;
-        height: 32px;
-        border-radius: 9px;
-        background: var(--navy-tint);
-        color: var(--navy-900);
-        font-weight: 800;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        transition: background 0.16s, color 0.16s;
+        @apply w-8 h-8 rounded-[9px] bg-navy-tint text-navy-900 font-extrabold text-[13px] flex items-center justify-center flex-shrink-0 transition-colors;
       }
       .runner-option-text {
-        font-size: 14.5px;
-        font-weight: 600;
-        color: var(--ink-900);
-        flex: 1;
+        @apply text-[14.5px] font-semibold text-ink-900 flex-1;
       }
       .runner-option-check {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: var(--teal-500);
-        color: #fff;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
+        @apply w-[22px] h-[22px] rounded-full bg-teal-500 text-white flex-shrink-0 flex items-center justify-center opacity-0;
         transform: scale(0.5);
         transition: opacity 0.16s, transform 0.16s;
       }
       .runner-option-check svg {
-        width: 12px;
-        height: 12px;
+        @apply w-3 h-3;
       }
-      /* State "terpilih" — netral, TIDAK menunjukkan benar/salah */
       .runner-option.selected {
-        border-color: var(--teal-500);
-        background: var(--teal-tint);
+        @apply border-teal-500 bg-teal-tint;
         box-shadow: 0 0 0 3px rgba(22, 160, 161, 0.14);
       }
       .runner-option.selected .runner-option-letter {
-        background: var(--teal-600);
-        color: #fff;
+        @apply bg-teal-600 text-white;
       }
       .runner-option.selected .runner-option-check {
-        opacity: 1;
+        @apply opacity-100;
         transform: scale(1);
       }
 
-      /* Tombol lanjut soal */
       .runner-next-wrap {
-        margin-top: 28px;
-        text-align: center;
+        @apply mt-7 text-center;
         min-height: 48px;
       }
       .btn-next {
-        display: none;
-        align-items: center;
-        gap: 8px;
-        margin: 0 auto;
+        @apply hidden items-center gap-2 mx-auto text-white text-[13.5px] font-extrabold rounded-full border-none cursor-pointer shadow-[0_10px_24px_rgba(21,33,89,0.16)];
         background: linear-gradient(120deg, var(--navy-900), var(--navy-700));
-        color: #fff;
-        font-size: 13.5px;
-        font-weight: 800;
         padding: 13px 40px;
-        border-radius: 99px;
-        border: none;
-        cursor: pointer;
-        box-shadow: var(--shadow-pop);
-        transition:
-          filter 0.18s,
-          transform 0.18s;
+        transition: filter 0.18s, transform 0.18s;
       }
       .btn-next.show {
-        display: inline-flex;
+        @apply inline-flex;
       }
       .btn-next:hover {
+        @apply -translate-y-0.5;
         filter: brightness(1.15);
-        transform: translateY(-2px);
       }
 
       /* ============ LAYAR HASIL ============ */
       .runner-result {
-        display: none;
-        flex: 1;
-        max-width: 500px;
-        width: 100%;
-        margin: 0 auto;
+        @apply hidden flex-1 max-w-[500px] w-full mx-auto text-center flex-col items-center justify-center relative z-[1];
         padding: 36px clamp(16px, 5vw, 32px) 48px;
-        text-align: center;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        z-index: 1;
       }
       .runner-result.show {
-        display: flex;
+        @apply flex;
       }
       .result-card {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-pop);
+        @apply bg-surface rounded-[28px] shadow-[0_10px_24px_rgba(21,33,89,0.16)] w-full;
         padding: clamp(32px, 5vw, 48px) clamp(24px, 5vw, 40px);
-        width: 100%;
         animation: cardIn 0.45s ease;
       }
       .result-score-ring {
-        position: relative;
-        width: 140px;
-        height: 140px;
-        margin: 0 auto 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        @apply relative w-[140px] h-[140px] mx-auto mb-5 flex items-center justify-center;
       }
       .result-score-ring svg {
-        position: absolute;
-        inset: 0;
+        @apply absolute inset-0;
         transform: rotate(-90deg);
       }
       .result-score-val {
-        font-family: var(--font-display);
-        font-size: 36px;
-        font-weight: 700;
-        color: var(--navy-900);
-        position: relative;
-        z-index: 1;
-        line-height: 1;
+        @apply font-display text-[36px] font-bold text-navy-900 relative z-[1] leading-none;
       }
       .result-score-lbl {
-        font-size: 10px;
-        color: var(--ink-400);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-top: 2px;
-        position: relative;
-        z-index: 1;
+        @apply text-[10px] text-ink-400 font-bold uppercase tracking-[0.05em] mt-0.5 relative z-[1];
       }
       .result-heading {
-        font-family: var(--font-display);
-        font-size: 23px;
-        font-weight: 700;
-        color: var(--ink-900);
+        @apply font-display text-[23px] font-bold text-ink-900;
         margin: 8px 0 6px;
       }
       .result-sub {
-        font-size: 14px;
-        color: var(--ink-600);
-        font-weight: 600;
-        margin: 0 0 8px;
+        @apply text-sm text-ink-600 font-semibold mb-2 mt-0;
       }
       .result-sub b {
-        color: var(--teal-600);
-        font-weight: 800;
+        @apply text-teal-600 font-extrabold;
       }
       .result-status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        font-weight: 800;
+        @apply inline-flex items-center gap-1.5 text-xs font-extrabold rounded-full;
         padding: 7px 18px;
-        border-radius: 99px;
         margin: 6px 0 26px;
       }
       .result-status-pill.lulus {
@@ -926,99 +569,60 @@
         border: 1px solid #fecaca;
       }
       .result-actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        justify-content: center;
+        @apply flex gap-3 flex-wrap justify-center;
       }
       .btn-ulang {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
+        @apply inline-flex items-center gap-2 bg-teal-tint text-teal-600 border-none rounded-full text-[13px] font-bold cursor-pointer;
         padding: 12px 24px;
-        background: var(--teal-tint);
-        color: var(--teal-600);
-        border: none;
-        border-radius: 99px;
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
-        transition:
-          background 0.18s,
-          color 0.18s,
-          transform 0.15s;
+        transition: background 0.18s, color 0.18s, transform 0.15s;
       }
       .btn-ulang:hover {
-        background: var(--teal-600);
-        color: #fff;
-        transform: translateY(-2px);
+        @apply -translate-y-0.5 bg-teal-600 text-white;
       }
       .btn-selesai {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px 28px;
+        @apply inline-flex items-center gap-2 text-white border-none rounded-full text-[13px] font-extrabold cursor-pointer shadow-[0_10px_24px_rgba(21,33,89,0.16)];
         background: linear-gradient(120deg, var(--navy-900), var(--navy-700));
-        color: #fff;
-        border: none;
-        border-radius: 99px;
-        font-size: 13px;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: var(--shadow-pop);
+        padding: 12px 28px;
         transition: filter 0.18s, transform 0.15s;
       }
       .btn-selesai:hover {
+        @apply -translate-y-0.5;
         filter: brightness(1.15);
-        transform: translateY(-2px);
       }
       .btn-selesai:disabled {
-        background: var(--border);
-        color: var(--ink-400);
-        box-shadow: none;
-        cursor: not-allowed;
+        @apply bg-border text-ink-400 shadow-none cursor-not-allowed;
+        background-image: none;
         transform: none;
       }
       .result-note {
-        font-size: 12px;
-        color: var(--ink-400);
+        @apply text-xs text-ink-400 leading-[1.5];
         margin-top: 16px;
         max-width: 360px;
-        line-height: 1.5;
       }
       .result-note.gagal {
+        @apply font-semibold;
         color: #b91c1c;
-        font-weight: 600;
       }
 
       /* ============ FOOTER ============ */
       .footer {
+        @apply flex flex-wrap justify-between items-center gap-3.5 mt-14;
         background: #0d1735;
         padding: 28px clamp(16px, 5vw, 48px);
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-        gap: 14px;
-        margin-top: 56px;
       }
       .footer p {
-        font-size: 13px;
+        @apply text-[13px] m-0;
         color: #4a6a9f;
-        margin: 0;
       }
       .footer-links {
-        display: flex;
-        gap: 20px;
+        @apply flex gap-5;
       }
       .footer-links a {
-        font-size: 13px;
+        @apply text-[13px] no-underline transition-colors;
         color: #4a6a9f;
-        text-decoration: none;
-        transition: color 0.15s;
       }
       .footer-links a:hover {
-        color: #aeb6e0;
+        @apply text-[#aeb6e0];
       }
       @media (max-width: 767px) {
         .footer {
@@ -1028,197 +632,166 @@
 
       /* ============ BOTTOM NAV (mobile) ============ */
       .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        @apply fixed bottom-0 left-0 right-0 bg-surface border-t border-border flex items-center justify-around z-30;
         height: var(--bottomnav-h);
-        background: var(--surface);
-        border-top: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
         padding: 0 6px;
         padding-bottom: env(safe-area-inset-bottom);
-        z-index: 30;
       }
       .bottom-nav a {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        color: var(--ink-400);
-        font-size: 10px;
-        font-weight: 700;
-        flex: 1;
+        @apply flex flex-col items-center gap-1 text-ink-400 text-[10px] font-bold flex-1 no-underline;
         padding: 6px 0;
-        text-decoration: none;
       }
       .bottom-nav a .ic {
-        width: 22px;
-        height: 22px;
+        @apply w-[22px] h-[22px];
       }
       .bottom-nav a.active {
-        color: var(--navy-900);
+        @apply text-navy-900;
       }
       .bottom-nav a.home {
-        flex: 0 0 auto;
-        color: #fff;
+        @apply flex-none text-white bg-navy-900 w-[54px] h-[54px] rounded-full shadow-[0_10px_24px_rgba(21,33,89,0.16)] justify-center;
         margin-top: -30px;
-        background: var(--navy-900);
-        width: 54px;
-        height: 54px;
-        border-radius: 50%;
-        box-shadow: var(--shadow-pop);
-        justify-content: center;
       }
       .bottom-nav a.home .ic {
-        width: 24px;
-        height: 24px;
+        @apply w-6 h-6;
       }
       .bottom-nav a.home span {
-        display: none;
+        @apply hidden;
       }
       @media (min-width: 768px) {
         .bottom-nav {
-          display: none;
+          @apply hidden;
         }
       }
     </style>
-  </head>
+</head>
 
-  <body>
-    <!-- ============ NAVBAR ============ -->
-    <header class="navbar">
-      <a
-        href="{{ route('dashboard') }}"
-        class="navbar-brand"
-        aria-label="PKKMB-KT UNILAM Beranda"
-      >
-        <div class="navbar-logo">
-          <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
+<body>
+  <!-- ============ NAVBAR ============ -->
+  <header class="navbar">
+    <a
+      href="{{ route('dashboard') }}"
+      class="navbar-brand"
+      aria-label="PKKMB-KT UNILAM Beranda">
+      <div class="navbar-logo">
+        <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
+      </div>
+      <div class="navbar-brand-text">
+        <strong>PKKMB-KT</strong>
+        <span>UNILAM 2026</span>
+      </div>
+    </a>
+
+    <nav class="navbar-links" id="navbarLinks">
+      <a href="{{ route('role.student.modul') }}">Modul</a>
+      <a href="{{ route('role.student.leaderboard') }}">Leaderboard</a>
+      <a href="{{ route('dashboard') }}">Dashboard</a>
+      <a href="{{ route('role.student.info') }}">Info</a>
+      <a href="{{ route('role.student.profil') }}">Profil</a>
+    </nav>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero-info">
+    <div class="hero-slideshow" id="heroSlideshow"></div>
+
+    <div class="hero-info-inner">
+      <div class="hero-info-left">
+        <div class="hero-eyebrow">
+          <span class="dot"></span>
+          Evaluasi Materi
         </div>
-        <div class="navbar-brand-text">
-          <strong>PKKMB-KT</strong>
-          <span>UNILAM 2026</span>
+        <h1>Kuis Evaluasi<br />PKKMB-KT UNILAM 2026</h1>
+        <p class="hero-info-sub">
+          Pilih kategori kuis yang ingin kamu kerjakan. Soal dikerjakan satu
+          per satu dengan batas waktu di tiap soal. Skor minimal 75 untuk
+          lulus.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="statTotalKuis">0</div>
+          <div class="hero-stat-lbl">Total Kuis</div>
         </div>
-      </a>
-
-     
-
-      <nav class="navbar-links" id="navbarLinks">
-        <a href="{{ route('role.student.modul') }}">Modul</a>
-        <a href="{{ route('role.student.leaderboard') }}">Leaderboard</a>
-        <a href="{{ route('dashboard') }}">Dashboard</a>
-        <a href="{{ route('role.student.info') }}">Info</a>
-        <a href="{{ route('role.student.profil') }}">Profil</a>
-      </nav>
-    </header>
-
-    <!-- ============ HERO ============ -->
-    <section class="hero-info">
-      <!-- ►► SLIDESHOW LATAR — slide diisi otomatis lewat JS di bawah -->
-      <div class="hero-slideshow" id="heroSlideshow"></div>
-
-      <div class="hero-info-inner">
-        <div class="hero-info-left">
-          <div class="hero-eyebrow">
-            <span class="dot"></span>
-            Evaluasi Materi
-          </div>
-          <h1>Kuis Evaluasi<br />PKKMB-KT UNILAM 2026</h1>
-          <p class="hero-info-sub">
-            Pilih kategori kuis yang ingin kamu kerjakan. Soal dikerjakan satu
-            per satu dengan batas waktu di tiap soal. Skor minimal 75 untuk
-            lulus.
-          </p>
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="statTotalSoal">0</div>
+          <div class="hero-stat-lbl">Total Soal</div>
         </div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <div class="hero-stat-val" id="statTotalKuis">0</div>
-            <div class="hero-stat-lbl">Total Kuis</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-val" id="statTotalSoal">0</div>
-            <div class="hero-stat-lbl">Total Soal</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-val" id="statLulus">0</div>
-            <div class="hero-stat-lbl">Lulus</div>
-          </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="statLulus">0</div>
+          <div class="hero-stat-lbl">Lulus</div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ============ MAIN — DAFTAR KARTU KUIS ============ -->
-    <div class="content-wrap" id="pageDaftar">
-      <div class="section-head">
-        <div class="section-head-bar"></div>
-        <h2>Pilih Kuis Evaluasi</h2>
-        <span class="count" id="kuisCount">0</span>
+  <!-- ============ MAIN — DAFTAR KARTU KUIS ============ -->
+  <div class="content-wrap" id="pageDaftar">
+    <div class="section-head">
+      <div class="section-head-bar"></div>
+      <h2>Pilih Kuis Evaluasi</h2>
+      <span class="count" id="kuisCount">0</span>
+    </div>
+    <div class="quiz-grid" id="quizGridContainer"></div>
+  </div>
+
+  <!-- ============ MODE KUIS (layar ngerjain soal) ============ -->
+  <section class="quiz-runner" id="quizRunner">
+    <!-- Bar atas -->
+    <div class="runner-topbar">
+      <button class="runner-exit" id="btnRunnerExit" aria-label="Keluar">
+        ×
+      </button>
+      <div class="runner-progress-track">
+        <div class="runner-progress-fill" id="runnerProgressFill"></div>
       </div>
-      <div class="quiz-grid" id="quizGridContainer"></div>
+      <div class="runner-qcount" id="runnerQCount">1 / 10</div>
+      <div class="runner-timer" id="runnerTimer">
+        <svg viewBox="0 0 36 36" width="44" height="44">
+          <path
+            stroke="rgba(255,255,255,0.18)"
+            stroke-width="3.5"
+            fill="none"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path
+            id="runnerTimerArc"
+            stroke="var(--lime-500)"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            fill="none"
+            stroke-dasharray="100, 100"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+        <span class="runner-timer-num" id="runnerTimerNum">30</span>
+      </div>
     </div>
 
-    <!-- ============ MODE KUIS (layar ngerjain soal) ============ -->
-    <section class="quiz-runner" id="quizRunner">
-      <!-- Bar atas -->
-      <div class="runner-topbar">
-        <button class="runner-exit" onclick="keluarKuis()" aria-label="Keluar">
-          ×
-        </button>
-        <div class="runner-progress-track">
-          <div class="runner-progress-fill" id="runnerProgressFill"></div>
-        </div>
-        <div class="runner-qcount" id="runnerQCount">1 / 10</div>
-        <div class="runner-timer" id="runnerTimer">
-          <svg viewBox="0 0 36 36" width="44" height="44">
-            <path
-              stroke="rgba(255,255,255,0.18)"
-              stroke-width="3.5"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path
-              id="runnerTimerArc"
-              stroke="var(--lime-500)"
-              stroke-width="3.5"
-              stroke-linecap="round"
-              fill="none"
-              stroke-dasharray="100, 100"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
+    <!-- Isi soal -->
+    <div class="runner-body" id="runnerBody">
+      <div class="runner-question-card" id="runnerQuestionCard">
+        <div class="runner-kategori-tag" id="runnerKategoriTag">Kategori</div>
+        <h2 class="runner-question" id="runnerQuestion">Pertanyaan…</h2>
+      </div>
+      <div class="runner-options" id="runnerOptions"></div>
+      <div class="runner-next-wrap">
+        <button class="btn-next" id="btnNext">
+          Soal Berikutnya
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M13 5l7 7-7 7" />
           </svg>
-          <span class="runner-timer-num" id="runnerTimerNum">30</span>
-        </div>
+        </button>
       </div>
+    </div>
 
-      <!-- Isi soal -->
-      <div class="runner-body" id="runnerBody">
-        <div class="runner-question-card" id="runnerQuestionCard">
-          <div class="runner-kategori-tag" id="runnerKategoriTag">Kategori</div>
-          <h2 class="runner-question" id="runnerQuestion">Pertanyaan…</h2>
-        </div>
-        <div class="runner-options" id="runnerOptions"></div>
-        <div class="runner-next-wrap">
-          <button class="btn-next" id="btnNext" onclick="soalBerikutnya()">
-            Soal Berikutnya
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Layar hasil -->
-      <div class="runner-result" id="runnerResult">
-        <div class="result-card">
+    <!-- Layar hasil -->
+    <div class="runner-result" id="runnerResult">
+      <div class="result-card">
         <div class="result-score-ring">
           <svg viewBox="0 0 36 36" width="140" height="140">
             <path
               stroke="#e8ebf6"
               stroke-width="3"
               fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             <path
               id="resultScoreArc"
               stroke="url(#rg)"
@@ -1226,8 +799,7 @@
               stroke-linecap="round"
               fill="none"
               stroke-dasharray="0, 100"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             <defs>
               <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#16a0a1" />
@@ -1244,148 +816,127 @@
         <p class="result-sub" id="resultSub"></p>
         <div id="resultStatusWrap"></div>
         <div class="result-actions">
-          <button class="btn-ulang" onclick="ulangiKuis()">
+          <button class="btn-ulang" id="btnUlangKuis">
             ↻ Ulangi Kuis
           </button>
-          <button class="btn-selesai" id="btnSelesai" onclick="selesaiKuis()">
+          <button class="btn-selesai" id="btnSelesai">
             Kirim Hasil
           </button>
         </div>
         <p class="result-note" id="resultNote"></p>
-        </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ============ FOOTER ============ -->
-    <footer class="footer">
-      <p>© 2026 PKKMB-KT UNILAM. Semua hak dilindungi.</p>
-      <div class="footer-links">
-        <a href="{{ route('landing.kebijakan-privasi') }}">Kebijakan Privasi</a>
-        <a href="{{ route('landing.syarat-ketentuan') }}">Syarat &amp; Ketentuan</a>
-        <a href="{{ route('landing.bantuan') }}">Bantuan</a>
-      </div>
-    </footer>
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <p>© 2026 PKKMB-KT UNILAM. Semua hak dilindungi.</p>
+    <div class="footer-links">
+      <a href="{{ route('landing.kebijakan-privasi') }}">Kebijakan Privasi</a>
+      <a href="{{ route('landing.syarat-ketentuan') }}">Syarat &amp; Ketentuan</a>
+      <a href="{{ route('landing.bantuan') }}">Bantuan</a>
+    </div>
+  </footer>
 
-    <!-- ======= BOTTOM NAV (mobile only) ======= -->
-    <nav class="bottom-nav" aria-label="Navigasi bawah">
-      <a href="{{ route('role.student.modul') }}">
-        <svg
-          class="ic"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5C4.7 20 4 19.3 4 18.5z" />
-          <path
-            d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5z"
-          />
-        </svg>
-        <span>Modul</span>
-      </a>
-      <a href="{{ route('role.student.leaderboard') }}">
-        <svg
-          class="ic"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M12 3l1.8 3.6L18 7.2l-3 2.9.7 4.1L12 12.3l-3.7 1.9.7-4.1-3-2.9 4.2-.6z"
-          />
-          <path d="M5 21v-5M12 21v-7M19 21v-4" />
-        </svg>
-        <span>Papan</span>
-      </a>
-      <a href="{{ route('dashboard') }}" class="home" aria-label="Beranda">
-        <svg
-          class="ic"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M4 11.5 12 4l8 7.5" />
-          <path
-            d="M6 10v9.5a.5.5 0 0 0 .5.5H10v-6h4v6h3.5a.5.5 0 0 0 .5-.5V10"
-          />
-        </svg>
-        <span>Beranda</span>
-      </a>
-      <a href="{{ route('role.student.info') }}">
-        <svg
-          class="ic"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5"
-          />
-          <path d="M9 17a3 3 0 0 0 6 0" />
-        </svg>
-        <span>Info</span>
-      </a>
-      <a href="{{ route('role.student.profil') }}">
-        <svg
-          class="ic"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="8" r="3.4" />
-          <path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6" />
-        </svg>
-        <span>Profil</span>
-      </a>
-    </nav>
+  <!-- ======= BOTTOM NAV (mobile only) ======= -->
+  <nav class="bottom-nav" aria-label="Navigasi bawah">
+    <a href="{{ route('role.student.modul') }}">
+      <svg
+        class="ic"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5C4.7 20 4 19.3 4 18.5z" />
+        <path
+          d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5z" />
+      </svg>
+      <span>Modul</span>
+    </a>
+    <a href="{{ route('role.student.leaderboard') }}">
+      <svg
+        class="ic"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <path
+          d="M12 3l1.8 3.6L18 7.2l-3 2.9.7 4.1L12 12.3l-3.7 1.9.7-4.1-3-2.9 4.2-.6z" />
+        <path d="M5 21v-5M12 21v-7M19 21v-4" />
+      </svg>
+      <span>Papan</span>
+    </a>
+    <a href="{{ route('dashboard') }}" class="home" aria-label="Beranda">
+      <svg
+        class="ic"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M4 11.5 12 4l8 7.5" />
+        <path
+          d="M6 10v9.5a.5.5 0 0 0 .5.5H10v-6h4v6h3.5a.5.5 0 0 0 .5-.5V10" />
+      </svg>
+      <span>Beranda</span>
+    </a>
+    <a href="{{ route('role.student.info') }}">
+      <svg
+        class="ic"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <path
+          d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
+        <path d="M9 17a3 3 0 0 0 6 0" />
+      </svg>
+      <span>Info</span>
+    </a>
+    <a href="{{ route('role.student.profil') }}">
+      <svg
+        class="ic"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <circle cx="12" cy="8" r="3.4" />
+        <path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6" />
+      </svg>
+      <span>Profil</span>
+    </a>
+  </nav>
 
-    <script>
+  <script>
+    $(function() {
       /* =====================================================================
        *  ⚙️  PENGATURAN UTAMA — UBAH DI SINI SAJA
        * ===================================================================== */
 
-      // ⏱️ WAKTU PER SOAL (dalam DETIK).
-      //    Ubah angka ini untuk mengatur berapa detik tiap soal.
-      //    Kalau ingin 40 detik, ganti jadi 40. Kalau 35 detik, ganti jadi 35.
       const WAKTU_PER_SOAL = 30; // <<< GANTI ANGKA DETIK DI SINI (contoh: 30, 35, 40)
-
-      // 🎯 SKOR MINIMAL UNTUK LULUS (0–100).
-      //    Kalau skor di bawah ini, tombol "Kirim Hasil" terkunci.
       const SKOR_LULUS = 75; // <<< GANTI BATAS KELULUSAN DI SINI
 
       /* =====================================================================
        *  📚  DATA KUIS — ISI SOAL DI SINI
-       *  - Tiap kategori = 1 kartu di halaman depan.
-       *  - "correctAnswer" = nomor urut jawaban benar, MULAI DARI 0.
-       *      0 = Pilihan pertama (A), 1 = B, 2 = C, 3 = D.
-       *  - "icon" & "warna" hanya untuk tampilan kartu (boleh diabaikan).
        * ===================================================================== */
-      const DAFTAR_KUIS = [
-        {
+      const DAFTAR_KUIS = [{
           id: "keuangan",
           judul: "Evaluasi Keuangan",
-          deskripsi:
-            "Uji pemahamanmu tentang UKT, beasiswa, dan administrasi keuangan mahasiswa.",
-          warna: "linear-gradient(135deg,#f59e0b,#c2410c)", // warna latar ikon kartu
-          soal: [
-            {
+          deskripsi: "Uji pemahamanmu tentang UKT, beasiswa, dan administrasi keuangan mahasiswa.",
+          warna: "linear-gradient(135deg,#f59e0b,#c2410c)",
+          soal: [{
               question: "Pertanyaan Keuangan No. 1: (tulis soal di sini)",
               options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0, // 0 = A benar
+              correctAnswer: 0,
             },
             {
               question: "Pertanyaan Keuangan No. 2: (tulis soal di sini)",
@@ -1437,14 +988,12 @@
         {
           id: "akademik",
           judul: "Evaluasi Akademik",
-          deskripsi:
-            "Soal seputar KRS, SKS, dosen wali, dan aturan perkuliahan dasar.",
-          warna: "linear-gradient(135deg,#0d9488,#1e40af)", // warna latar ikon kartu
-          soal: [
-            {
+          deskripsi: "Soal seputar KRS, SKS, dosen wali, dan aturan perkuliahan dasar.",
+          warna: "linear-gradient(135deg,#0d9488,#1e40af)",
+          soal: [{
               question: "Pertanyaan Akademik No. 1: (tulis soal di sini)",
               options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0, // 0 = A benar
+              correctAnswer: 0,
             },
             {
               question: "Pertanyaan Akademik No. 2: (tulis soal di sini)",
@@ -1496,14 +1045,12 @@
         {
           id: "kemahasiswaan",
           judul: "Evaluasi Kemahasiswaan",
-          deskripsi:
-            "Materi organisasi kampus, tata tertib mahasiswa, dan LKMS.",
-          warna: "linear-gradient(135deg,#9333ea,#3730a3)", // warna latar ikon kartu
-          soal: [
-            {
+          deskripsi: "Materi organisasi kampus, tata tertib mahasiswa, dan LKMS.",
+          warna: "linear-gradient(135deg,#9333ea,#3730a3)",
+          soal: [{
               question: "Pertanyaan Kemahasiswaan No. 1: (tulis soal di sini)",
               options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0, // 0 = A benar
+              correctAnswer: 0,
             },
             {
               question: "Pertanyaan Kemahasiswaan No. 2: (tulis soal di sini)",
@@ -1555,14 +1102,12 @@
         {
           id: "tatib",
           judul: "Evaluasi Tata Tertib",
-          deskripsi:
-            "Template evaluasi — silakan ganti dengan soal tata tertib kampus.",
-          warna: "linear-gradient(135deg,#0891b2,#1e40af)", // warna latar ikon kartu
-          soal: [
-            {
+          deskripsi: "Template evaluasi — silakan ganti dengan soal tata tertib kampus.",
+          warna: "linear-gradient(135deg,#0891b2,#1e40af)",
+          soal: [{
               question: "Pertanyaan Tata Tertib No. 1: (tulis soal di sini)",
               options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0, // 0 = A benar
+              correctAnswer: 0,
             },
             {
               question: "Pertanyaan Tata Tertib No. 2: (tulis soal di sini)",
@@ -1614,14 +1159,12 @@
         {
           id: "organisasi",
           judul: "Evaluasi Organisasi",
-          deskripsi:
-            "Template evaluasi — silakan ganti dengan soal keorganisasian.",
-          warna: "linear-gradient(135deg,#4f46e5,#6b21a8)", // warna latar ikon kartu
-          soal: [
-            {
+          deskripsi: "Template evaluasi — silakan ganti dengan soal keorganisasian.",
+          warna: "linear-gradient(135deg,#4f46e5,#6b21a8)",
+          soal: [{
               question: "Pertanyaan Organisasi No. 1: (tulis soal di sini)",
               options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0, // 0 = A benar
+              correctAnswer: 0,
             },
             {
               question: "Pertanyaan Organisasi No. 2: (tulis soal di sini)",
@@ -1673,14 +1216,12 @@
         {
           id: "kampus",
           judul: "Evaluasi Profil Kampus",
-          deskripsi:
-            "Template evaluasi — silakan ganti dengan soal profil & sejarah kampus.",
-          warna: "linear-gradient(135deg,#9333ea,#be185d)", // warna latar ikon kartu
-          soal: [
-            {
+          deskripsi: "Template evaluasi — silakan ganti dengan soal profil & sejarah kampus.",
+          warna: "linear-gradient(135deg,#9333ea,#be185d)",
+          soal: [{
               question: "Pertanyaan Profil Kampus No. 1: (tulis soal di sini)",
               options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0, // 0 = A benar
+              correctAnswer: 0,
             },
             {
               question: "Pertanyaan Profil Kampus No. 2: (tulis soal di sini)",
@@ -1733,32 +1274,30 @@
 
       /* =====================================================================
        *  🔧  MULAI DARI SINI KE BAWAH ADALAH MESIN PROGRAM.
-       *      Tidak perlu diubah kecuali kamu paham JavaScript.
        * ===================================================================== */
 
-      // Menyimpan status tiap kuis: skor terbaik & apakah sudah lulus/dikirim
       const statusKuis = {};
       DAFTAR_KUIS.forEach((k) => {
-        statusKuis[k.id] = { skorTerbaik: null, sudahKirim: false };
+        statusKuis[k.id] = {
+          skorTerbaik: null,
+          sudahKirim: false
+        };
       });
 
-      // Variabel jalannya kuis
-      let kuisAktif = null; // objek kuis yang sedang dikerjakan
-      let indexSoal = 0; // soal ke berapa (mulai 0)
-      let jawabanUser = []; // menyimpan pilihan user tiap soal (null = tidak dijawab)
-      let timerInterval = null; // penampung setInterval timer
-      let sisaWaktu = WAKTU_PER_SOAL; // detik tersisa untuk soal ini
+      let kuisAktif = null;
+      let indexSoal = 0;
+      let jawabanUser = [];
+      let timerInterval = null;
+      let sisaWaktu = WAKTU_PER_SOAL;
 
-      // Ambil elemen HTML
-      const pageDaftar = document.getElementById("pageDaftar");
-      const quizGrid = document.getElementById("quizGridContainer");
-      const runner = document.getElementById("quizRunner");
-      const runnerBody = document.getElementById("runnerBody");
-      const runnerResult = document.getElementById("runnerResult");
+      const $quizGrid = $("#quizGridContainer");
+      const $runner = $("#quizRunner");
+      const $runnerBody = $("#runnerBody");
+      const $runnerResult = $("#runnerResult");
 
       /* ---------- RENDER KARTU KUIS DI HALAMAN DEPAN ---------- */
       function renderKartuKuis() {
-        quizGrid.innerHTML = DAFTAR_KUIS.map((k) => {
+        const html = DAFTAR_KUIS.map((k) => {
           const st = statusKuis[k.id];
           let statusHtml = `<span class="quiz-status belum">Belum dikerjakan</span>`;
           if (st.skorTerbaik !== null) {
@@ -1792,13 +1331,18 @@
                   </span>
                 </div>
                 ${statusHtml}
-                <button class="btn-mulai" onclick="mulaiKuis('${k.id}')">Mulai Kuis</button>
+                <button class="btn-mulai" data-kuis-id="${k.id}">Mulai Kuis</button>
               </div>
             </div>
           `;
         }).join("");
 
-        document.getElementById("kuisCount").innerText = DAFTAR_KUIS.length;
+        $quizGrid.html(html);
+        $quizGrid.find(".btn-mulai").on("click", function() {
+          mulaiKuis($(this).data("kuis-id"));
+        });
+
+        $("#kuisCount").text(DAFTAR_KUIS.length);
       }
 
       /* ---------- STATISTIK DI HERO ---------- */
@@ -1807,9 +1351,9 @@
         const totalLulus = Object.values(statusKuis).filter(
           (s) => s.skorTerbaik !== null && s.skorTerbaik >= SKOR_LULUS,
         ).length;
-        document.getElementById("statTotalKuis").innerText = DAFTAR_KUIS.length;
-        document.getElementById("statTotalSoal").innerText = totalSoal;
-        document.getElementById("statLulus").innerText = totalLulus;
+        $("#statTotalKuis").text(DAFTAR_KUIS.length);
+        $("#statTotalSoal").text(totalSoal);
+        $("#statLulus").text(totalLulus);
       }
 
       /* ---------- MULAI MENGERJAKAN SEBUAH KUIS ---------- */
@@ -1818,40 +1362,31 @@
         indexSoal = 0;
         jawabanUser = new Array(kuisAktif.soal.length).fill(null);
 
-        runner.classList.add("open");
-        runnerBody.style.display = "flex";
-        runnerResult.classList.remove("show");
-        document.getElementById("runnerKategoriTag").innerText =
-          kuisAktif.judul;
-        document.body.style.overflow = "hidden"; // kunci scroll latar
+        $runner.addClass("open");
+        $runnerBody.css("display", "flex");
+        $runnerResult.removeClass("show");
+        $("#runnerKategoriTag").text(kuisAktif.judul);
+        $("body").css("overflow", "hidden");
 
         tampilkanSoal();
       }
-      window.mulaiKuis = mulaiKuis;
 
       /* ---------- TAMPILKAN SATU SOAL ---------- */
       function tampilkanSoal() {
         const soal = kuisAktif.soal[indexSoal];
         const total = kuisAktif.soal.length;
 
-        // Update progress bar & nomor soal
-        document.getElementById("runnerQCount").innerText =
-          `${indexSoal + 1} / ${total}`;
-        document.getElementById("runnerProgressFill").style.width =
-          `${(indexSoal / total) * 100}%`;
+        $("#runnerQCount").text(`${indexSoal + 1} / ${total}`);
+        $("#runnerProgressFill").css("width", `${(indexSoal / total) * 100}%`);
+        $("#runnerQuestion").text(soal.question);
 
-        // Tampilkan pertanyaan
-        document.getElementById("runnerQuestion").innerText = soal.question;
-
-        // Tampilkan pilihan jawaban (A, B, C, D...).
-        // Kalau soal ini sudah pernah dipilih, tandai "selected" (netral, bukan benar/salah).
         const huruf = ["A", "B", "C", "D", "E", "F"];
         const pilihanSebelumnya = jawabanUser[indexSoal];
-        document.getElementById("runnerOptions").innerHTML = soal.options
+        const html = soal.options
           .map((opt, i) => {
             const selected = pilihanSebelumnya === i ? "selected" : "";
             return `
-              <button class="runner-option ${selected}" onclick="pilihJawaban(${i})">
+              <button class="runner-option ${selected}" data-pilihan="${i}">
                 <span class="runner-option-letter">${huruf[i]}</span>
                 <span class="runner-option-text">${opt}</span>
                 <span class="runner-option-check">
@@ -1862,21 +1397,20 @@
           })
           .join("");
 
-        // Mainkan ulang animasi masuk kartu soal setiap kali soal berganti
-        const questionCard = document.getElementById("runnerQuestionCard");
-        questionCard.style.animation = "none";
-        void questionCard.offsetWidth;
-        questionCard.style.animation = "";
+        const $runnerOptions = $("#runnerOptions");
+        $runnerOptions.html(html);
+        $runnerOptions.find(".runner-option").on("click", function() {
+          pilihJawaban(parseInt($(this).data("pilihan"), 10));
+        });
 
-        // Tombol "Soal Berikutnya" hanya muncul kalau soal ini sudah dijawab.
-        const btnNext = document.getElementById("btnNext");
-        if (pilihanSebelumnya !== null) {
-          btnNext.classList.add("show");
-        } else {
-          btnNext.classList.remove("show");
-        }
+        const $questionCard = $("#runnerQuestionCard");
+        $questionCard.css("animation", "none");
+        void $questionCard[0].offsetWidth;
+        $questionCard.css("animation", "");
 
-        // Mulai timer untuk soal ini
+        const $btnNext = $("#btnNext");
+        $btnNext.toggleClass("show", pilihanSebelumnya !== null);
+
         mulaiTimer();
       }
 
@@ -1890,8 +1424,6 @@
           sisaWaktu--;
           updateTampilanTimer();
 
-          // Kalau waktu habis -> langsung maju ke soal berikutnya.
-          // (Jawaban yang sudah tersimpan tetap terpakai; jika kosong dianggap tidak dijawab.)
           if (sisaWaktu <= 0) {
             clearInterval(timerInterval);
             waktuHabis();
@@ -1900,65 +1432,51 @@
       }
 
       function updateTampilanTimer() {
-        const num = document.getElementById("runnerTimerNum");
-        const arc = document.getElementById("runnerTimerArc");
-        const wrap = document.getElementById("runnerTimer");
-        num.innerText = sisaWaktu;
-        // Panjang lingkaran timer mengecil seiring waktu
+        const $num = $("#runnerTimerNum");
+        const $arc = $("#runnerTimerArc");
+        const $wrap = $("#runnerTimer");
+        $num.text(sisaWaktu);
         const persen = (sisaWaktu / WAKTU_PER_SOAL) * 100;
-        arc.setAttribute("stroke-dasharray", `${persen}, 100`);
-        // 5 detik terakhir -> tanda merah berkedip
-        if (sisaWaktu <= 5) {
-          wrap.classList.add("danger");
-        } else {
-          wrap.classList.remove("danger");
-        }
+        $arc.attr("stroke-dasharray", `${persen}, 100`);
+        $wrap.toggleClass("danger", sisaWaktu <= 5);
       }
 
       /* ---------- SAAT WAKTU HABIS ---------- */
-      //  Langsung maju ke soal berikutnya. Kalau user sempat memilih, pilihannya
-      //  tetap tersimpan; kalau belum, dianggap tidak dijawab. Benar/salah tidak
-      //  diperlihatkan di sini — hanya muncul di layar hasil.
       function waktuHabis() {
         soalBerikutnya();
       }
 
       /* ---------- SAAT USER MEMILIH JAWABAN ---------- */
-      //  Jawaban hanya disimpan & disorot (netral). Benar/salah TIDAK ditampilkan
-      //  di sini. User masih boleh ganti pilihan selama belum klik "Soal Berikutnya".
       function pilihJawaban(pilihan) {
-        jawabanUser[indexSoal] = pilihan; // simpan pilihan
+        jawabanUser[indexSoal] = pilihan;
 
-        // Sorot opsi yang dipilih, hapus sorot dari opsi lain
-        const tombol = document.querySelectorAll(".runner-option");
-        tombol.forEach((btn, i) => {
-          btn.classList.toggle("selected", i === pilihan);
+        $(".runner-option").each(function(i) {
+          $(this).toggleClass("selected", i === pilihan);
         });
 
-        // Tampilkan tombol lanjut
-        document.getElementById("btnNext").classList.add("show");
+        $("#btnNext").addClass("show");
       }
-      window.pilihJawaban = pilihJawaban;
 
       /* ---------- LANJUT KE SOAL BERIKUTNYA / SELESAI ---------- */
       function soalBerikutnya() {
-        clearInterval(timerInterval); // stop timer soal sekarang
+        clearInterval(timerInterval);
         indexSoal++;
         if (indexSoal < kuisAktif.soal.length) {
           tampilkanSoal();
-          runner.scrollTo({ top: 0, behavior: "smooth" });
+          $runner[0].scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
         } else {
           tampilkanHasil();
         }
       }
-      window.soalBerikutnya = soalBerikutnya;
 
       /* ---------- TAMPILKAN HASIL AKHIR ---------- */
       function tampilkanHasil() {
         clearInterval(timerInterval);
         const total = kuisAktif.soal.length;
 
-        // Hitung jumlah benar dari jawaban yang tersimpan
         let jumlahBenar = 0;
         kuisAktif.soal.forEach((soal, i) => {
           if (jawabanUser[i] === soal.correctAnswer) jumlahBenar++;
@@ -1967,58 +1485,53 @@
         const skor = Math.round((jumlahBenar / total) * 100);
         const lulus = skor >= SKOR_LULUS;
 
-        // Simpan skor terbaik
         const st = statusKuis[kuisAktif.id];
         if (st.skorTerbaik === null || skor > st.skorTerbaik) {
           st.skorTerbaik = skor;
         }
 
-        // Progress bar penuh
-        document.getElementById("runnerProgressFill").style.width = "100%";
+        $("#runnerProgressFill").css("width", "100%");
 
-        // Isi tampilan hasil
-        document.getElementById("resultScoreVal").innerText = skor;
-        document
-          .getElementById("resultScoreArc")
-          .setAttribute("stroke-dasharray", `${skor}, 100`);
-        document.getElementById("resultHeading").innerText = lulus
-          ? "Selamat, Kamu Lulus! 🎉"
-          : "Belum Lulus 😔";
-        document.getElementById("resultSub").innerHTML =
-          `Jawaban benar <b>${jumlahBenar}</b> dari <b>${total}</b> soal.`;
+        $("#resultScoreVal").text(skor);
+        $("#resultScoreArc").attr("stroke-dasharray", `${skor}, 100`);
+        $("#resultHeading").text(lulus ? "Selamat, Kamu Lulus! 🎉" : "Belum Lulus 😔");
+        $("#resultSub").html(`Jawaban benar <b>${jumlahBenar}</b> dari <b>${total}</b> soal.`);
 
-        document.getElementById("resultStatusWrap").innerHTML = lulus
-          ? `<span class="result-status-pill lulus">✓ Lulus (minimal ${SKOR_LULUS})</span>`
-          : `<span class="result-status-pill gagal">✕ Belum Lulus (minimal ${SKOR_LULUS})</span>`;
+        $("#resultStatusWrap").html(
+          lulus ?
+          `<span class="result-status-pill lulus">✓ Lulus (minimal ${SKOR_LULUS})</span>` :
+          `<span class="result-status-pill gagal">✕ Belum Lulus (minimal ${SKOR_LULUS})</span>`,
+        );
 
-        // Aturan tombol Kirim: hanya aktif kalau lulus
-        const btnSelesai = document.getElementById("btnSelesai");
-        const note = document.getElementById("resultNote");
-        btnSelesai.disabled = !lulus;
+        const $btnSelesai = $("#btnSelesai");
+        const $note = $("#resultNote");
+        $btnSelesai.prop("disabled", !lulus);
         if (lulus) {
-          note.className = "result-note";
-          note.innerText =
-            "Skormu sudah memenuhi syarat. Kamu tetap boleh mengulang untuk skor lebih tinggi sebelum mengirim.";
+          $note.attr("class", "result-note");
+          $note.text(
+            "Skormu sudah memenuhi syarat. Kamu tetap boleh mengulang untuk skor lebih tinggi sebelum mengirim.",
+          );
         } else {
-          note.className = "result-note gagal";
-          note.innerText = `Skormu masih di bawah ${SKOR_LULUS}. Tombol "Kirim Hasil" terkunci — silakan ulangi kuis.`;
+          $note.attr("class", "result-note gagal");
+          $note.text(`Skormu masih di bawah ${SKOR_LULUS}. Tombol "Kirim Hasil" terkunci — silakan ulangi kuis.`);
         }
 
-        // Tampilkan layar hasil, sembunyikan soal
-        runnerBody.style.display = "none";
-        runnerResult.classList.add("show");
-        runner.scrollTo({ top: 0, behavior: "smooth" });
+        $runnerBody.css("display", "none");
+        $runnerResult.addClass("show");
+        $runner[0].scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
       }
 
       /* ---------- ULANGI KUIS DARI AWAL ---------- */
       function ulangiKuis() {
         indexSoal = 0;
         jawabanUser = new Array(kuisAktif.soal.length).fill(null);
-        runnerResult.classList.remove("show");
-        runnerBody.style.display = "flex";
+        $runnerResult.removeClass("show");
+        $runnerBody.css("display", "flex");
         tampilkanSoal();
       }
-      window.ulangiKuis = ulangiKuis;
 
       /* ---------- KIRIM HASIL (hanya bila lulus) ---------- */
       function selesaiKuis() {
@@ -2026,28 +1539,27 @@
         alert(`Hasil kuis "${kuisAktif.judul}" berhasil dikirim!`);
         keluarKuis();
       }
-      window.selesaiKuis = selesaiKuis;
 
       /* ---------- KELUAR DARI MODE KUIS ---------- */
       function keluarKuis() {
         clearInterval(timerInterval);
-        runner.classList.remove("open");
-        document.body.style.overflow = ""; // buka lagi scroll latar
-        renderKartuKuis(); // perbarui status kartu
+        $runner.removeClass("open");
+        $("body").css("overflow", "");
+        renderKartuKuis();
         renderStatHero();
       }
-      window.keluarKuis = keluarKuis;
 
-      /* ---------- NAVBAR HAMBURGER (mobile) ---------- */
-   
+      $("#btnRunnerExit").on("click", keluarKuis);
+      $("#btnNext").on("click", soalBerikutnya);
+      $("#btnUlangKuis").on("click", ulangiKuis);
+      $("#btnSelesai").on("click", selesaiKuis);
 
       /* ---------- JALANKAN SAAT HALAMAN DIBUKA ---------- */
       renderKartuKuis();
       renderStatHero();
 
       // ======================================================================
-      // ►► SLIDESHOW LATAR HERO — sama seperti absensi/materi/denah.html.
-      //    Ganti / tambah gambar di array ini.
+      // ►► SLIDESHOW LATAR HERO
       // ======================================================================
       const heroSlideImages = [
         "{{ asset('gambar/gedungutama.jpeg') }}",
@@ -2055,24 +1567,26 @@
         "{{ asset('gambar/gedung.jpeg') }}",
       ];
       const HERO_SLIDE_INTERVAL_MS = 6000;
-      const heroSlideshow = document.getElementById("heroSlideshow");
-      if (heroSlideshow && heroSlideImages.length) {
+      const $heroSlideshow = $("#heroSlideshow");
+      if ($heroSlideshow.length && heroSlideImages.length) {
         heroSlideImages.forEach((src, i) => {
-          const slide = document.createElement("div");
-          slide.className = "hero-slide" + (i === 0 ? " active" : "");
-          slide.style.backgroundImage = `url("${src}")`;
-          heroSlideshow.appendChild(slide);
+          $("<div>")
+            .addClass("hero-slide" + (i === 0 ? " active" : ""))
+            .css("background-image", `url("${src}")`)
+            .appendTo($heroSlideshow);
         });
         if (heroSlideImages.length > 1) {
           let currentSlide = 0;
-          const slideEls = heroSlideshow.querySelectorAll(".hero-slide");
+          const $slides = $heroSlideshow.find(".hero-slide");
           setInterval(() => {
-            slideEls[currentSlide].classList.remove("active");
-            currentSlide = (currentSlide + 1) % slideEls.length;
-            slideEls[currentSlide].classList.add("active");
+            $slides.eq(currentSlide).removeClass("active");
+            currentSlide = (currentSlide + 1) % $slides.length;
+            $slides.eq(currentSlide).addClass("active");
           }, HERO_SLIDE_INTERVAL_MS);
         }
       }
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>
