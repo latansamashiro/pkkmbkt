@@ -210,6 +210,15 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::post('/import', 'import')->name('committee.mahasiswa.import'), $defaults);
         });
 
+        // ===== Kelola Advisor (reuse UserController, view komite) =====
+        Route::controller(\App\Http\Controllers\Admin\UserController::class)->prefix('committee/advisor')->group(function () use ($withDefaults) {
+            $defaults = ['roleKey' => 'ADVISOR', 'title' => 'Kelola Advisor', 'view' => 'role.committee.advisor.index'];
+            $withDefaults(Route::get('/', 'index')->name('committee.advisor.index'), $defaults);
+            $withDefaults(Route::post('/', 'store')->name('committee.advisor.store'), $defaults);
+            $withDefaults(Route::put('/{user}', 'update')->name('committee.advisor.update'), $defaults);
+            $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.advisor.destroy'), $defaults);
+        });
+
         // ===== Kelola Mentor (reuse UserController, view komite) =====
         Route::controller(\App\Http\Controllers\Admin\UserController::class)->prefix('mentor')->group(function () use ($withDefaults) {
             $defaults = ['roleKey' => 'MENTOR', 'title' => 'Kelola Mentor', 'view' => 'role.committee.mentor.index'];

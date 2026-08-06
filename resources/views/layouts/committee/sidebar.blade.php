@@ -24,6 +24,10 @@
                 <span class="ic"><i data-lucide="user-check"></i></span>
                 <span class="label">Mentor</span>
             </a>
+           <a href="{{ route('committee.advisor.index') }}" class="{{ request()->routeIs('committee.advisor.*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="user-cog"></i></span>
+                <span class="label">Advisor</span>
+            </a>
             <a href="{{ route('committee.master.index') }}" class="{{ request()->routeIs('committee.master.*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="users-round"></i></span>
                 <span class="label">Kelompok</span>

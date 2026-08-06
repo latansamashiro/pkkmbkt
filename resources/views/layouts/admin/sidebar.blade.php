@@ -27,15 +27,15 @@
                 <span class="ic"><i data-lucide="user-check"></i></span>
                 <span class="label">Kelola Mentor</span>
             </a>
-            <a href="{{ route('admin.kelompok.index') }}"
-                class="{{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
-                <span class="ic"><i data-lucide="users-round"></i></span>
-                <span class="label">Kelola Kelompok</span>
-            </a>
             <a href="{{ route('admin.advisor.index') }}"
                 class="{{ request()->routeIs('admin.advisor.*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="user-cog"></i></span>
                 <span class="label">Kelola Advisor</span>
+            </a>
+            <a href="{{ route('admin.kelompok.index') }}"
+                class="{{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="users-round"></i></span>
+                <span class="label">Kelola Kelompok</span>
             </a>
             <a href="{{ route('admin.panitia.index') }}"
                 class="{{ request()->routeIs('admin.panitia.*') ? 'active' : '' }}">

@@ -472,6 +472,7 @@ class UserController extends Controller
                 'email' => $user->email,
                 'password' => $passwordAsli,
                 'kelompok' => $group->name ?? null,
+                 'prodi' => $prodi ?: null,
             ];
         }
         fclose($handle);
