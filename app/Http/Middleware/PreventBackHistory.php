@@ -22,7 +22,6 @@ class PreventBackHistory
 
         if (is_string($content) && str_contains($content, '</body>')) {
             $script = <<<'HTML'
-               $script = <<<'HTML'
     <script>
         window.addEventListener('pageshow', function (event) {
             if (event.persisted) {

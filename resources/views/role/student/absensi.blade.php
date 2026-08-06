@@ -765,7 +765,7 @@
       // ►► IDENTITAS AKUN — diambil dari sesi login Laravel
       // ======================================================================
       const CURRENT_STUDENT = {
-        nama: @json(auth() - > user() - > name),
+        nama: @json(auth() -> user() -> name),
         kelompok: @json($groupName ?? 'Belum tergabung kelompok'),
       };
 
