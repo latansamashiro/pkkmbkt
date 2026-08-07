@@ -26,6 +26,10 @@
                     class="inline-flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
                     <i data-lucide="upload" class="w-4 h-4"></i>Import Excel/CSV
                 </button>
+                <button id="btnExportHasil"
+                    class="inline-flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                    <i data-lucide="download" class="w-4 h-4"></i>Riwayat Import
+                </button>
             @endif
             <button id="btnTambah"
                 class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
@@ -89,11 +93,58 @@
                                 </table>
                             </div>
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-1.5">Geser tabel ke samping kalau kepotong di layar kecil. Catat/kirim password ini ke mahasiswa &mdash; tidak ditampilkan lagi setelah modal ditutup. Kalau lupa, klik "Download Hasil (CSV)" dulu sebelum menutup ini.</p>
+                        <p class="text-[11px] text-slate-400 mt-1.5">Geser tabel ke samping kalau kepotong di layar kecil. Catat/kirim password ini ke mahasiswa &mdash; tidak ditampilkan lagi setelah modal ditutup. Kalau lupa, klik "Download Hasil (CSV)" dulu sebelum menutup ini, atau gunakan tombol "Riwayat Import" di halaman utama kapan saja.</p>
                     </div>
                     <div id="importGagalWrap" class="hidden">
                         <p class="text-xs font-bold text-rose-500 mb-1.5">Baris bermasalah:</p>
                         <ul id="importGagalList" class="text-xs text-rose-600 list-disc pl-4 space-y-1"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== MODAL RIWAYAT IMPORT (dengan filter) ===== -->
+        <div id="modalExport" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl w-full max-w-md p-6">
+                <div class="flex items-start justify-between gap-4 mb-1">
+                    <h3 class="text-lg font-extrabold text-slate-800 m-0">Riwayat Import</h3>
+                    <button id="btnCloseExport" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-slate-400 mt-1 mb-4">
+                    Berisi akun yang <b>dibuat lewat Import Excel/CSV</b> di halaman ini (nama, email, password{{ $showGroup ? ', kelompok' : '' }}{{ $showAcademic ? ', prodi' : '' }}).
+                    Kosongkan filter untuk export semua. Data ini tersimpan di browser ini saja &mdash; mahasiswa yang dibuat manual lewat tombol "Tambah" atau yang sudah ada sebelum fitur ini dipasang <b>tidak akan muncul di sini</b>, karena passwordnya sudah tidak bisa diambil lagi setelah tersimpan di database.
+                </p>
+                <div class="grid grid-cols-1 gap-4">
+                    @if ($showAcademic)
+                        <div>
+                            <label for="exportFilterProdi" class="block text-xs font-bold text-slate-500 mb-1.5">Program Studi</label>
+                            <select id="exportFilterProdi"
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                                <option value="">Semua Program Studi</option>
+                            </select>
+                        </div>
+                    @endif
+                    @if ($showGroup)
+                        <div>
+                            <label for="exportFilterKelompok" class="block text-xs font-bold text-slate-500 mb-1.5">Kode Kelompok</label>
+                            <select id="exportFilterKelompok"
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                                <option value="">Semua Kelompok</option>
+                            </select>
+                        </div>
+                    @endif
+                </div>
+                <p id="exportInfo" class="text-xs text-slate-400 mt-3">0 akun ditemukan.</p>
+                <div class="flex items-center justify-between gap-3 mt-6">
+                    <button type="button" id="btnHapusRiwayatExport"
+                        class="text-rose-500 hover:underline text-xs font-bold">Hapus riwayat</button>
+                    <div class="flex items-center gap-3">
+                        <button type="button" id="btnBatalExport"
+                            class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm px-4 py-2.5 rounded-xl transition">Batal</button>
+                        <button type="button" id="btnProsesExport"
+                            class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">Export CSV</button>
                     </div>
                 </div>
             </div>
@@ -108,7 +159,7 @@
                 <option value="aktif">Aktif</option>
                 <option value="nonaktif">Nonaktif</option>
             </select>
-             @if ($showAcademic)
+               @if ($showAcademic)
             <select id="filterProdi"
                 class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600">
                 <option value="">Semua Program Studi</option>
@@ -119,6 +170,7 @@
                 @endforeach
             </select>
             @endif
+
             <div
                 class="flex-1 min-w-[200px] flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5">
                 <i data-lucide="search" class="w-4 h-4 text-slate-400 shrink-0"></i>
@@ -374,7 +426,7 @@
             let currentPage = 1;
             let editingId = null;
 
-              function filteredData() {
+            function filteredData() {
             const status = $("#filterStatus").val();
             const q = $("#searchPengguna").val().trim().toLowerCase();
             const prodi = $("#filterProdi").val(); // tambahan
@@ -479,7 +531,7 @@
 
             $("#filterStatus").on("change", () => { currentPage = 1; renderTabel(); });
             $("#searchPengguna").on("keyup", () => { currentPage = 1; renderTabel(); });
-             $("#filterProdi").on("change", () => { currentPage = 1; renderTabel(); });
+            $("#filterProdi").on("change", () => { currentPage = 1; renderTabel(); });
 
             const $modalForm = $("#modalForm");
             const $modalDetail = $("#modalDetail");
@@ -518,10 +570,59 @@
             $("#btnTambah").on("click", () => bukaForm(null));
 
             @if ($showImport)
-            // ================== IMPORT EXCEL/CSV ==================
+            // ================== IMPORT EXCEL/CSV + EXPORT HASIL (dengan filter & riwayat) ==================
             const $modalImport = $("#modalImport");
-            let lastImportBerhasil = [];
+
             if ($modalImport.length) {
+
+                // Riwayat semua hasil import disimpan permanen di localStorage, per halaman (URL_BASE).
+                // Alasan: password cuma plaintext sesaat setelah generate, jadi harus disimpan
+                // di sisi client kalau mau bisa di-export kapan saja setelahnya.
+                const IMPORT_STORAGE_KEY = `hasil_import_${URL_BASE}`;
+
+                function ambilSemuaHasilImport() {
+                    try {
+                        const raw = localStorage.getItem(IMPORT_STORAGE_KEY);
+                        return raw ? JSON.parse(raw) : [];
+                    } catch (e) { return []; }
+                }
+
+                // Gabung hasil import baru ke riwayat lama. Kalau email sama (re-import), data lama ditimpa.
+                function tambahHasilImportKeRiwayat(list) {
+                    if (!list || !list.length) return;
+                    const map = new Map(ambilSemuaHasilImport().map((x) => [x.email, x]));
+                    list.forEach((x) => map.set(x.email, x));
+                    try { localStorage.setItem(IMPORT_STORAGE_KEY, JSON.stringify(Array.from(map.values()))); } catch (e) {}
+                }
+                function unduhCSV(list, namaFile) {
+                if (!list || !list.length) return;
+                const header = ["Nama", "Email", "Password"];
+                if (SHOW_GROUP) header.push("Kelompok");
+                if (SHOW_ACADEMIC) header.push("Program Studi");
+                const baris = [header];
+                list.forEach((b) => {
+                    const row = [b.nama, b.email, b.password];
+                    if (SHOW_GROUP) row.push(b.kelompok || "-");
+                    if (SHOW_ACADEMIC) row.push(b.prodi || "-");
+                    baris.push(row);
+                });
+                const csv = "\uFEFF" + "sep=,\r\n" + baris
+                    .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+                    .join("\r\n");
+
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = namaFile;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                }
+                   
+                let lastImportBerhasil = [];
+
                 function bukaImport() {
                     $("#importError").addClass("hidden");
                     $("#importResult").addClass("hidden");
@@ -557,23 +658,25 @@
                         headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
                     }).done(function (result) {
                         lastImportBerhasil = result.berhasil || [];
+                        tambahHasilImportKeRiwayat(lastImportBerhasil);
 
                         // masukkan akun baru ke tabel tanpa reload halaman
                         (result.berhasil || []).forEach((b) => {
                             penggunaList.push({
                                 id: b.id, nama: b.nama, email: b.email, status: "aktif",
-                                phone_no: null, faculty_name: null, program_study_name: null, gender: null,
+                                phone_no: null, faculty_name: null, program_study_name: b.prodi || null,
+                                gender: null,
                             });
                         });
                         if (typeof renderTabel === "function") renderTabel();
 
                         $("#importSummary").text(result.message);
-                        const $bWrap = $("#importBerhasilWrap").toggleClass("hidden", !(result.berhasil && result.berhasil.length));
+                        $("#importBerhasilWrap").toggleClass("hidden", !(result.berhasil && result.berhasil.length));
                         const $bList = $("#importBerhasilList").empty();
                         (result.berhasil || []).forEach((b) => {
                             $bList.append(`<tr class="border-t border-slate-100 hover:bg-slate-50"><td class="px-3 py-2 whitespace-nowrap font-semibold text-slate-700">${b.nama}</td><td class="px-3 py-2 whitespace-nowrap text-slate-500">${b.email}</td><td class="px-3 py-2 whitespace-nowrap"><span class="font-mono bg-amber-50 text-amber-700 px-2 py-0.5 rounded">${b.password}</span></td><td class="px-3 py-2 whitespace-nowrap text-slate-500">${b.kelompok || "-"}</td></tr>`);
                         });
-                        const $gWrap = $("#importGagalWrap").toggleClass("hidden", !(result.gagal && result.gagal.length));
+                        $("#importGagalWrap").toggleClass("hidden", !(result.gagal && result.gagal.length));
                         const $gList = $("#importGagalList").empty();
                         (result.gagal || []).forEach((g) => $gList.append(`<li>${g}</li>`));
 
@@ -589,28 +692,58 @@
                 });
 
                 $("#btnDownloadHasil").on("click", function () {
-                    if (!lastImportBerhasil.length) return;
+                    unduhCSV(lastImportBerhasil, `hasil_import_{{ \Illuminate\Support\Str::slug($roleLabel) }}_${new Date().toISOString().slice(0, 10)}.csv`);
+                });
 
-                    const baris = [["Nama", "Email", "Password", "Kelompok"]];
-                    lastImportBerhasil.forEach((b) => {
-                        baris.push([b.nama, b.email, b.password, b.kelompok || "-"]);
+                // ===== EXPORT DENGAN FILTER (riwayat semua sesi import, permanen di localStorage) =====
+                const $modalExport = $("#modalExport");
+                if ($modalExport.length) {
+                    function isiOpsiFilterExport() {
+                        const data = ambilSemuaHasilImport();
+                        if (SHOW_ACADEMIC) {
+                            const prodiSet = [...new Set(data.map((d) => d.prodi).filter(Boolean))].sort();
+                            $("#exportFilterProdi").html(`<option value="">Semua Program Studi</option>` + prodiSet.map((p) => `<option value="${p}">${p}</option>`).join(""));
+                        }
+                        if (SHOW_GROUP) {
+                            const kelompokSet = [...new Set(data.map((d) => d.kelompok).filter(Boolean))].sort();
+                            $("#exportFilterKelompok").html(`<option value="">Semua Kelompok</option>` + kelompokSet.map((k) => `<option value="${k}">${k}</option>`).join(""));
+                        }
+                        perbaruiInfoExport();
+                    }
+
+                    function dataTerfilterExport() {
+                        const prodi = $("#exportFilterProdi").val() || "";
+                        const kelompok = $("#exportFilterKelompok").val() || "";
+                        return ambilSemuaHasilImport().filter((d) =>
+                            (!prodi || d.prodi === prodi) && (!kelompok || d.kelompok === kelompok)
+                        );
+                    }
+
+                    function perbaruiInfoExport() {
+                        $("#exportInfo").text(`${dataTerfilterExport().length} akun ditemukan.`);
+                    }
+
+                    $("#exportFilterProdi, #exportFilterKelompok").on("change", perbaruiInfoExport);
+
+                    $("#btnExportHasil").on("click", function () {
+                        isiOpsiFilterExport();
+                        $modalExport.removeClass("hidden").addClass("flex");
+                    });
+                    $("#btnCloseExport, #btnBatalExport").on("click", () => $modalExport.addClass("hidden").removeClass("flex"));
+                    $modalExport.on("click", function (e) { if (e.target === this) $modalExport.addClass("hidden").removeClass("flex"); });
+
+                    $("#btnProsesExport").on("click", function () {
+                        const data = dataTerfilterExport();
+                        if (!data.length) { alert("Tidak ada data untuk kriteria ini."); return; }
+                        unduhCSV(data, `export_akun_{{ \Illuminate\Support\Str::slug($roleLabel) }}_${new Date().toISOString().slice(0, 10)}.csv`);
                     });
 
-                    const csv = "\uFEFF" + baris
-                        .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
-                        .join("\r\n");
-
-                    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-                    const url = URL.createObjectURL(blob);
-                    const tanggal = new Date().toISOString().slice(0, 10);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `hasil_import_{{ \Illuminate\Support\Str::slug($roleLabel) }}_${tanggal}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                });
+                    $("#btnHapusRiwayatExport").on("click", function () {
+                        if (!confirm("Hapus semua riwayat password hasil import yang tersimpan di browser ini?\n\nAkun yang sudah dibuat tidak akan terhapus, hanya salinan password lokal ini.")) return;
+                        try { localStorage.removeItem(IMPORT_STORAGE_KEY); } catch (e) {}
+                        isiOpsiFilterExport();
+                    });
+                }
             }
             @endif
             $("#btnCloseForm").on("click", tutupForm);
