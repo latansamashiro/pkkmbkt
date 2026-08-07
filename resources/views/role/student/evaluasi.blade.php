@@ -928,360 +928,18 @@
       /* =====================================================================
        *  📚  DATA KUIS — ISI SOAL DI SINI
        * ===================================================================== */
-      const DAFTAR_KUIS = [{
-          id: "keuangan",
-          judul: "Evaluasi Keuangan",
-          deskripsi: "Uji pemahamanmu tentang UKT, beasiswa, dan administrasi keuangan mahasiswa.",
-          warna: "linear-gradient(135deg,#f59e0b,#c2410c)",
-          soal: [{
-              question: "Pertanyaan Keuangan No. 1: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 2: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 3: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 4: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 5: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 6: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 7: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 8: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 9: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Keuangan No. 10: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-          ],
-        },
-        {
-          id: "akademik",
-          judul: "Evaluasi Akademik",
-          deskripsi: "Soal seputar KRS, SKS, dosen wali, dan aturan perkuliahan dasar.",
-          warna: "linear-gradient(135deg,#0d9488,#1e40af)",
-          soal: [{
-              question: "Pertanyaan Akademik No. 1: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 2: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 3: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 4: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 5: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 6: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 7: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 8: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 9: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Akademik No. 10: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-          ],
-        },
-        {
-          id: "kemahasiswaan",
-          judul: "Evaluasi Kemahasiswaan",
-          deskripsi: "Materi organisasi kampus, tata tertib mahasiswa, dan LKMS.",
-          warna: "linear-gradient(135deg,#9333ea,#3730a3)",
-          soal: [{
-              question: "Pertanyaan Kemahasiswaan No. 1: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 2: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 3: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 4: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 5: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 6: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 7: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 8: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 9: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Kemahasiswaan No. 10: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-          ],
-        },
-        {
-          id: "tatib",
-          judul: "Evaluasi Tata Tertib",
-          deskripsi: "Template evaluasi — silakan ganti dengan soal tata tertib kampus.",
-          warna: "linear-gradient(135deg,#0891b2,#1e40af)",
-          soal: [{
-              question: "Pertanyaan Tata Tertib No. 1: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 2: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 3: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 4: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 5: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 6: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 7: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 8: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 9: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Tata Tertib No. 10: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-          ],
-        },
-        {
-          id: "organisasi",
-          judul: "Evaluasi Organisasi",
-          deskripsi: "Template evaluasi — silakan ganti dengan soal keorganisasian.",
-          warna: "linear-gradient(135deg,#4f46e5,#6b21a8)",
-          soal: [{
-              question: "Pertanyaan Organisasi No. 1: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 2: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 3: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 4: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 5: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 6: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 7: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 8: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 9: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Organisasi No. 10: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-          ],
-        },
-        {
-          id: "kampus",
-          judul: "Evaluasi Profil Kampus",
-          deskripsi: "Template evaluasi — silakan ganti dengan soal profil & sejarah kampus.",
-          warna: "linear-gradient(135deg,#9333ea,#be185d)",
-          soal: [{
-              question: "Pertanyaan Profil Kampus No. 1: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 2: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 3: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 4: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 5: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 6: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 7: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 8: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 9: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-            {
-              question: "Pertanyaan Profil Kampus No. 10: (tulis soal di sini)",
-              options: ["Pilihan A", "Pilihan B", "Pilihan C", "Pilihan D"],
-              correctAnswer: 0,
-            },
-          ],
-        },
-      ];
-
+      const DAFTAR_KUIS = @json($daftarKuis);
+      const STATUS_AWAL = @json($statusAwal);
+      const CSRF_TOKEN_EVAL = @json(csrf_token());
       /* =====================================================================
        *  🔧  MULAI DARI SINI KE BAWAH ADALAH MESIN PROGRAM.
        * ===================================================================== */
 
       const statusKuis = {};
       DAFTAR_KUIS.forEach((k) => {
-        statusKuis[k.id] = {
-          skorTerbaik: null,
-          sudahKirim: false
-        };
+        statusKuis[k.id] = STATUS_AWAL[k.id]
+          ? { skorTerbaik: STATUS_AWAL[k.id].skorTerbaik, sudahKirim: STATUS_AWAL[k.id].sudahKirim }
+          : { skorTerbaik: null, sudahKirim: false };
       });
 
       let kuisAktif = null;
@@ -1535,9 +1193,24 @@
 
       /* ---------- KIRIM HASIL (hanya bila lulus) ---------- */
       function selesaiKuis() {
-        statusKuis[kuisAktif.id].sudahKirim = true;
-        alert(`Hasil kuis "${kuisAktif.judul}" berhasil dikirim!`);
-        keluarKuis();
+        const $btn = $("#btnSelesai");
+        $btn.prop("disabled", true);
+
+        $.ajax({
+          url: `{{ url('mahasiswa/evaluasi') }}/${kuisAktif.id}/submit`,
+          method: "POST",
+          contentType: "application/json",
+          headers: { "X-CSRF-TOKEN": CSRF_TOKEN_EVAL, "Accept": "application/json" },
+          data: JSON.stringify({ jawaban: jawabanUser }),
+        }).done(function (result) {
+          statusKuis[kuisAktif.id].sudahKirim = true;
+          statusKuis[kuisAktif.id].skorTerbaik = result.skor;
+          alert(`Hasil kuis "${kuisAktif.judul}" berhasil dikirim! Skor tersimpan: ${result.skor}.`);
+          keluarKuis();
+        }).fail(function () {
+          alert("Gagal mengirim hasil kuis. Coba lagi.");
+          $btn.prop("disabled", false);
+        });
       }
 
       /* ---------- KELUAR DARI MODE KUIS ---------- */

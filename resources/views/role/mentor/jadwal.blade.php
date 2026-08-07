@@ -1008,165 +1008,47 @@
       </div>
 
       <div class="timeline-wrap">
-        <!-- HARI 1 -->
-        <div class="timeline-item">
-          <div class="timeline-date">
-            <span class="timeline-date-day">07 Sep</span>
-            <span class="timeline-date-weekday">Senin</span>
-          </div>
-          <div class="timeline-dot"></div>
-          <div class="timeline-card">
-            <span class="timeline-date-mobile">Senin, 07 September 2026</span>
-            <div class="timeline-card-head">
-              <div>
-                <span class="timeline-day-badge">Hari ke-1</span>
-                <h3 class="timeline-title">Pra-PKKMB &amp; Pembagian Kelompok</h3>
+        @forelse ($jadwalList as $idx => $j)
+          <div class="timeline-item">
+            <div class="timeline-date">
+              <span class="timeline-date-day">{{ \Carbon\Carbon::parse($j->schedule_date)->translatedFormat('d M') }}</span>
+              <span class="timeline-date-weekday">{{ \Carbon\Carbon::parse($j->schedule_date)->translatedFormat('l') }}</span>
+            </div>
+            <div class="timeline-dot"></div>
+            <div class="timeline-card">
+              <span class="timeline-date-mobile">{{ \Carbon\Carbon::parse($j->schedule_date)->translatedFormat('l, d F Y') }}</span>
+              <div class="timeline-card-head">
+                <div>
+                  <span class="timeline-day-badge">Hari ke-{{ $idx + 1 }}</span>
+                  <h3 class="timeline-title">{{ $j->title }}</h3>
+                </div>
+                <span class="timeline-time">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+                  {{ substr($j->schedule_begin_time, 0, 5) }} - {{ substr($j->schedule_end_time, 0, 5) }}
+                </span>
               </div>
-              <span class="timeline-time">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-                07:30 - 12:00
-              </span>
-            </div>
-            <div class="timeline-list">
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Pengondisian barisan dan absensi mahasiswa baru.
-              </p>
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Penjelasan atribut pakaian dan tata tertib resmi.
-              </p>
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Pembagian mentor pendamping kelompok.
-              </p>
-            </div>
-            <div class="timeline-location">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-              <span>Lapangan Utama Kampus UNILAM</span>
+              @if ($j->description)
+                <div class="timeline-list">
+                  @foreach (preg_split('/\r\n|\r|\n/', $j->description) as $baris)
+                    @continue(trim($baris) === '')
+                    <p>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
+                      {{ $baris }}
+                    </p>
+                  @endforeach
+                </div>
+              @endif
+              @if ($j->place)
+                <div class="timeline-location">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+                  <span>{{ $j->place }}</span>
+                </div>
+              @endif
             </div>
           </div>
-        </div>
-
-        <!-- HARI 2 -->
-        <div class="timeline-item">
-          <div class="timeline-date">
-            <span class="timeline-date-day">08 Sep</span>
-            <span class="timeline-date-weekday">Selasa</span>
-          </div>
-          <div class="timeline-dot"></div>
-          <div class="timeline-card">
-            <span class="timeline-date-mobile">Selasa, 08 September 2026</span>
-            <div class="timeline-card-head">
-              <div>
-                <span class="timeline-day-badge">Hari ke-2</span>
-                <h3 class="timeline-title">Opening Ceremony &amp; Sidang Senat Terbuka</h3>
-              </div>
-              <span class="timeline-time">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-                07:00 - 16:00
-              </span>
-            </div>
-            <div class="timeline-list">
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Upacara pembukaan &amp; pengukuhan mahasiswa baru secara simbolis.
-              </p>
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Kuliah Umum: Pengenalan Nilai Kebangsaan dan Moderasi Beragama.
-              </p>
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Orientasi sistem nilai kepesantrenan &amp; filosofi "La Tansa Mashiro".
-              </p>
-            </div>
-            <div class="timeline-location">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-              <span>Hall / Auditorium Utama Pembela Umat</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- HARI 3 -->
-        <div class="timeline-item">
-          <div class="timeline-date">
-            <span class="timeline-date-day">09 Sep</span>
-            <span class="timeline-date-weekday">Rabu</span>
-          </div>
-          <div class="timeline-dot"></div>
-          <div class="timeline-card">
-            <span class="timeline-date-mobile">Rabu, 09 September 2026</span>
-            <div class="timeline-card-head">
-              <div>
-                <span class="timeline-day-badge">Hari ke-3</span>
-                <h3 class="timeline-title">Pengenalan Sistem Akademik &amp; Fakultas</h3>
-              </div>
-              <span class="timeline-time">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-                07:30 - 15:30
-              </span>
-            </div>
-            <div class="timeline-list">
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Penjelasan mekanisme KRS, perwalian, dan portal SIAKAD kampus.
-              </p>
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Pengenalan jajaran Dekanat, dosen prodi, serta laboratorium.
-              </p>
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Sosialisasi prospek karir dan kurikulum program studi masing-masing.
-              </p>
-            </div>
-            <div class="timeline-location">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-              <span>Gedung Fakultas Masing-Masing</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- HARI 4 (TERAKHIR) -->
-        <div class="timeline-item last">
-          <div class="timeline-date">
-            <span class="timeline-date-day">10 Sep</span>
-            <span class="timeline-date-weekday">Kamis</span>
-          </div>
-          <div class="timeline-dot"></div>
-          <div class="timeline-card highlight">
-            <span class="timeline-date-mobile">Kamis, 10 September 2026</span>
-            <div class="timeline-card-head">
-              <div>
-                <span class="timeline-day-badge">Hari Terakhir</span>
-                <h3 class="timeline-title">Inagurasi, Display UKM &amp; Closing Party</h3>
-              </div>
-              <span class="timeline-time">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-                07:30 - Selesai
-              </span>
-            </div>
-            <div class="timeline-list">
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Parade demonstrasi Unit Kegiatan Mahasiswa (UKM) &amp; Organisasi internal.
-              </p>
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Panggung ekspresi seni kreativitas mahasiswa baru.
-              </p>
-              <p>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
-                Pengumuman kelompok/peserta terbaik &amp; penutupan resmi.
-              </p>
-            </div>
-            <div class="timeline-location">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-              <span>Gedung Olahraga (GOR) / Lapangan Utama</span>
-            </div>
-          </div>
-        </div>
+        @empty
+          <p class="text-center text-sm text-slate-400 py-10">Jadwal PKKMB belum diisi Panitia.</p>
+        @endforelse
       </div>
 
       <!-- CATATAN PENTING -->

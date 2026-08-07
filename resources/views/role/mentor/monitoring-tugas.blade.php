@@ -196,115 +196,13 @@
       // ======================================================================
       // ►► DAFTAR TUGAS — tiap tugas jadi satu KOLOM di tabel.
       // ======================================================================
-      const DAFTAR_TUGAS = [{
-          id: "tugas1",
-          nama: "Resume Materi Akademik"
-        },
-        {
-          id: "tugas2",
-          nama: "Tugas Kelompok LKMS"
-        },
-        {
-          id: "tugas3",
-          nama: "Essay Nilai Kebangsaan"
-        },
-      ];
+      const DAFTAR_TUGAS = @json($daftarTugas);
 
       // ======================================================================
-      // ►► KELOMPOK MENTOR & STATUS TUGAS — satu kelompok saja.
+      // ►► KELOMPOK MENTOR & STATUS TUGAS — dari database (real).
       // ======================================================================
-      const KELOMPOK_MENTOR = "Kelompok 01";
-      const ANGGOTA_KELOMPOK = [{
-          nama: "Alexander Arul Husein",
-          npm: "525241019",
-          tugas: {
-            tugas1: true,
-            tugas2: true,
-            tugas3: false
-          }
-        },
-        {
-          nama: "Bunga Citra Lestari",
-          npm: "525241020",
-          tugas: {
-            tugas1: true,
-            tugas2: false,
-            tugas3: false
-          }
-        },
-        {
-          nama: "Dimas Prakoso",
-          npm: "525241021",
-          tugas: {
-            tugas1: false,
-            tugas2: false,
-            tugas3: false
-          }
-        },
-        {
-          nama: "Eka Putri Ramadhani",
-          npm: "525241022",
-          tugas: {
-            tugas1: true,
-            tugas2: true,
-            tugas3: true
-          }
-        },
-        {
-          nama: "Farhan Maulana",
-          npm: "525241023",
-          tugas: {
-            tugas1: true,
-            tugas2: false,
-            tugas3: false
-          }
-        },
-        {
-          nama: "Gita Ayu Saputri",
-          npm: "525241024",
-          tugas: {
-            tugas1: false,
-            tugas2: false,
-            tugas3: false
-          }
-        },
-        {
-          nama: "Hendra Wijaya",
-          npm: "525241025",
-          tugas: {
-            tugas1: true,
-            tugas2: true,
-            tugas3: false
-          }
-        },
-        {
-          nama: "Indah Permata Sari",
-          npm: "525241026",
-          tugas: {
-            tugas1: true,
-            tugas2: true,
-            tugas3: true
-          }
-        },
-        {
-          nama: "Joko Anggoro",
-          npm: "525241027",
-          tugas: {
-            tugas1: false,
-            tugas2: false,
-            tugas3: false
-          }
-        },
-        {
-          nama: "Kirana Dewi",
-          npm: "525241028",
-          tugas: {
-            tugas1: true,
-            tugas2: false,
-            tugas3: false
-          }
-        },
-      ];
+      const KELOMPOK_MENTOR = @json($group->name ?? 'Belum ada kelompok');
+      const ANGGOTA_KELOMPOK = @json($anggotaKelompok);
 
       $("#kelompokNama").text(KELOMPOK_MENTOR);
 

@@ -174,37 +174,7 @@
       // ==========================================
       // DATA PENGUMUMAN — TAMBAH / EDIT DI SINI
       // ==========================================
-      const announcementData = [{
-          icon: "📢",
-          type: "urgent",
-          tag: "Wajib",
-          title: "Pengumuman",
-          desc: "Besok seluruh peserta wajib memakai almamater.",
-          meta: [{
-            kind: "date",
-            text: "09 Juli 2026"
-          }],
-        },
-        {
-          icon: "📢",
-          type: "info",
-          tag: "Perubahan Jadwal",
-          title: "Perubahan Jadwal",
-          desc: "Materi Bela Negara dipindah ke Aula B.",
-          meta: [],
-        },
-        {
-          icon: "📢",
-          type: "default",
-          tag: "Tugas",
-          title: "Pengumpulan Tugas",
-          desc: "Batas akhir pengumpulan tugas materi.",
-          meta: [{
-            kind: "deadline",
-            text: "Deadline: 10 Juli, 23.59 WIB"
-          }],
-        },
-      ];
+      const announcementData = @json($announcementData);
 
       const $listEl = $("#announcementList");
       $("#countBadgeLabel").text(`${announcementData.length} pengumuman`);

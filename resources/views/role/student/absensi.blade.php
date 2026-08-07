@@ -765,24 +765,15 @@
       // ►► IDENTITAS AKUN — diambil dari sesi login Laravel
       // ======================================================================
       const CURRENT_STUDENT = {
-        nama: @json(auth() -> user() -> name),
+        nama: @json(auth()->user()->name),
         kelompok: @json($groupName ?? 'Belum tergabung kelompok'),
       };
 
-      const KODE_KE_LABEL = {
-        H: "Hadir",
-        S: "Sakit",
-        I: "Izin",
-        A: "Alpha"
-      };
-      const DEMO_STATUSES = ["Hadir", "Hadir", "Hadir", "Sakit", "Izin", "Alpha"];
+      // Semua sesi absensi milik mahasiswa ini, per tanggal (dari database, bukan contoh).
+      // Bentuknya: { "2026-08-02": [{label, waktu, status}, ...], ... }
+      const TANDA_PER_TANGGAL = @json($tandaPerTanggal);
 
       let currentDate = new Date().toISOString().slice(0, 10);
-      let isLiveData = false;
-
-      function storageKey(group, date) {
-        return `absensi:${group}:${date}`;
-      }
 
       function formatTanggalIndo(isoDate) {
         const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -790,16 +781,6 @@
         const [y, m, d] = isoDate.split("-").map(Number);
         const namaHari = hari[new Date(y, m - 1, d).getDay()];
         return `${namaHari}, ${d} ${bulan[m - 1]} ${y}`;
-      }
-
-      function statusDemoUntukSaya() {
-        let hash = 0;
-        for (const ch of CURRENT_STUDENT.nama) hash += ch.charCodeAt(0);
-        return {
-          pagi: DEMO_STATUSES[hash % DEMO_STATUSES.length],
-          siang: DEMO_STATUSES[(hash + 1) % DEMO_STATUSES.length],
-          sore: DEMO_STATUSES[(hash + 2) % DEMO_STATUSES.length],
-        };
       }
 
       function getStatusBadge(status) {
@@ -810,16 +791,13 @@
         return `<span class="status-badge badge-belum">Belum Mulai</span>`;
       }
 
-      function updateStats(myStatus) {
-        let hadir = 0,
-          sakit = 0,
-          izin = 0,
-          alpha = 0;
-        [myStatus.pagi, myStatus.siang, myStatus.sore].forEach((stat) => {
-          if (stat === "Hadir") hadir++;
-          else if (stat === "Sakit") sakit++;
-          else if (stat === "Izin") izin++;
-          else if (stat === "Alpha") alpha++;
+      function updateStats(sesiHariIni) {
+        let hadir = 0, sakit = 0, izin = 0, alpha = 0;
+        sesiHariIni.forEach((s) => {
+          if (s.status === "Hadir") hadir++;
+          else if (s.status === "Sakit") sakit++;
+          else if (s.status === "Izin") izin++;
+          else if (s.status === "Alpha") alpha++;
         });
         $("#stat-hadir").html(`${hadir} <small>sesi</small>`);
         $("#stat-sakit").html(`${sakit} <small>sesi</small>`);
@@ -827,39 +805,26 @@
         $("#stat-alpha").html(`${alpha} <small>sesi</small>`);
       }
 
-      function renderSessionList(myStatus) {
-        const sessions = [{
-            key: "pagi",
-            label: "Sesi Pagi",
-            time: "08:00 WIB",
-            icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" /></svg>`,
-          },
-          {
-            key: "siang",
-            label: "Sesi Siang",
-            time: "13:00 WIB",
-            icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2" /></svg>`,
-          },
-          {
-            key: "sore",
-            label: "Sesi Sore",
-            time: "16:00 WIB",
-            icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6" /><path d="M5.6 8.6l1.4 1.4M18.4 8.6l-1.4 1.4" /><path d="M3 16h18" /><path d="M5 20h14" /></svg>`,
-          },
-        ];
+      const iconJam = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>`;
 
-        const html = sessions
+      function renderSessionList(sesiHariIni) {
+        if (!sesiHariIni.length) {
+          $("#sessionList").html(`<p class="text-center text-sm text-slate-400 py-8">Belum ada sesi absensi untuk tanggal ini.</p>`);
+          return;
+        }
+
+        const html = sesiHariIni
           .map(
             (s) => `
                 <div class="session-row">
                   <div class="session-info">
-                    <span class="session-icon">${s.icon}</span>
+                    <span class="session-icon">${iconJam}</span>
                     <div>
                       <p class="session-name">${s.label}</p>
-                      <p class="session-time">${s.time}</p>
+                      <p class="session-time">${s.waktu}</p>
                     </div>
                   </div>
-                  ${getStatusBadge(myStatus[s.key])}
+                  ${getStatusBadge(s.status)}
                 </div>
               `,
           )
@@ -869,41 +834,13 @@
       }
 
       // ======================================================================
-      // ►► AMBIL DATA — hanya baris milik CURRENT_STUDENT
+      // ►► AMBIL DATA — dari TANDA_PER_TANGGAL yang sudah dikirim server tadi
       // ======================================================================
-      async function ambilStatusSaya() {
-        try {
-          const res = await window.storage.get(
-            storageKey(CURRENT_STUDENT.kelompok, currentDate),
-            true,
-          );
-          if (res && res.value) {
-            const payload = JSON.parse(res.value);
-            if (payload && Array.isArray(payload.rows)) {
-              const baris = payload.rows.find(
-                (r) =>
-                r.nama &&
-                r.nama.trim().toLowerCase() ===
-                CURRENT_STUDENT.nama.trim().toLowerCase(),
-              );
-              if (baris) {
-                isLiveData = true;
-                return {
-                  pagi: KODE_KE_LABEL[baris.pagi] || "Belum Mulai",
-                  siang: KODE_KE_LABEL[baris.siang] || "Belum Mulai",
-                  sore: KODE_KE_LABEL[baris.sore] || "Belum Mulai",
-                };
-              }
-            }
-          }
-        } catch (e) {
-          // belum ada data tersimpan untuk kelompok/tanggal ini
-        }
-        isLiveData = false;
-        return statusDemoUntukSaya();
+      function ambilSesiSaya() {
+        return TANDA_PER_TANGGAL[currentDate] || [];
       }
 
-      async function renderHalaman() {
+      function renderHalaman() {
         $("#datePill").text(formatTanggalIndo(currentDate));
         $("#sessionCardTitle").text(
           currentDate === new Date().toISOString().slice(0, 10) ?
@@ -911,19 +848,17 @@
           `Detail Kehadiran ${formatTanggalIndo(currentDate)}`,
         );
 
+        const sesiHariIni = ambilSesiSaya();
+
         const $sourceBadge = $("#sourceBadge");
-        $sourceBadge.text("Memuat...").attr("class", "source-badge");
-
-        const myStatus = await ambilStatusSaya();
-
-        if (isLiveData) {
-          $sourceBadge.text("Data Live dari Mentor").attr("class", "source-badge source-live");
+        if (sesiHariIni.length) {
+          $sourceBadge.text("Data dari Mentor").attr("class", "source-badge source-live");
         } else {
-          $sourceBadge.text("Data Contoh (Belum Dikirim Mentor)").attr("class", "source-badge source-demo");
+          $sourceBadge.text("Belum Ada Sesi").attr("class", "source-badge source-demo");
         }
 
-        updateStats(myStatus);
-        renderSessionList(myStatus);
+        updateStats(sesiHariIni);
+        renderSessionList(sesiHariIni);
         updateKontrolNavigasi();
       }
 

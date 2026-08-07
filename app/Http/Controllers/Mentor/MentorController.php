@@ -18,7 +18,26 @@ class MentorController extends Controller
 
     public function info()
     {
-        return view('role.mentor.info');
+        $announcementData = \App\Models\Information::where('status', 'published')
+            ->orderByDesc('important_flag')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($i) {
+                $meta = [];
+                if ($i->important_flag) {
+                    $meta[] = ['kind' => 'date', 'text' => $i->created_at->translatedFormat('d F Y')];
+                }
+                return [
+                    'icon' => '📢',
+                    'type' => $i->important_flag ? 'urgent' : 'default',
+                    'tag' => strtoupper($i->category),
+                    'title' => $i->title,
+                    'desc' => $i->description ?? '-',
+                    'meta' => $meta,
+                ];
+            });
+
+        return view('role.mentor.info', compact('announcementData'));
     }
 
     public function profil()
@@ -80,7 +99,12 @@ class MentorController extends Controller
 
     public function jadwal()
     {
-        return view('role.mentor.jadwal');
+        $jadwalList = \App\Models\Schedule::where('status', 'published')
+            ->orderBy('schedule_date')
+            ->orderBy('schedule_begin_time')
+            ->get();
+
+        return view('role.mentor.jadwal', compact('jadwalList'));
     }
 
     /**
@@ -212,7 +236,45 @@ class MentorController extends Controller
 
     public function evaluasi()
     {
-        return view('role.mentor.evaluasi');
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+
+        $categories = \App\Models\EvaluationCategory::orderBy('urutan')->get();
+        $kategoriEvaluasi = $categories->map(fn($c) => ['id' => (string) $c->id, 'nama' => $c->name]);
+
+        $anggotaKelompok = collect();
+        if ($group) {
+            $studentIds = \App\Models\Member::where('group_id', $group->id)->pluck('student_id');
+
+            $evaluations = \App\Models\Evaluation::whereIn('student_id', $studentIds)
+                ->with('details')
+                ->get()
+                ->keyBy('student_id');
+
+            $anggotaKelompok = \App\Models\Member::where('group_id', $group->id)
+                ->with('student')
+                ->get()
+                ->map(function ($m) use ($categories, $evaluations) {
+                    $evaluation = $evaluations->get($m->student_id);
+                    $detailByCategory = $evaluation ? $evaluation->details->keyBy('evaluation_category_id') : collect();
+
+                    $hasil = $categories->mapWithKeys(function ($cat) use ($detailByCategory, $evaluation) {
+                        $detail = $detailByCategory->get($cat->id);
+                        return [(string) $cat->id => [
+                            'selesai' => $detail !== null,
+                            'skor' => $detail?->value,
+                            'waktu' => $detail ? $evaluation->updated_at?->translatedFormat('d M Y, H:i') : null,
+                        ]];
+                    });
+
+                    return [
+                        'nama' => $m->student->name ?? '-',
+                        'npm' => $m->student->npm ?? '-',
+                        'hasil' => $hasil,
+                    ];
+                })->values();
+        }
+
+        return view('role.mentor.evaluasi', compact('group', 'kategoriEvaluasi', 'anggotaKelompok'));
     }
 
     public function evaluasiDetail()
@@ -227,6 +289,43 @@ class MentorController extends Controller
 
     public function monitoringTugas()
     {
-        return view('role.mentor.monitoring-tugas');
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+
+        $tasks = \App\Models\Task::where('status', '!=', 'draft')->orderBy('deadline')->get();
+        $daftarTugas = $tasks->map(fn($t) => ['id' => (string) $t->id, 'nama' => $t->title]);
+
+        $anggotaKelompok = collect();
+        if ($group) {
+            // status 'selesai' dianggap sudah mengumpulkan; status lain ('ditugaskan', dst) dianggap belum.
+            $groupTaskDoneTaskIds = \App\Models\GroupTask::where('group_id', $group->id)
+                ->where('status', 'selesai')
+                ->pluck('task_id')
+                ->all();
+
+            $anggotaKelompok = \App\Models\Member::where('group_id', $group->id)
+                ->with('student')
+                ->get()
+                ->map(function ($m) use ($tasks, $groupTaskDoneTaskIds) {
+                    $tugas = $tasks->mapWithKeys(function ($t) use ($m, $groupTaskDoneTaskIds) {
+                        if ($t->task_type === 'kelompok') {
+                            $done = in_array($t->id, $groupTaskDoneTaskIds, true);
+                        } else {
+                            $done = \App\Models\StudentTask::where('task_id', $t->id)
+                                ->where('student_id', $m->student_id)
+                                ->where('status', 'selesai')
+                                ->exists();
+                        }
+                        return [(string) $t->id => $done];
+                    });
+
+                    return [
+                        'nama' => $m->student->name ?? '-',
+                        'npm' => $m->student->npm ?? '-',
+                        'tugas' => $tugas,
+                    ];
+                })->values();
+        }
+
+        return view('role.mentor.monitoring-tugas', compact('group', 'daftarTugas', 'anggotaKelompok'));
     }
 }

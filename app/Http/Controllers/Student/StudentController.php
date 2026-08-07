@@ -18,7 +18,26 @@ class StudentController extends Controller
 
     public function info()
     {
-        return view('role.student.info');
+        $announcementData = \App\Models\Information::where('status', 'published')
+            ->orderByDesc('important_flag')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($i) {
+                $meta = [];
+                if ($i->important_flag) {
+                    $meta[] = ['kind' => 'date', 'text' => $i->created_at->translatedFormat('d F Y')];
+                }
+                return [
+                    'icon' => '📢',
+                    'type' => $i->important_flag ? 'urgent' : 'default',
+                    'tag' => strtoupper($i->category),
+                    'title' => $i->title,
+                    'desc' => $i->description ?? '-',
+                    'meta' => $meta,
+                ];
+            });
+
+        return view('role.student.info', compact('announcementData'));
     }
 
     public function profil()
@@ -28,7 +47,12 @@ class StudentController extends Controller
 
     public function jadwal()
     {
-        return view('role.student.jadwal');
+        $jadwalList = \App\Models\Schedule::where('status', 'published')
+            ->orderBy('schedule_date')
+            ->orderBy('schedule_begin_time')
+            ->get();
+
+        return view('role.student.jadwal', compact('jadwalList'));
     }
 
     public function keaktifan()
@@ -38,7 +62,36 @@ class StudentController extends Controller
 
     public function materi()
     {
-        return view('role.student.materi');
+        $topics = \App\Models\Topic::where('status', 'published')->orderByDesc('created_at')->get();
+
+        $gradients = [
+            'from-teal-600 to-blue-800', 'from-purple-600 to-indigo-800', 'from-amber-500 to-orange-700',
+            'from-cyan-600 to-blue-800', 'from-purple-600 to-pink-700', 'from-indigo-600 to-purple-800',
+        ];
+
+        $mapItem = function ($t, $idx) use ($gradients) {
+            return [
+                'id' => ($t->category === 'video' ? 'vid-' : 'doc-') . $t->id,
+                'tipe' => $t->category,
+                'judul' => $t->title,
+                'deskripsi' => '-',
+                'pemateri' => $t->trainer ?? '-',
+                'durasi' => '-',
+                'youtube' => $t->category === 'video' ? ($t->file_link ?? '#') : null,
+                'pdf' => $t->category === 'ebook' ? ($t->file_link ?? '#') : null,
+                'fileSize' => '-',
+                'updatedAt' => $t->updated_at?->translatedFormat('d F Y'),
+                'thumbnailImg' => '',
+                'gradientFallback' => $gradients[$idx % count($gradients)],
+                'progress' => 0,
+                'tags' => array_values(array_filter([$t->category, $t->topic_type])),
+            ];
+        };
+
+        $videoMateri = $topics->where('category', 'video')->values()->map(fn($t, $i) => $mapItem($t, $i));
+        $ebookMateri = $topics->where('category', 'ebook')->values()->map(fn($t, $i) => $mapItem($t, $i));
+
+        return view('role.student.materi', compact('videoMateri', 'ebookMateri'));
     }
 
     public function denahKampus()
@@ -48,16 +101,139 @@ class StudentController extends Controller
 
     public function evaluasi()
     {
-        return view('role.student.evaluasi');
+        $exams = \App\Models\Exam::with('details')->orderBy('title')->get();
+
+        $studentExams = \App\Models\StudentExam::where('student_id', auth()->id())
+            ->whereIn('exam_id', $exams->pluck('id'))
+            ->get()
+            ->groupBy('exam_id');
+
+        $hurufKeIndex = ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3];
+        $warnaPalet = [
+            'linear-gradient(135deg,#f59e0b,#c2410c)', 'linear-gradient(135deg,#0d9488,#1e40af)',
+            'linear-gradient(135deg,#9333ea,#3730a3)', 'linear-gradient(135deg,#dc2626,#7c2d12)',
+            'linear-gradient(135deg,#2563eb,#1e3a8f)', 'linear-gradient(135deg,#16a34a,#14532d)',
+        ];
+
+        $daftarKuis = $exams->values()->map(function ($exam, $idx) use ($hurufKeIndex, $warnaPalet) {
+            return [
+                'id' => (string) $exam->id,
+                'judul' => $exam->title,
+                'deskripsi' => $exam->subtitle ?? '-',
+                'warna' => $warnaPalet[$idx % count($warnaPalet)],
+                'soal' => $exam->details->map(function ($d) use ($hurufKeIndex) {
+                    $options = array_values(array_filter([$d->option_a, $d->option_b, $d->option_c, $d->option_d], fn($o) => $o !== null && $o !== ''));
+                    return [
+                        'question' => $d->question,
+                        'options' => $options,
+                        'correctAnswer' => $hurufKeIndex[strtolower($d->key)] ?? 0,
+                    ];
+                })->values(),
+            ];
+        })->filter(fn($k) => count($k['soal']) > 0)->values();
+
+        // status pengerjaan siswa yang SUDAH tersimpan sebelumnya (kalau ada)
+        $statusAwal = [];
+        foreach ($exams as $exam) {
+            $rows = $studentExams->get($exam->id);
+            if ($rows && $rows->count() > 0) {
+                $total = $exam->details->count();
+                $benar = 0;
+                foreach ($rows as $r) {
+                    $detail = $exam->details->firstWhere('id', $r->exam_detail_id);
+                    if ($detail && strtolower($r->value) === strtolower($detail->key)) {
+                        $benar++;
+                    }
+                }
+                $statusAwal[(string) $exam->id] = [
+                    'skorTerbaik' => $total ? (int) round($benar / $total * 100) : 0,
+                    'sudahKirim' => true,
+                ];
+            }
+        }
+
+        return view('role.student.evaluasi', compact('daftarKuis', 'statusAwal'));
+    }
+
+    /**
+     * Simpan hasil satu kuis (dihitung ulang di server, tidak percaya skor
+     * dari client) — dipanggil begitu mahasiswa klik "Kirim Hasil".
+     */
+    public function evaluasiSubmit(\Illuminate\Http\Request $request, \App\Models\Exam $exam)
+    {
+        $validated = $request->validate([
+            'jawaban' => ['required', 'array'],
+            'jawaban.*' => ['nullable', 'integer', 'min:0', 'max:5'],
+        ]);
+
+        $details = $exam->details()->orderBy('id')->get();
+        $hurufAbjad = ['a', 'b', 'c', 'd', 'e', 'f'];
+        $benar = 0;
+
+        foreach ($details as $i => $detail) {
+            $pilihIndex = $validated['jawaban'][$i] ?? null;
+            $pilihHuruf = $pilihIndex !== null ? ($hurufAbjad[$pilihIndex] ?? null) : null;
+
+            \App\Models\StudentExam::updateOrCreate(
+                ['exam_id' => $exam->id, 'exam_detail_id' => $detail->id, 'student_id' => auth()->id()],
+                [
+                    'question' => $detail->question,
+                    'value' => $pilihHuruf,
+                    'created_by_id' => auth()->id(),
+                    'updated_by_id' => auth()->id(),
+                ]
+            );
+
+            if ($pilihHuruf && strtolower($pilihHuruf) === strtolower($detail->key)) {
+                $benar++;
+            }
+        }
+
+        $skor = $details->count() ? (int) round($benar / $details->count() * 100) : 0;
+
+        return response()->json([
+            'message' => 'Hasil kuis berhasil dikirim.',
+            'skor' => $skor,
+        ]);
     }
 
     public function absensi()
     {
-        $groupName = \App\Models\Member::with('group')
-            ->where('student_id', auth()->id())
-            ->first()?->group?->name;
+        $member = \App\Models\Member::with('group')->where('student_id', auth()->id())->first();
+        $groupName = $member?->group?->name;
 
-        return view('role.student.absensi', compact('groupName'));
+        // semua tanda kehadiran milik mahasiswa ini, dikelompokkan per tanggal —
+        // dipakai buat date-picker di halaman (bisa lihat tanggal manapun, bukan cuma hari ini)
+        $tandaPerTanggal = [];
+        if ($member) {
+            $attendances = \App\Models\Attendance::with('template')
+                ->where('group_id', $member->group_id)
+                ->get();
+
+            $labelStatus = ['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alfa' => 'Alpha'];
+
+            foreach ($attendances as $att) {
+                $detail = \App\Models\AttendanceDetail::where('attendance_id', $att->id)
+                    ->where('student_id', auth()->id())
+                    ->first();
+
+                $tanggal = $att->attendance_date;
+                $tandaPerTanggal[$tanggal] = $tandaPerTanggal[$tanggal] ?? [];
+                $tandaPerTanggal[$tanggal][] = [
+                    'label' => $att->template->session_name ?? '-',
+                    'waktu' => substr($att->template->time_begin ?? '00:00', 0, 5) . ' WIB',
+                    'status' => $detail ? ($labelStatus[$detail->status_presence] ?? 'Belum Mulai') : 'Belum Mulai',
+                ];
+            }
+
+            // urutkan sesi tiap tanggal berdasarkan jam mulai
+            foreach ($tandaPerTanggal as $tgl => $sesiList) {
+                usort($sesiList, fn($a, $b) => strcmp($a['waktu'], $b['waktu']));
+                $tandaPerTanggal[$tgl] = $sesiList;
+            }
+        }
+
+        return view('role.student.absensi', compact('groupName', 'tandaPerTanggal'));
     }
 
     /**

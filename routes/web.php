@@ -183,6 +183,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/materi', 'materi')->name('role.student.materi');
             Route::get('/denah-kampus', 'denahKampus')->name('role.student.denah-kampus');
             Route::get('/evaluasi', 'evaluasi')->name('role.student.evaluasi');
+            Route::post('/evaluasi/{exam}/submit', 'evaluasiSubmit')->name('role.student.evaluasi.submit');
             Route::get('/absensi', 'absensi')->name('role.student.absensi');
         });
     });
@@ -210,20 +211,6 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::post('/import', 'import')->name('committee.mahasiswa.import'), $defaults);
         });
 
-             Route::controller(\App\Http\Controllers\Committee\TaskAssignmentController::class)->prefix('tugas')->group(function () {
-            Route::get('/{task}/assign', 'show')->name('committee.tugas.assign.show');
-            Route::post('/{task}/assign', 'save')->name('committee.tugas.assign.save');
-            });
-
-        // ===== Kelola Advisor (reuse UserController, view komite) =====
-        Route::controller(\App\Http\Controllers\Admin\UserController::class)->prefix('committee/advisor')->group(function () use ($withDefaults) {
-            $defaults = ['roleKey' => 'ADVISOR', 'title' => 'Kelola Advisor', 'view' => 'role.committee.advisor.index'];
-            $withDefaults(Route::get('/', 'index')->name('committee.advisor.index'), $defaults);
-            $withDefaults(Route::post('/', 'store')->name('committee.advisor.store'), $defaults);
-            $withDefaults(Route::put('/{user}', 'update')->name('committee.advisor.update'), $defaults);
-            $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.advisor.destroy'), $defaults);
-        });
-
         // ===== Kelola Mentor (reuse UserController, view komite) =====
         Route::controller(\App\Http\Controllers\Admin\UserController::class)->prefix('mentor')->group(function () use ($withDefaults) {
             $defaults = ['roleKey' => 'MENTOR', 'title' => 'Kelola Mentor', 'view' => 'role.committee.mentor.index'];
@@ -233,6 +220,21 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mentor.destroy'), $defaults);
             $withDefaults(Route::get('/import/template', 'importTemplate')->name('committee.mentor.import-template'), $defaults);
             $withDefaults(Route::post('/import', 'import')->name('committee.mentor.import'), $defaults);
+        });
+
+        // ===== Assign Tugas ke mahasiswa/kelompok (checklist di modal "Assign") =====
+        Route::controller(\App\Http\Controllers\Committee\TaskAssignmentController::class)->prefix('tugas')->group(function () {
+            Route::get('/{task}/assign', 'show')->name('committee.tugas.assign.show');
+            Route::post('/{task}/assign', 'save')->name('committee.tugas.assign.save');
+        });
+
+        // ===== Kelola Advisor (reuse UserController, view komite) =====
+        Route::controller(\App\Http\Controllers\Admin\UserController::class)->prefix('committee/advisor')->group(function () use ($withDefaults) {
+            $defaults = ['roleKey' => 'ADVISOR', 'title' => 'Kelola Advisor', 'view' => 'role.committee.advisor.index'];
+            $withDefaults(Route::get('/', 'index')->name('committee.advisor.index'), $defaults);
+            $withDefaults(Route::post('/', 'store')->name('committee.advisor.store'), $defaults);
+            $withDefaults(Route::put('/{user}', 'update')->name('committee.advisor.update'), $defaults);
+            $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.advisor.destroy'), $defaults);
         });
 
         // ===== Kelola Anggota per Kelompok (masih pakai GroupController, tapi
@@ -259,9 +261,9 @@ Route::middleware(['auth'])->group(function () {
                 'modul-pkkmb' => ['path' => 'modul-pkkmb', 'types' => ['modul'],                            'title' => 'Kelola Modul PKKMB', 'view' => 'role.committee.modul-pkkmb.index'],
                 'materi'      => ['path' => 'materi',      'types' => ['topik'],                            'title' => 'Kelola Materi',      'view' => 'role.committee.materi.index'],
                 'evaluasi'    => ['path' => 'evaluasi',    'types' => ['ujian', 'kategori_evaluasi', 'soal'], 'title' => 'Kelola Evaluasi',   'view' => 'role.committee.evaluasi.index'],
+                'tugas'       => ['path' => 'tugas',       'types' => ['tugas'],                            'title' => 'Kelola Tugas',       'view' => 'role.committee.tugas.index'],
                 'absensi'     => ['path' => 'absensi',     'types' => ['jadwal_absensi'],                  'title' => 'Kelola Jadwal Absensi', 'view' => 'role.committee.absensi.index'],
                 'master'      => ['path' => 'kelompok',    'types' => ['kelompok'],                        'title' => 'Kelola Kelompok',    'view' => 'role.committee.kelompok.index'],
-                'tugas' => ['path' => 'tugas', 'types' => ['tugas'], 'title' => 'Kelola Tugas', 'view' => 'role.committee.tugas.index'],
             ];
 
             foreach ($sections as $key => $sec) {
