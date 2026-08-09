@@ -74,19 +74,8 @@
       </div>
     </a>
 
-    <button
-      class="menu-toggle flex flex-col justify-between w-6 h-[18px] bg-transparent border-none cursor-pointer z-50 p-0 md:hidden [&.active_span:nth-child(1)]:translate-y-2 [&.active_span:nth-child(1)]:rotate-45 [&.active_span:nth-child(2)]:opacity-0 [&.active_span:nth-child(3)]:-translate-y-2 [&.active_span:nth-child(3)]:-rotate-45"
-      id="menuToggle"
-      aria-label="Buka Menu">
-      <span class="block w-full h-0.5 bg-white rounded transition-all"></span>
-      <span class="block w-full h-0.5 bg-white rounded transition-all"></span>
-      <span class="block w-full h-0.5 bg-white rounded transition-all"></span>
-    </button>
 
-    <nav
-      class="navbar-links flex flex-col fixed top-0 gap-6 w-[280px] h-screen bg-[#0d1735] shadow-[-5px_0_25px_rgba(0,0,0,0.3)] transition-[right] duration-300 md:static md:flex-row md:w-auto md:h-auto md:bg-transparent md:shadow-none md:gap-7 md:transition-none"
-      id="navbarLinks"
-      style="right: -100%; padding: 100px 32px 32px;">
+    <nav class="hidden md:flex flex-row gap-7" id="navbarLinks">
       <a href="#" class="text-white text-base md:text-[13.5px] font-semibold no-underline border-l-[3px] md:border-l-0 md:border-b-2 border-lime-500 pl-2 md:pl-0 md:pb-0.5">Modul</a>
       <a href="{{ route('role.mentor.leaderboard') }}" class="text-[#c7cce8] text-base md:text-[13.5px] font-semibold no-underline transition-colors hover:text-white">Leaderboard</a>
       <a href="{{ route('dashboard') }}" class="text-[#c7cce8] text-base md:text-[13.5px] font-semibold no-underline transition-colors hover:text-white">Dashboard</a>
