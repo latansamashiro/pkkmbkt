@@ -57,44 +57,7 @@
 </head>
 
 <body class="font-sans text-ink-900 m-0 p-0 bg-bg antialiased">
-  <!-- ============ NAVBAR — IDENTIK HALAMAN LAIN ============ -->
-  <header
-    class="sticky top-0 z-40 flex items-center justify-between gap-4 px-4 sm:px-8 md:px-12 py-3.5 bg-navy-900 border-b border-white/10">
-    <a
-      href="#"
-      class="flex items-center gap-2.5 z-50 no-underline"
-      aria-label="PKKMB-KT UNILAM Beranda">
-      <div
-        class="w-[38px] h-[38px] rounded-full bg-white flex items-center justify-center font-display text-[9px] font-bold text-navy-900 text-center leading-tight flex-shrink-0 overflow-hidden">
-        <img
-          src="{{ asset('gambar/unilam.png') }}"
-          alt="Logo UNILAM"
-          class="w-full h-full object-contain" />
-      </div>
-      <div>
-        <strong class="block font-display text-[14.5px] text-white">PKKMB-KT</strong>
-        <span class="text-[10.5px] text-[#aeb6e0] tracking-[0.04em]">UNILAM 2026</span>
-      </div>
-    </a>
-
-    <nav class="hidden md:flex flex-row gap-7" id="navbarLinks">
-      <a
-        href="{{ route('role.mentor.modul') }}"
-        class="text-[#c7cce8] text-[13.5px] font-semibold no-underline transition-colors hover:text-white">Modul</a>
-      <a
-        href="{{ route('role.mentor.leaderboard') }}"
-        class="text-[#c7cce8] text-[13.5px] font-semibold no-underline transition-colors hover:text-white">Leaderboard</a>
-      <a
-        href="{{ route('dashboard') }}"
-        class="text-[#c7cce8] text-[13.5px] font-semibold no-underline transition-colors hover:text-white">Dashboard</a>
-      <a
-        href="#"
-        class="text-white text-[13.5px] font-semibold no-underline border-b-2 border-lime-500 pb-0.5">Info</a>
-      <a
-        href="{{ route('role.mentor.profil') }}"
-        class="text-[#c7cce8] text-[13.5px] font-semibold no-underline transition-colors hover:text-white">Profil</a>
-    </nav>
-  </header>
+  @include('layouts.mentor.topnav', ['navActive' => 'info'])
 
   <!-- ============ HERO ============ -->
   <section
@@ -135,73 +98,10 @@
   </div>
 
   <!-- ============ FOOTER ============ -->
-  <footer
-    class="bg-[#0d1735] px-4 sm:px-8 md:px-12 py-7 flex flex-wrap justify-between items-center gap-3.5 mt-14 pb-[calc(74px+16px)] md:pb-7">
-    <p class="text-[13px] text-[#4a6a9f] m-0">© 2026 PKKMB-KT UNILAM. Semua hak dilindungi.</p>
-    <div class="flex gap-5">
-      <a
-        href="{{ route('landing.kebijakan-privasi') }}"
-        class="text-[13px] text-[#4a6a9f] no-underline transition-colors hover:text-[#aeb6e0]">Kebijakan Privasi</a>
-      <a
-        href="{{ route('landing.syarat-ketentuan') }}"
-        class="text-[13px] text-[#4a6a9f] no-underline transition-colors hover:text-[#aeb6e0]">Syarat &amp; Ketentuan</a>
-      <a
-        href="{{ route('landing.bantuan') }}"
-        class="text-[13px] text-[#4a6a9f] no-underline transition-colors hover:text-[#aeb6e0]">Bantuan</a>
-    </div>
-  </footer>
+  @include('layouts.mentor.footer')
 
   <!-- ======= BOTTOM NAV (mobile only) ======= -->
-  <nav
-    class="fixed bottom-0 left-0 right-0 h-[74px] bg-surface border-t border-border flex items-center justify-around px-1.5 pb-[env(safe-area-inset-bottom)] z-30 md:hidden"
-    aria-label="Navigasi bawah">
-    <a
-      href="{{ route('role.mentor.modul') }}"
-      class="flex flex-col items-center gap-1 text-ink-400 text-[10px] font-bold flex-1 py-1.5 no-underline">
-      <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5C4.7 20 4 19.3 4 18.5z" />
-        <path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5z" />
-      </svg>
-      <span>Modul</span>
-    </a>
-    <a
-      href="{{ route('role.mentor.leaderboard') }}"
-      class="flex flex-col items-center gap-1 text-ink-400 text-[10px] font-bold flex-1 py-1.5 no-underline">
-      <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 3l1.8 3.6L18 7.2l-3 2.9.7 4.1L12 12.3l-3.7 1.9.7-4.1-3-2.9 4.2-.6z" />
-        <path d="M5 21v-5M12 21v-7M19 21v-4" />
-      </svg>
-      <span>Leaderboard</span>
-    </a>
-    <a
-      href="{{ route('dashboard') }}"
-      class="flex-none flex flex-col items-center justify-center text-white -mt-[30px] bg-navy-900 w-[54px] h-[54px] rounded-full shadow-[0_10px_24px_rgba(21,33,89,0.16)] no-underline [&>span]:hidden"
-      aria-label="Beranda">
-      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 11.5 12 4l8 7.5" />
-        <path d="M6 10v9.5a.5.5 0 0 0 .5.5H10v-6h4v6h3.5a.5.5 0 0 0 .5-.5V10" />
-      </svg>
-      <span>Beranda</span>
-    </a>
-    <a
-      href="#"
-      class="flex flex-col items-center gap-1 text-navy-900 text-[10px] font-bold flex-1 py-1.5 no-underline">
-      <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-        <path d="M9 17a3 3 0 0 0 6 0" />
-      </svg>
-      <span>Info</span>
-    </a>
-    <a
-      href="{{ route('role.mentor.profil') }}"
-      class="flex flex-col items-center gap-1 text-ink-400 text-[10px] font-bold flex-1 py-1.5 no-underline">
-      <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="8" r="3.4" />
-        <path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6" />
-      </svg>
-      <span>Profil</span>
-    </a>
-  </nav>
+  @include('layouts.mentor.bottomnav', ['navActive' => 'info'])
 
   <script>
     $(function() {
