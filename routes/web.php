@@ -166,6 +166,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/evaluasi/detail', 'evaluasiDetail')->name('role.mentor.evaluasi.detail');
             Route::get('/keaktifan', 'keaktifan')->name('role.mentor.keaktifan');
             Route::get('/monitoring-tugas', 'monitoringTugas')->name('role.mentor.monitoring-tugas');
+            Route::post('/monitoring-tugas/submit', 'monitoringTugasSubmit')->name('role.mentor.monitoring-tugas.submit');
         });
     });
 

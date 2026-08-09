@@ -90,7 +90,8 @@
         <h1 class="font-display font-bold text-white mb-3 leading-[1.2] m-0" style="font-size: clamp(24px,4vw,38px);">Pengumpulan Tugas</h1>
         <p class="text-sm text-white/75 leading-[1.7] m-0" style="max-width: 480px;">
           Centang tugas yang sudah dikumpulkan tiap mahasiswa langsung dari
-          tabel — geser ke samping kalau tugasnya banyak, geser ke bawah
+          tabel, lalu tekan tombol <strong>Kirim</strong> di bawah tabel untuk
+          menyimpan — geser ke samping kalau tugasnya banyak, geser ke bawah
           kalau mahasiswanya banyak.
         </p>
       </div>
@@ -136,10 +137,21 @@
       <div class="tugas-table-scroll" style="max-height: 560px; overflow: auto;">
         <table class="w-full border-collapse" style="min-width: 560px;">
           <thead>
+            <tr id="tableGroupHeadRow"></tr>
             <tr id="tableHeadRow"></tr>
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
+      </div>
+      <div class="bg-bg border-t border-border flex justify-between items-center gap-3 flex-wrap" style="padding: 14px 20px;">
+        <span class="text-[11.5px] font-bold text-lime-600" id="statusKirim">Semua status sudah tersimpan</span>
+        <button type="button" id="btnKirim" disabled class="opacity-60 cursor-not-allowed inline-flex items-center gap-2 bg-navy-900 text-white text-[12.5px] font-bold rounded-full transition-colors hover:bg-navy-700" style="padding: 10px 22px; border: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+            <path d="M22 2 11 13" />
+            <path d="M22 2 15 22l-4-9-9-4z" />
+          </svg>
+          Kirim Status Pengumpulan
+        </button>
       </div>
     </div>
   </main>
@@ -203,16 +215,36 @@
       // ======================================================================
       const KELOMPOK_MENTOR = @json($group->name ?? 'Belum ada kelompok');
       const ANGGOTA_KELOMPOK = @json($anggotaKelompok);
+      const CSRF_TOKEN = @json(csrf_token());
+      const SUBMIT_URL = @json(route('role.mentor.monitoring-tugas.submit'));
+      let adaPerubahan = false;
 
       $("#kelompokNama").text(KELOMPOK_MENTOR);
 
       let kataKunciCari = "";
 
       function renderTableHead() {
+        // Baris label kelompok kolom: "Tugas Individu" vs "Tugas Kelompok".
+        let groupHeaderHtml =
+          `<th class="border-b border-border bg-bg sticky top-0 z-[2]" colspan="2"></th>`;
+        let i = 0;
+        while (i < DAFTAR_TUGAS.length) {
+          const tipe = DAFTAR_TUGAS[i].tipe;
+          let span = 0;
+          while (i < DAFTAR_TUGAS.length && DAFTAR_TUGAS[i].tipe === tipe) {
+            span++;
+            i++;
+          }
+          const label = tipe === "kelompok" ? "Tugas Kelompok" : "Tugas Individu";
+          const tone = tipe === "kelompok" ? "text-teal-600 bg-teal-tint" : "text-navy-700 bg-navy-tint";
+          groupHeaderHtml += `<th colspan="${span}" class="text-center text-[10px] font-extrabold uppercase tracking-[0.05em] ${tone} border-b border-border sticky top-0 z-[2] whitespace-nowrap" style="padding:7px 14px;">${label}</th>`;
+        }
+        $("#tableGroupHeadRow").html(groupHeaderHtml);
+
         const html =
-          `<th class="w-11 text-center text-[10.5px] font-extrabold uppercase tracking-[0.03em] text-navy-900 bg-bg border-b-[1.5px] border-border sticky top-0 z-[2] whitespace-nowrap" style="padding:12px 14px;">No</th>` +
-          `<th class="text-left text-[10.5px] font-extrabold uppercase tracking-[0.03em] text-navy-900 bg-bg border-b-[1.5px] border-border sticky top-0 z-[2] whitespace-nowrap" style="padding:12px 14px; min-width:200px;">Nama</th>` +
-          DAFTAR_TUGAS.map((t) => `<th class="text-center text-[10.5px] font-extrabold uppercase tracking-[0.03em] text-navy-900 bg-bg border-b-[1.5px] border-border sticky top-0 z-[2] whitespace-nowrap" style="padding:12px 14px; min-width:150px;">${t.nama}</th>`).join("");
+          `<th class="w-11 text-center text-[10.5px] font-extrabold uppercase tracking-[0.03em] text-navy-900 bg-bg border-b-[1.5px] border-border sticky z-[2] whitespace-nowrap" style="padding:12px 14px; top:28px;">No</th>` +
+          `<th class="text-left text-[10.5px] font-extrabold uppercase tracking-[0.03em] text-navy-900 bg-bg border-b-[1.5px] border-border sticky z-[2] whitespace-nowrap" style="padding:12px 14px; min-width:200px; top:28px;">Nama</th>` +
+          DAFTAR_TUGAS.map((t) => `<th class="text-center text-[10.5px] font-extrabold uppercase tracking-[0.03em] text-navy-900 bg-bg border-b-[1.5px] border-border sticky z-[2] whitespace-nowrap" style="padding:12px 14px; min-width:150px; top:28px;">${t.nama}</th>`).join("");
         $("#tableHeadRow").html(html);
       }
 
@@ -233,7 +265,7 @@
                 const done = !!m.tugas[t.id];
                 return `
                     <td class="text-center border-t border-border" style="padding:12px 14px;">
-                      <button class="w-[30px] h-[30px] rounded-[9px] border-[1.5px] inline-flex items-center justify-center cursor-pointer transition-all ${done ? "bg-[#22c55e] border-[#22c55e]" : "border-border bg-surface hover:border-teal-500"}" data-npm="${m.npm}" data-tugas="${t.id}" aria-label="${t.nama}">
+                      <button class="w-[30px] h-[30px] rounded-[9px] border-[1.5px] inline-flex items-center justify-center cursor-pointer transition-all disabled:opacity-50 disabled:cursor-wait ${done ? "bg-[#22c55e] border-[#22c55e]" : "border-border bg-surface hover:border-teal-500"}" data-student="${m.student_id}" data-tugas="${t.id}" aria-label="${t.nama}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-[15px] h-[15px] text-white ${done ? "opacity-100" : "opacity-0"}"><path d="M20 6 9 17l-5-5" /></svg>
                       </button>
                     </td>
@@ -260,11 +292,18 @@
 
           $tbody.html(html);
 
-          $tbody.find(".check-toggle, button[data-npm]").on("click", function() {
+          $tbody.find("button[data-student]").on("click", function() {
             const $btn = $(this);
-            const mhs = ANGGOTA_KELOMPOK.find((m) => m.npm === $btn.data("npm"));
-            const tugasKey = $btn.data("tugas");
-            mhs.tugas[tugasKey] = !mhs.tugas[tugasKey];
+            const studentId = $btn.data("student");
+            const taskId = String($btn.data("tugas"));
+            const mhs = ANGGOTA_KELOMPOK.find((m) => String(m.student_id) === String(studentId));
+            if (!mhs) return;
+
+            // Cuma ubah state lokal dulu — belum dikirim ke server sampai
+            // tombol "Kirim" ditekan.
+            mhs.tugas[taskId] = !mhs.tugas[taskId];
+            adaPerubahan = true;
+            updateTombolKirim();
             renderTableBody();
           });
         }
@@ -284,6 +323,60 @@
         $("#statBelum").text(belum);
       }
 
+      // ======================================================================
+      // ►► TOMBOL KIRIM — kirim SEMUA centangan sekaligus ke server, bukan
+      // per klik. Selama belum dikirim, perubahan cuma ada di browser.
+      // ======================================================================
+      function updateTombolKirim() {
+        const $btn = $("#btnKirim");
+        const $status = $("#statusKirim");
+        if (adaPerubahan) {
+          $btn.prop("disabled", false).removeClass("opacity-60 cursor-not-allowed");
+          $status.text("Ada perubahan yang belum dikirim").removeClass("text-lime-600").addClass("text-[#d97706]");
+        } else {
+          $btn.prop("disabled", true).addClass("opacity-60 cursor-not-allowed");
+          $status.text("Semua status sudah tersimpan").removeClass("text-[#d97706]").addClass("text-lime-600");
+        }
+      }
+
+      $("#btnKirim").on("click", function() {
+        const $btn = $(this);
+        if ($btn.prop("disabled")) return;
+
+        const data = {};
+        ANGGOTA_KELOMPOK.forEach((m) => {
+          data[m.student_id] = {};
+          DAFTAR_TUGAS.forEach((t) => {
+            data[m.student_id][t.id] = !!m.tugas[t.id];
+          });
+        });
+
+        $btn.prop("disabled", true).addClass("opacity-60 cursor-not-allowed");
+        $btn.data("label", $btn.html());
+        $btn.html("Mengirim...");
+
+        $.ajax({
+          url: SUBMIT_URL,
+          method: "POST",
+          headers: { "X-CSRF-TOKEN": CSRF_TOKEN },
+          data: { data: data },
+          dataType: "json",
+        })
+          .done(function() {
+            adaPerubahan = false;
+            updateTombolKirim();
+          })
+          .fail(function(xhr) {
+            const msg = xhr.responseJSON?.message || "Gagal mengirim status tugas. Coba lagi.";
+            alert(msg);
+            adaPerubahan = true;
+            updateTombolKirim();
+          })
+          .always(function() {
+            $btn.html($btn.data("label"));
+          });
+      });
+
       $("#searchInput").on("input", function() {
         kataKunciCari = $(this).val();
         renderTableBody();
@@ -291,6 +384,14 @@
 
       renderTableHead();
       renderTableBody();
+      updateTombolKirim();
+
+      window.addEventListener("beforeunload", function(e) {
+        if (adaPerubahan) {
+          e.preventDefault();
+          e.returnValue = "";
+        }
+      });
 
       // ======================================================================
       // ►► SLIDESHOW LATAR HERO — sama seperti halaman lain.

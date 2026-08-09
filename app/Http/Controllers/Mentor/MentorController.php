@@ -301,34 +301,35 @@ class MentorController extends Controller
     {
         $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
 
-        $tasks = \App\Models\Task::where('status', '!=', 'draft')->orderBy('deadline')->get();
-        $daftarTugas = $tasks->map(fn($t) => ['id' => (string) $t->id, 'nama' => $t->title]);
+        // Urutkan tugas individu duluan baru kelompok, supaya kolomnya di tabel
+        // gampang dikelompokkan per jenis (bukan campur acak).
+        $tasks = \App\Models\Task::where('status', '!=', 'draft')
+            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok')")
+            ->orderBy('deadline')
+            ->get();
+        $daftarTugas = $tasks->map(fn($t) => ['id' => (string) $t->id, 'nama' => $t->title, 'tipe' => $t->task_type]);
 
         $anggotaKelompok = collect();
         if ($group) {
-            // status 'selesai' dianggap sudah mengumpulkan; status lain ('ditugaskan', dst) dianggap belum.
-            $groupTaskDoneTaskIds = \App\Models\GroupTask::where('group_id', $group->id)
-                ->where('status', 'selesai')
-                ->pluck('task_id')
-                ->all();
-
             $anggotaKelompok = \App\Models\Member::where('group_id', $group->id)
                 ->with('student')
                 ->get()
-                ->map(function ($m) use ($tasks, $groupTaskDoneTaskIds) {
-                    $tugas = $tasks->mapWithKeys(function ($t) use ($m, $groupTaskDoneTaskIds) {
-                        if ($t->task_type === 'kelompok') {
-                            $done = in_array($t->id, $groupTaskDoneTaskIds, true);
-                        } else {
-                            $done = \App\Models\StudentTask::where('task_id', $t->id)
-                                ->where('student_id', $m->student_id)
-                                ->where('status', 'selesai')
-                                ->exists();
-                        }
-                        return [(string) $t->id => $done];
+                ->map(function ($m) use ($tasks) {
+                    // Status pengumpulan SELALU per mahasiswa, baik tugas individu
+                    // maupun kelompok — supaya mentor bisa membedakan anggota yang
+                    // benar-benar ikut mengerjakan dari yang tidak, walau tugasnya
+                    // ditugaskan ke kelompok.
+                    $doneTaskIds = \App\Models\StudentTask::where('student_id', $m->student_id)
+                        ->where('status', 'selesai')
+                        ->pluck('task_id')
+                        ->all();
+
+                    $tugas = $tasks->mapWithKeys(function ($t) use ($doneTaskIds) {
+                        return [(string) $t->id => in_array($t->id, $doneTaskIds, true)];
                     });
 
                     return [
+                        'student_id' => $m->student_id,
                         'nama' => $m->student->name ?? '-',
                         'npm' => $m->student->npm ?? '-',
                         'tugas' => $tugas,
@@ -337,5 +338,61 @@ class MentorController extends Controller
         }
 
         return view('role.mentor.monitoring-tugas', compact('group', 'daftarTugas', 'anggotaKelompok'));
+    }
+
+    /**
+     * Mentor kirim sekaligus semua centang status pengumpulan tugas (per
+     * mahasiswa, per tugas) dari halaman Monitoring Pengumpulan Tugas —
+     * dikirim satu kali lewat tombol "Kirim", bukan tersimpan otomatis tiap
+     * klik centang.
+     *
+     * Statusnya selalu disimpan per mahasiswa (student_tasks), baik untuk tugas
+     * individu maupun kelompok — sengaja TIDAK otomatis menyamakan status ke
+     * seluruh anggota kelompok, karena bisa saja ada anggota yang tidak ikut
+     * mengerjakan padahal tugasnya ditugaskan ke kelompoknya.
+     */
+    public function monitoringTugasSubmit(\Illuminate\Http\Request $request)
+    {
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+        abort_unless($group, 403, 'Kamu belum punya kelompok bimbingan.');
+
+        $validated = $request->validate([
+            'data' => 'required|array',
+        ]);
+
+        $validStudentIds = \App\Models\Member::where('group_id', $group->id)->pluck('student_id')->all();
+        $validTaskIds = \App\Models\Task::where('status', '!=', 'draft')->pluck('id')->all();
+
+        $disimpan = 0;
+        foreach ($validated['data'] as $studentId => $tugasMap) {
+            $studentId = (int) $studentId;
+            if (!in_array($studentId, $validStudentIds, true) || !is_array($tugasMap)) {
+                continue; // abaikan kalau bukan anggota kelompok ini
+            }
+
+            foreach ($tugasMap as $taskId => $selesai) {
+                $taskId = (int) $taskId;
+                if (!in_array($taskId, $validTaskIds, true)) {
+                    continue; // abaikan kalau task_id-nya tidak valid/tidak aktif
+                }
+
+                $record = \App\Models\StudentTask::firstOrNew([
+                    'student_id' => $studentId,
+                    'task_id' => $taskId,
+                ]);
+                $record->status = $selesai ? 'selesai' : 'ditugaskan';
+                if (!$record->exists) {
+                    $record->created_by_id = auth()->id();
+                }
+                $record->updated_by_id = auth()->id();
+                $record->save();
+                $disimpan++;
+            }
+        }
+
+        return response()->json([
+            'message' => 'Status pengumpulan tugas berhasil dikirim.',
+            'disimpan' => $disimpan,
+        ]);
     }
 }
