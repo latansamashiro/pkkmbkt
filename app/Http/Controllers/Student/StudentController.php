@@ -16,6 +16,16 @@ class StudentController extends Controller
         return view('role.student.leaderboard');
     }
 
+    public function dashboard()
+    {
+        $jadwalHariIni = \App\Models\Schedule::where('status', 'published')
+            ->whereDate('schedule_date', today())
+            ->orderBy('schedule_begin_time')
+            ->get();
+
+        return view('role.student.dashboard', compact('jadwalHariIni'));
+    }
+
     public function info()
     {
         $announcementData = \App\Models\Information::where('status', 'published')

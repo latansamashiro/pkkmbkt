@@ -1004,69 +1004,37 @@
               </a>
             </div>
 
-            <a class="schedule-card" href="{{ route('role.student.jadwal') }}">
-              <span class="schedule-icon">
-                <svg
-                  class="ic"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <rect x="4" y="5" width="16" height="16" rx="2" />
-                  <path d="M8 3v4M16 3v4M4 9.5h16" />
-                  <circle
-                    cx="8.3"
-                    cy="13.2"
-                    r=".9"
-                    fill="currentColor"
-                    stroke="none" />
-                  <circle
-                    cx="12"
-                    cy="13.2"
-                    r=".9"
-                    fill="currentColor"
-                    stroke="none" />
-                  <circle
-                    cx="15.7"
-                    cy="13.2"
-                    r=".9"
-                    fill="currentColor"
-                    stroke="none" />
-                  <circle
-                    cx="8.3"
-                    cy="16.6"
-                    r=".9"
-                    fill="currentColor"
-                    stroke="none" />
-                  <circle
-                    cx="12"
-                    cy="16.6"
-                    r=".9"
-                    fill="currentColor"
-                    stroke="none" />
-                </svg>
-              </span>
-              <span class="schedule-info">
-                <p class="schedule-title">Pembekalan PKKMB</p>
-                <p class="schedule-meta">
-                  <span>08.00&ndash;09.00</span><span>&middot;</span><span>Hall Unilam</span>
-                </p>
-              </span>
-              <span class="schedule-go">
-                <svg
-                  class="ic"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path d="M9 6l6 6-6 6" />
-                </svg>
-              </span>
-            </a>
+@forelse ($jadwalHariIni as $j)
+              <a class="schedule-card" href="{{ route('role.student.jadwal') }}">
+                <span class="schedule-icon">
+                  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="5" width="16" height="16" rx="2" />
+                    <path d="M8 3v4M16 3v4M4 9.5h16" />
+                    <circle cx="8.3" cy="13.2" r=".9" fill="currentColor" stroke="none" />
+                    <circle cx="12" cy="13.2" r=".9" fill="currentColor" stroke="none" />
+                    <circle cx="15.7" cy="13.2" r=".9" fill="currentColor" stroke="none" />
+                    <circle cx="8.3" cy="16.6" r=".9" fill="currentColor" stroke="none" />
+                    <circle cx="12" cy="16.6" r=".9" fill="currentColor" stroke="none" />
+                  </svg>
+                </span>
+                <span class="schedule-info">
+                  <p class="schedule-title">{{ $j->title }}</p>
+                  <p class="schedule-meta">
+                    <span>{{ substr($j->schedule_begin_time, 0, 5) }}&ndash;{{ substr($j->schedule_end_time, 0, 5) }}</span>
+                    @if ($j->place)
+                      <span>&middot;</span><span>{{ $j->place }}</span>
+                    @endif
+                  </p>
+                </span>
+                <span class="schedule-go">
+                  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                </span>
+              </a>
+            @empty
+              <p class="text-sm text-ink-400 text-center py-6 m-0">Tidak ada jadwal untuk hari ini.</p>
+            @endforelse
           </section>
         </div>
 

@@ -22,8 +22,8 @@ class DashboardController extends Controller
         return match ($role) {
             'SUPER-ADMIN' => $this->superAdmin(),
             'ADVISOR'     => app(\App\Http\Controllers\Advisor\AdvisorController::class)->dashboard(),
-            'MENTOR'      => view('role.mentor.dashboard'),
-            'STUDENT'     => view('role.student.dashboard'),
+            'MENTOR'      => app(\App\Http\Controllers\Mentor\MentorController::class)->dashboard(),
+            'STUDENT'     => app(\App\Http\Controllers\Student\StudentController::class)->dashboard(),
             'COMMITTEE'   => app(\App\Http\Controllers\Committee\DashboardController::class)->index(),
             default       => abort(403, 'Role akun tidak dikenali: "' . auth()->user()->role_name . '"'),
         };
