@@ -46,6 +46,11 @@
                 <span class="ic"><i data-lucide="alert-triangle"></i></span>
                 <span class="label">Pelanggaran</span>
             </a>
+            <a href="{{ route('role.advisor.monitoring.tugas') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.tugas*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="clipboard-list"></i></span>
+                <span class="label">Pengumpulan Tugas</span>
+            </a>
             <a href="#" class="disabled" aria-disabled="true">
                 <span class="ic"><i data-lucide="trophy"></i></span>
                 <span class="label">Leaderboard</span>

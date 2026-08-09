@@ -11,6 +11,8 @@ use App\Models\Activity;
 use App\Models\Evaluation;
 use App\Models\EvaluationCategory;
 use App\Models\Member;
+use App\Models\Task;
+use App\Models\StudentTask;
 
 /**
  * ASUMSI YANG PERLU DICEK:
@@ -380,6 +382,141 @@ class AdvisorController extends Controller
             : 'role.advisor.monitoring-pelanggaran.detail';
 
         return view($view, compact('group', 'rows', 'tipe'));
+    }
+
+    // ===== Monitoring Pengumpulan Tugas (scoped ke kelompok binaan) =====
+
+    public function tugas(Request $request)
+    {
+        $cari = $request->query('cari');
+
+        $tasks = Task::where('status', '!=', 'draft')->get();
+        $totalTugas = $tasks->count();
+        $taskIds = $tasks->pluck('id');
+
+        $laporan = $this->myGroups()
+            ->with('mentor')
+            ->when($cari, fn ($q) => $q->where('name', 'like', "%{$cari}%"))
+            ->get()
+            ->map(function ($group) use ($taskIds, $totalTugas) {
+                $studentIds = Member::where('group_id', $group->id)->pluck('student_id');
+                $totalAnggota = $studentIds->count();
+                $totalSlot = $totalAnggota * $totalTugas;
+
+                $query = StudentTask::whereIn('student_id', $studentIds)
+                    ->whereIn('task_id', $taskIds)
+                    ->where('status', 'selesai');
+
+                $selesai = (clone $query)->count();
+                $updateTerakhir = (clone $query)->max('updated_at');
+
+                $status = match (true) {
+                    $selesai === 0 => 'Belum dimulai',
+                    $totalSlot > 0 && $selesai >= $totalSlot => "Selesai {$selesai}/{$totalSlot}",
+                    default => "Berjalan {$selesai}/{$totalSlot}",
+                };
+
+                return [
+                    'group_id'   => $group->id,
+                    'oleh_label' => ($group->mentor->name ?? '-') . ' — ' . $group->name,
+                    'tanggal'    => $updateTerakhir,
+                    'status'     => $status,
+                ];
+            })
+            ->filter(fn ($g) => $g['tanggal'] !== null)
+            ->values();
+
+        $filters = compact('cari');
+
+        return view('role.advisor.monitoring-tugas.index', compact('laporan', 'filters'));
+    }
+
+    public function tugasDetail($groupId)
+    {
+        [$group, $tasks, $rows] = array_values($this->siapkanDataTugasDetail($groupId));
+
+        return view('role.advisor.monitoring-tugas.detail', compact('group', 'tasks', 'rows'));
+    }
+
+    public function tugasExportExcel($groupId)
+    {
+        [$group, $tasks, $rows] = array_values($this->siapkanDataTugasDetail($groupId));
+
+        $namaFile = 'tugas_' . \Illuminate\Support\Str::slug($group->name) . '.csv';
+
+        $callback = function () use ($tasks, $rows) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+
+            $header = ['No', 'Mahasiswa', 'NPM'];
+            foreach ($tasks as $t) {
+                $header[] = $t->title . ' (' . ($t->task_type === 'kelompok' ? 'Kelompok' : 'Individu') . ')';
+            }
+            $header[] = 'Selesai';
+            fputcsv($out, $header);
+
+            foreach ($rows as $idx => $r) {
+                $row = [$idx + 1, $r['nama'], $r['npm']];
+                foreach ($tasks as $t) {
+                    $row[] = ($r['tugas'][(string) $t->id] ?? false) ? 'Selesai' : 'Belum';
+                }
+                $row[] = "{$r['selesai']}/{$r['total']}";
+                fputcsv($out, $row);
+            }
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$namaFile}\"",
+        ]);
+    }
+
+    /**
+     * Helper bareng buat tugasDetail()/tugasExportExcel() — meniru
+     * App\Http\Controllers\Admin\MonitoringController::siapkanDataTugasDetail(),
+     * cuma findOrFail-nya lewat myGroups() supaya advisor tidak bisa intip
+     * kelompok yang bukan binaannya (404 kalau bukan).
+     */
+    protected function siapkanDataTugasDetail($groupId): array
+    {
+        $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
+
+        $tasks = Task::where('status', '!=', 'draft')
+            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok')")
+            ->orderBy('deadline')
+            ->get();
+
+        $studentIds = Member::where('group_id', $groupId)->pluck('student_id');
+
+        $doneMap = StudentTask::whereIn('student_id', $studentIds)
+            ->whereIn('task_id', $tasks->pluck('id'))
+            ->where('status', 'selesai')
+            ->get()
+            ->groupBy('student_id')
+            ->map(fn ($c) => $c->pluck('task_id')->all());
+
+        $rows = Member::where('group_id', $groupId)
+            ->with('student')
+            ->get()
+            ->map(function ($m) use ($tasks, $doneMap) {
+                $doneIds = $doneMap->get($m->student_id, []);
+
+                $tugas = $tasks->mapWithKeys(
+                    fn ($t) => [(string) $t->id => in_array($t->id, $doneIds, true)]
+                );
+
+                return [
+                    'nama'    => $m->student->name ?? '-',
+                    'npm'     => $m->student->npm ?? '-',
+                    'tugas'   => $tugas,
+                    'selesai' => count($doneIds),
+                    'total'   => $tasks->count(),
+                ];
+            })
+            ->values();
+
+        return compact('group', 'tasks', 'rows');
     }
 
     // ===== Profil =====

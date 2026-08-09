@@ -83,6 +83,11 @@
                 <span class="ic"><i data-lucide="alert-triangle"></i></span>
                 <span class="label">Pelanggaran</span>
             </a>
+            <a href="{{ route('admin.monitoring.tugas') }}"
+                class="{{ request()->routeIs('admin.monitoring.tugas*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="clipboard-list"></i></span>
+                <span class="label">Pengumpulan Tugas</span>
+            </a>
             <a href="{{ route('admin.monitoring.laporan') }}"
                 class="{{ request()->routeIs('admin.monitoring.laporan') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="file-bar-chart-2"></i></span>

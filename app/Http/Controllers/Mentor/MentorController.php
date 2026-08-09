@@ -376,6 +376,12 @@ class MentorController extends Controller
                     continue; // abaikan kalau task_id-nya tidak valid/tidak aktif
                 }
 
+                // PENTING: $selesai datang dari request HTTP sebagai STRING
+                // ("true"/"false"), bukan boolean asli — PHP menganggap string
+                // "false" itu TRUTHY, jadi harus di-parse eksplisit pakai
+                // filter_var(), bukan langsung dipakai di kondisi if/ternary.
+                $selesai = filter_var($selesai, FILTER_VALIDATE_BOOLEAN);
+
                 $record = \App\Models\StudentTask::firstOrNew([
                     'student_id' => $studentId,
                     'task_id' => $taskId,

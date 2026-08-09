@@ -122,6 +122,13 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.monitoring.evaluasi');
         Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'evaluasiDetail'])
             ->name('admin.monitoring.evaluasi.detail');
+
+        Route::get('/monitoring/tugas', [MonitoringController::class, 'tugas'])
+            ->name('admin.monitoring.tugas');
+        Route::get('/monitoring/tugas/{groupId}', [MonitoringController::class, 'tugasDetail'])
+            ->name('admin.monitoring.tugas.detail');
+        Route::get('/monitoring/tugas/{groupId}/export-excel', [MonitoringController::class, 'tugasExportExcel'])
+            ->name('admin.monitoring.tugas.export-excel');
     });
 
     //Advisor
@@ -140,6 +147,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-excel', 'absensiExportExcel')->name('role.advisor.monitoring.absensi.export-excel');
             Route::get('/monitoring/evaluasi', 'evaluasi')->name('role.advisor.monitoring.evaluasi');
             Route::get('/monitoring/evaluasi/{groupId}', 'evaluasiDetail')->name('role.advisor.monitoring.evaluasi.detail');
+
+            Route::get('/monitoring/tugas', 'tugas')->name('role.advisor.monitoring.tugas');
+            Route::get('/monitoring/tugas/{groupId}', 'tugasDetail')->name('role.advisor.monitoring.tugas.detail');
+            Route::get('/monitoring/tugas/{groupId}/export-excel', 'tugasExportExcel')->name('role.advisor.monitoring.tugas.export-excel');
 
             Route::get('/monitoring/keaktifan', 'keaktifan')->name('role.advisor.monitoring.keaktifan');
             Route::get('/monitoring/keaktifan/{groupId}', 'keaktifanDetail')->name('role.advisor.monitoring.keaktifan.detail');
@@ -304,6 +315,10 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/evaluasi', 'evaluasi')->name('committee.monitoring.evaluasi');
             Route::get('/evaluasi/{groupId}', 'evaluasiDetail')->name('committee.monitoring.evaluasi.detail');
+
+            Route::get('/tugas', 'tugas')->name('committee.monitoring.tugas');
+            Route::get('/tugas/{groupId}', 'tugasDetail')->name('committee.monitoring.tugas.detail');
+            Route::get('/tugas/{groupId}/export-excel', 'tugasExportExcel')->name('committee.monitoring.tugas.export-excel');
         });
 
         // ===== Profil (reuse ProfilController, view sama seperti Admin — otomatis deteksi layout) =====

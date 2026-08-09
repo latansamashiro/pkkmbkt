@@ -83,6 +83,10 @@
                 <span class="ic"><i data-lucide="alert-triangle"></i></span>
                 <span class="label">Pelanggaran</span>
             </a>
+            <a href="{{ route('committee.monitoring.tugas') }}" class="{{ request()->routeIs('committee.monitoring.tugas*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="clipboard-list"></i></span>
+                <span class="label">Pengumpulan Tugas</span>
+            </a>
             <a href="#">
                 <span class="ic"><i data-lucide="trophy"></i></span>
                 <span class="label">Leaderboard</span>
