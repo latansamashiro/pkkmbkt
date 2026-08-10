@@ -304,17 +304,8 @@
       /* ============ GRID LAYOUT ============ */
       .main-grid {
         @apply grid items-start;
-        grid-template-columns: 1fr 300px;
+        grid-template-columns: 1fr;
         gap: 28px;
-      }
-      @media (max-width: 1024px) {
-        .main-grid {
-          grid-template-columns: 1fr;
-        }
-        .sidebar {
-          @apply grid gap-4;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        }
       }
 
       /* ============ SECTION HEADING ============ */
@@ -433,40 +424,59 @@
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       }
       .ebook-card {
-        @apply bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] flex gap-3.5 items-start transition-all;
-        padding: 18px;
+        @apply bg-surface rounded-[18px] border border-border overflow-hidden shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] flex flex-col transition-all;
       }
       .ebook-card:hover {
-        @apply -translate-y-0.5 shadow-[0_10px_24px_rgba(21,33,89,0.16)];
+        @apply -translate-y-[3px] shadow-[0_10px_24px_rgba(21,33,89,0.16)];
       }
-      .ebook-icon {
-        @apply w-12 rounded-[10px] flex items-center justify-center flex-shrink-0;
-        height: 56px;
-        background: linear-gradient(135deg, var(--teal-600), var(--navy-700));
-        box-shadow: 0 4px 12px rgba(15, 138, 140, 0.3);
+      .ebook-thumb {
+        @apply relative overflow-hidden bg-navy-900 flex items-center justify-center;
+        height: 130px;
       }
-      .ebook-icon svg {
-        @apply w-[22px] h-[22px] opacity-90;
+      .ebook-thumb img {
+        @apply w-full h-full object-cover block;
+      }
+      .ebook-thumb-gradient {
+        @apply w-full h-full flex items-center justify-center;
+      }
+      .ebook-thumb-gradient svg {
+        @apply w-9 h-9 opacity-90;
         fill: #fff;
       }
       .ebook-body {
-        @apply flex-1 min-w-0;
+        @apply flex flex-col flex-1 gap-2.5;
+        padding: 14px 16px 16px;
       }
       .ebook-title {
-        @apply text-[13px] font-bold text-ink-900 leading-[1.4] mb-1 overflow-hidden;
+        @apply text-[13px] font-bold text-ink-900 leading-[1.4] overflow-hidden;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
       }
       .ebook-meta {
-        @apply text-[10.5px] text-ink-400 font-semibold mb-2.5;
+        @apply text-[10.5px] text-ink-400 font-semibold;
       }
-      .btn-download {
-        @apply block text-center rounded-[13px] text-[11.5px] font-bold bg-teal-tint text-teal-600 border-none cursor-pointer transition-colors w-full;
+      .ebook-btn-row {
+        @apply flex gap-2;
+      }
+      .btn-lihat,
+      .btn-unduh {
+        @apply flex-1 text-center rounded-[13px] text-[11.5px] font-bold border-none cursor-pointer transition-colors;
         padding: 8px 0;
       }
-      .btn-download:hover {
+      .btn-lihat {
+        @apply bg-teal-tint text-teal-600;
+      }
+      .btn-lihat:hover {
         @apply bg-teal-600 text-white;
+      }
+      .btn-unduh {
+        @apply bg-bg text-ink-600;
+        border: 1.5px solid var(--border);
+      }
+      .btn-unduh:hover {
+        @apply bg-navy-900 text-white;
+        border-color: transparent;
       }
 
       /* ============ EMPTY STATE ============ */
@@ -674,6 +684,7 @@
       .player-modal-close {
         @apply w-8 h-8 rounded-full border-none text-ink-400 text-lg leading-none cursor-pointer flex items-center justify-center transition-colors shrink-0;
         background: var(--bg);
+        margin-right: -4px; /* nyamain jarak ke kanan (18px) sama jarak ke atas (14px) biar simetris ke sudut kartu */
       }
       .player-modal-close:hover {
         @apply text-ink-900;
@@ -681,7 +692,10 @@
       }
       .player-modal-frame-wrap {
         @apply relative w-full bg-black;
-        padding-top: 56.25%; /* rasio 16:9 */
+        padding-top: 56.25%; /* rasio 16:9, dipakai buat video */
+      }
+      .player-modal-frame-wrap.is-document {
+        padding-top: 130%; /* lebih tinggi, buat baca dokumen/PDF */
       }
       .player-modal-frame-wrap iframe {
         @apply absolute inset-0 w-full h-full border-none;
@@ -893,108 +907,6 @@
         </div>
       </div>
 
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <!-- Progress Card -->
-        <div class="sidebar-card" style="text-align: center">
-          <p class="sidebar-title">Kemajuan Pembelajaran</p>
-          <div class="progress-ring-wrap">
-            <svg viewBox="0 0 36 36" width="100" height="100">
-              <path
-                stroke="#e8ebf6"
-                stroke-width="3"
-                stroke-linecap="round"
-                fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path
-                stroke="url(#pg)"
-                stroke-width="3"
-                stroke-linecap="round"
-                fill="none"
-                stroke-dasharray="75, 100"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <defs>
-                <linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#16a0a1" />
-                  <stop offset="100%" stop-color="#a9c73b" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div class="progress-ring-center">
-              <div class="progress-ring-val">75%</div>
-              <div class="progress-ring-lbl">Selesai</div>
-            </div>
-          </div>
-          <div class="sidebar-stats">
-            <div>
-              <div
-                class="sidebar-stat-val"
-                id="sideStatDone"
-                style="color: #16a34a">
-                0
-              </div>
-              <div class="sidebar-stat-lbl">Selesai</div>
-            </div>
-            <div>
-              <div
-                class="sidebar-stat-val"
-                id="sideStatProcess"
-                style="color: #d97706">
-                0
-              </div>
-              <div class="sidebar-stat-lbl">Progres</div>
-            </div>
-            <div>
-              <div
-                class="sidebar-stat-val"
-                id="sideStatUnstarted"
-                style="color: var(--ink-400)">
-                0
-              </div>
-              <div class="sidebar-stat-lbl">Belum</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Activity Card -->
-        <div class="sidebar-card">
-          <p class="sidebar-title">Aktivitas Terakhir</p>
-          <div class="activity-item">
-            <div class="activity-dot done">✓</div>
-            <div>
-              <div class="activity-text">Selesai Membaca E-Book PKKMB</div>
-              <div class="activity-sub">10 menit yang lalu</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-dot progress">•</div>
-            <div>
-              <div class="activity-text">Menonton Tata Tertib Mahasiswa</div>
-              <div class="activity-sub">Progress 45% · 1 jam lalu</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Download Card -->
-        <div class="download-card">
-          <h3>Download Semua Materi</h3>
-          <p>
-            Akses folder Google Drive untuk mengunduh seluruh materi, video,
-            dan dokumen SOP secara kolektif.
-          </p>
-          <button class="btn-drive" id="btnDownloadAll">
-            <svg
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round">
-              <path
-                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-            </svg>
-            Buka Cloud Google Drive
-          </button>
-        </div>
-      </aside>
     </div>
   </div>
 
@@ -1124,8 +1036,6 @@
 
   <script>
     $(function() {
-      const GOOGLE_DRIVE_FOLDER_URL = "#";
-
       const SKEMA_KATEGORI = [{
           id: "semua",
           label: "Semua"
@@ -1241,10 +1151,8 @@
         const html = items
           .map((v) => {
             const isDone = v.progress === 100;
-            const ytId = ekstrakYoutubeId(v.youtube);
-            // Prioritas thumbnail: gambar manual (kalau ada) > auto dari YouTube > gradasi warna.
-            const autoThumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
-            const thumbSrc = v.thumbnailImg || autoThumbUrl;
+            // Prioritas thumbnail: gambar manual (kalau ada) > auto dari YouTube/GDrive > gradasi warna.
+            const thumbSrc = v.thumbnailImg || dapatkanThumbnailOtomatis(v.youtube);
             const gradientCss = getGradientStyle(v.gradientFallback);
             const thumbHtml = thumbSrc ?
               `<img src="${thumbSrc}" alt="${v.judul}" onerror="gantiKeGradasi(this, '${gradientCss.replace(/'/g, "\\'")}')" />` :
@@ -1297,13 +1205,43 @@
         return m ? m[1] : null;
       }
 
-      // Dipanggil dari atribut onerror di tag <img> thumbnail (lihat renderVideos)
-      // kalau gambar thumbnail auto dari YouTube gagal dimuat -> ganti ke gradasi
+      function ekstrakGDriveId(url) {
+        if (!url) return null;
+        // Nangkep format: /file/d/ID/..., open?id=ID, uc?id=ID, uc?export=...&id=ID
+        const m = url.match(/drive\.google\.com\/(?:file\/d\/([a-zA-Z0-9_-]+)|(?:open|uc)\?[^#]*[?&]?id=([a-zA-Z0-9_-]+))/);
+        return m ? (m[1] || m[2]) : null;
+      }
+
+      /**
+       * Cari URL thumbnail otomatis dari link video/dokumen -> dipakai bareng
+       * di renderVideos() & renderEbooks(). YouTube & Google Drive sama-sama
+       * punya endpoint thumbnail publik yang bisa langsung dipasang di <img>.
+       */
+      function dapatkanThumbnailOtomatis(url) {
+        const ytId = ekstrakYoutubeId(url);
+        if (ytId) return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+        const gdId = ekstrakGDriveId(url);
+        if (gdId) return `https://drive.google.com/thumbnail?id=${gdId}&sz=w400`;
+        return null;
+      }
+
+      // Dipanggil dari atribut onerror di tag <img> thumbnail video (lihat renderVideos)
+      // kalau gambar thumbnail auto dari YouTube/GDrive gagal dimuat -> ganti ke gradasi
       // warna biasa. Ditaruh di window supaya bisa dipanggil dari inline HTML.
       window.gantiKeGradasi = function(imgEl, gradientCss) {
         const div = document.createElement("div");
         div.className = "video-thumb-gradient";
         div.style.background = gradientCss;
+        imgEl.replaceWith(div);
+      };
+
+      // Sama kayak gantiKeGradasi() tapi buat thumbnail E-Book -> fallback-nya
+      // ikon dokumen di atas gradasi warna, bukan gradasi polos doang.
+      window.gantiKeIkonDokumen = function(imgEl, gradientCss) {
+        const div = document.createElement("div");
+        div.className = "ebook-thumb-gradient";
+        div.style.background = gradientCss;
+        div.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm10 1.5V9h3.5L14 5.5zM7 13h10v1.5H7V13zm0 3h10v1.5H7V16z"/></svg>';
         imgEl.replaceWith(div);
       };
 
@@ -1354,16 +1292,32 @@
         }
 
         const ytId = ekstrakYoutubeId(item.youtube);
-        if (!ytId) {
-          // Bukan link YouTube yang dikenali (mis. Google Drive) -> gak bisa
-          // dijamin bisa di-embed, jadi tetap buka di tab baru.
-          window.open(item.youtube, "_blank");
+        if (ytId) {
+          putarYoutube(item, ytId);
           return;
         }
 
+        const gdId = ekstrakGDriveId(item.youtube);
+        if (gdId) {
+          // Video dari Google Drive -> pakai mode /preview-nya Google, sudah
+          // bawaan support puter video langsung di dalam iframe.
+          $("#videoPlayerTitle").text(item.judul);
+          $("#videoPlayerFrameWrap").removeClass("is-document").html(
+            `<iframe src="https://drive.google.com/file/d/${gdId}/preview" title="${item.judul}" allow="autoplay" allowfullscreen></iframe>`
+          );
+          $videoPlayerModal.addClass("open");
+          return;
+        }
+
+        // Bukan link YouTube atau Google Drive yang dikenali -> gak bisa
+        // dijamin bisa di-embed, jadi tetap buka di tab baru.
+        window.open(item.youtube, "_blank");
+      }
+
+      function putarYoutube(item, ytId) {
         // Video YouTube -> tampilkan embed langsung di web, gak usah pindah tab.
         $("#videoPlayerTitle").text(item.judul);
-        $("#videoPlayerFrameWrap").html('<div id="ytPlayerHost"></div>');
+        $("#videoPlayerFrameWrap").removeClass("is-document").html('<div id="ytPlayerHost"></div>');
         $videoPlayerModal.addClass("open");
 
         let playerSudahDibuat = false;
@@ -1397,8 +1351,8 @@
         });
 
         // Fallback kalau script youtube.com/iframe_api gagal/lambat dimuat
-        // (mis. diblokir ekstensi/ad-blocker seperti Brave Shields) -> jangan
-        // biarkan modal-nya kosong melompong, balik pakai <iframe> polos biasa.
+        // (mis. diblokir ekstensi/ad-blocker) -> jangan biarkan modal-nya
+        // kosong melompong, balik pakai <iframe> polos biasa.
         setTimeout(function() {
           if (playerSudahDibuat) return;
           const $host = $("#ytPlayerHost");
@@ -1410,6 +1364,54 @@
         }, 2500);
       }
 
+      /**
+       * E-book/dokumen (PDF) -> dibuka langsung di modal player yang sama
+       * kayak video, bukan lewat modal info + tombol unduh lagi.
+       */
+      function bukaDokumenLangsung(id) {
+        const item = GABUNGAN.find((x) => x.id === id);
+        if (!item) return;
+        if (!item.pdf || item.pdf === "#") {
+          triggerDetailModalEngine(id); // dokumennya belum ada linknya, kasih tau lewat modal
+          return;
+        }
+
+        $("#videoPlayerTitle").text(item.judul);
+        $("#videoPlayerFrameWrap").addClass("is-document"); // frame lebih tinggi, pas buat baca dokumen
+
+        const gdId = ekstrakGDriveId(item.pdf);
+        if (gdId) {
+          $("#videoPlayerFrameWrap").html(
+            `<iframe src="https://drive.google.com/file/d/${gdId}/preview" title="${item.judul}" allow="autoplay"></iframe>`
+          );
+        } else if (/\.pdf(\?|#|$)/i.test(item.pdf)) {
+          // Link PDF langsung -> browser modern bisa render PDF native di iframe.
+          $("#videoPlayerFrameWrap").html(`<iframe src="${item.pdf}" title="${item.judul}"></iframe>`);
+        } else {
+          // Bukan Google Drive & bukan link .pdf langsung -> gak yakin bisa
+          // di-embed (kemungkinan server sumbernya blokir iframe), jadi tetap
+          // buka di tab baru aja daripada nampilin kotak kosong.
+          window.open(item.pdf, "_blank");
+          return;
+        }
+
+        $videoPlayerModal.addClass("open");
+      }
+
+      /**
+       * Unduh dokumen langsung -> beda dari bukaDokumenLangsung() yang buka
+       * preview di modal. Ini trigger download file-nya.
+       */
+      function unduhDokumen(id) {
+        const item = GABUNGAN.find((x) => x.id === id);
+        if (!item || !item.pdf || item.pdf === "#") return;
+
+        const gdId = ekstrakGDriveId(item.pdf);
+        // Google Drive punya endpoint khusus buat force-download (bukan preview).
+        const url = gdId ? `https://drive.google.com/uc?export=download&id=${gdId}` : item.pdf;
+        window.open(url, "_blank");
+      }
+
       function tutupVideoPlayer() {
         $videoPlayerModal.removeClass("open");
         if (currentYtPlayer) {
@@ -1418,7 +1420,7 @@
           } catch (e) {}
           currentYtPlayer = null;
         }
-        $("#videoPlayerFrameWrap").html(""); // stop video-nya (hapus iframe biar suara berhenti)
+        $("#videoPlayerFrameWrap").removeClass("is-document").html(""); // stop video-nya (hapus iframe biar suara berhenti)
       }
 
       const $videoPlayerModal = $("#videoPlayerModal");
@@ -1435,26 +1437,41 @@
         }
         $ebookEmptyState.css("display", "none");
 
+        const ikonDokumen = '<svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm10 1.5V9h3.5L14 5.5zM7 13h10v1.5H7V13zm0 3h10v1.5H7V16z"/></svg>';
+
         const html = items
-          .map(
-            (doc) => `
+          .map((doc) => {
+            // Prioritas thumbnail: gambar manual (kalau ada) > auto dari Google Drive > ikon dokumen.
+            const thumbSrc = doc.thumbnailImg || dapatkanThumbnailOtomatis(doc.pdf);
+            const gradientCss = getGradientStyle(doc.gradientFallback);
+            const iconFallback = `<div class="ebook-thumb-gradient" style="background:${gradientCss}">${ikonDokumen}</div>`;
+            const thumbHtml = thumbSrc ?
+              `<img src="${thumbSrc}" alt="${doc.judul}" onerror="gantiKeIkonDokumen(this, '${gradientCss.replace(/'/g, "\\'")}')" />` :
+              iconFallback;
+
+            return `
             <div class="ebook-card">
-              <div class="ebook-icon">
-                <svg viewBox="0 0 24 24"><path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm10 1.5V9h3.5L14 5.5zM7 13h10v1.5H7V13zm0 3h10v1.5H7V16z"/></svg>
+              <div class="ebook-thumb">
+                ${thumbHtml}
               </div>
               <div class="ebook-body">
                 <div class="ebook-title">${doc.judul}</div>
                 <div class="ebook-meta">${doc.fileSize} · Diperbarui ${doc.updatedAt}</div>
-                <button class="btn-download" data-detail-id="${doc.id}">Lihat &amp; Unduh</button>
+                <div class="ebook-btn-row">
+                  <button class="btn-lihat" data-detail-id="${doc.id}">Lihat</button>
+                  <button class="btn-unduh" data-detail-id="${doc.id}">Unduh</button>
+                </div>
               </div>
-            </div>
-          `,
-          )
+            </div>`;
+          })
           .join("");
 
         $ebookGridContainer.html(html);
-        $ebookGridContainer.find(".btn-download").on("click", function() {
-          triggerDetailModalEngine($(this).data("detail-id"));
+        $ebookGridContainer.find(".btn-lihat").on("click", function() {
+          bukaDokumenLangsung($(this).data("detail-id"));
+        });
+        $ebookGridContainer.find(".btn-unduh").on("click", function() {
+          unduhDokumen($(this).data("detail-id"));
         });
       }
 
@@ -1500,21 +1517,6 @@
       function initStats() {
         $("#statTotalVideo").text(videoMateri.length);
         $("#statTotalEbook").text(ebookMateri.length);
-        const done = videoMateri.filter((v) => v.progress === 100).length;
-        const inprog = videoMateri.filter(
-          (v) => v.progress > 0 && v.progress < 100,
-        ).length;
-        const unstarted =
-          videoMateri.filter((v) => v.progress === 0).length +
-          ebookMateri.length;
-        $("#sideStatDone").text(done);
-        $("#sideStatProcess").text(inprog);
-        $("#sideStatUnstarted").text(unstarted);
-        $("#btnDownloadAll").on("click", () => {
-          GOOGLE_DRIVE_FOLDER_URL !== "#" ?
-            window.open(GOOGLE_DRIVE_FOLDER_URL, "_blank") :
-            alert("Folder Cloud belum tersedia.");
-        });
       }
 
       $searchInput.on("input", handleSearchAndFilter);
