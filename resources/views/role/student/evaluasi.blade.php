@@ -579,6 +579,12 @@
       .btn-ulang:hover {
         @apply -translate-y-0.5 bg-teal-600 text-white;
       }
+      .btn-ulang:disabled {
+        @apply opacity-50 cursor-not-allowed bg-border text-ink-400;
+      }
+      .btn-ulang:disabled:hover {
+        @apply translate-y-0 bg-border text-ink-400;
+      }
       .btn-selesai {
         @apply inline-flex items-center gap-2 text-white border-none rounded-full text-[13px] font-extrabold cursor-pointer shadow-[0_10px_24px_rgba(21,33,89,0.16)];
         background: linear-gradient(120deg, var(--navy-900), var(--navy-700));
@@ -923,7 +929,7 @@
        * ===================================================================== */
 
       const WAKTU_PER_SOAL = 30; // <<< GANTI ANGKA DETIK DI SINI (contoh: 30, 35, 40)
-      const SKOR_LULUS = 75; // <<< GANTI BATAS KELULUSAN DI SINI
+      const MAX_PERCOBAAN = 3; // <<< GANTI BATAS "ULANGI KUIS" DI SINI
 
       /* =====================================================================
        *  📚  DATA KUIS — ISI SOAL DI SINI
@@ -931,6 +937,7 @@
       const DAFTAR_KUIS = @json($daftarKuis);
       const STATUS_AWAL = @json($statusAwal);
       const CSRF_TOKEN_EVAL = @json(csrf_token());
+      const URL_EVAL_BASE = "{{ url('mahasiswa/evaluasi') }}"; // + /{id}/mulai | /{id}/submit
       /* =====================================================================
        *  🔧  MULAI DARI SINI KE BAWAH ADALAH MESIN PROGRAM.
        * ===================================================================== */
@@ -959,7 +966,7 @@
           const st = statusKuis[k.id];
           let statusHtml = `<span class="quiz-status belum">Belum dikerjakan</span>`;
           if (st.skorTerbaik !== null) {
-            if (st.skorTerbaik >= SKOR_LULUS) {
+            if (st.skorTerbaik >= k.passingGrade) {
               statusHtml = `<span class="quiz-status lulus">✓ Lulus · Skor ${st.skorTerbaik}</span>`;
             } else {
               statusHtml = `<span class="quiz-status gagal">✕ Belum lulus · Skor ${st.skorTerbaik}</span>`;
@@ -985,7 +992,7 @@
                   </span>
                   <span>
                     <svg viewBox="0 0 24 24"><path d="M9 11l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
-                    Min. ${SKOR_LULUS}
+                    Min. ${k.passingGrade}
                   </span>
                 </div>
                 ${statusHtml}
@@ -1006,21 +1013,42 @@
       /* ---------- STATISTIK DI HERO ---------- */
       function renderStatHero() {
         const totalSoal = DAFTAR_KUIS.reduce((a, k) => a + k.soal.length, 0);
-        const totalLulus = Object.values(statusKuis).filter(
-          (s) => s.skorTerbaik !== null && s.skorTerbaik >= SKOR_LULUS,
-        ).length;
+        const totalLulus = DAFTAR_KUIS.filter((k) => {
+          const s = statusKuis[k.id];
+          return s.skorTerbaik !== null && s.skorTerbaik >= k.passingGrade;
+        }).length;
         $("#statTotalKuis").text(DAFTAR_KUIS.length);
         $("#statTotalSoal").text(totalSoal);
         $("#statLulus").text(totalLulus);
       }
 
-      /* ---------- MULAI MENGERJAKAN SEBUAH KUIS ---------- */
+      /* ---------- MULAI/ULANGI MENGERJAKAN SEBUAH KUIS ----------
+       * Setiap kali dipanggil (baik "Mulai Kuis" pertama kali maupun tiap
+       * klik "Ulangi Kuis"), kita lapor dulu ke server buat naikkan hitungan
+       * percobaan -- server yang mutusin boleh/nggak (maksimal 3x), bukan
+       * cuma dicek di JS doang, supaya gak bisa diakalin refresh halaman. */
       function mulaiKuis(id) {
-        // .data("kuis-id") otomatis dikonversi jQuery jadi angka kalau attribute-nya
-        // cuma angka (mis. "3" -> 3), padahal k.id di DAFTAR_KUIS itu string -> String()
-        // di sini biar perbandingannya selalu ketemu, gak peduli tipe aslinya.
-        kuisAktif = DAFTAR_KUIS.find((k) => String(k.id) === String(id));
-        if (!kuisAktif) return; // jaga-jaga kalau memang belum ada datanya sama sekali
+        const kuis = DAFTAR_KUIS.find((k) => String(k.id) === String(id));
+        if (!kuis) return;
+
+        $.ajax({
+          url: `${URL_EVAL_BASE}/${kuis.id}/mulai`,
+          method: "POST",
+          headers: { "X-CSRF-TOKEN": CSRF_TOKEN_EVAL },
+        })
+          .done(function(res) {
+            kuis.attemptsUsed = res.attemptsUsed;
+            bukaRunnerKuis(kuis);
+          })
+          .fail(function(xhr) {
+            const res = xhr.responseJSON || {};
+            if (res.attemptsUsed !== undefined) kuis.attemptsUsed = res.attemptsUsed;
+            alert(res.message || "Gagal memulai kuis. Coba lagi.");
+          });
+      }
+
+      function bukaRunnerKuis(kuis) {
+        kuisAktif = kuis;
         indexSoal = 0;
         jawabanUser = new Array(kuisAktif.soal.length).fill(null);
 
@@ -1145,7 +1173,8 @@
         });
 
         const skor = Math.round((jumlahBenar / total) * 100);
-        const lulus = skor >= SKOR_LULUS;
+        const lulus = skor >= kuisAktif.passingGrade;
+        const percobaanHabis = (kuisAktif.attemptsUsed || 0) >= MAX_PERCOBAAN;
 
         const st = statusKuis[kuisAktif.id];
         if (st.skorTerbaik === null || skor > st.skorTerbaik) {
@@ -1161,21 +1190,36 @@
 
         $("#resultStatusWrap").html(
           lulus ?
-          `<span class="result-status-pill lulus">✓ Lulus (minimal ${SKOR_LULUS})</span>` :
-          `<span class="result-status-pill gagal">✕ Belum Lulus (minimal ${SKOR_LULUS})</span>`,
+          `<span class="result-status-pill lulus">✓ Lulus (minimal ${kuisAktif.passingGrade})</span>` :
+          `<span class="result-status-pill gagal">✕ Belum Lulus (minimal ${kuisAktif.passingGrade})</span>`,
         );
 
         const $btnSelesai = $("#btnSelesai");
+        const $btnUlang = $("#btnUlangKuis");
         const $note = $("#resultNote");
         $btnSelesai.prop("disabled", !lulus);
-        if (lulus) {
+
+        // Percobaan "Ulangi Kuis" dibatasi maksimal MAX_PERCOBAAN kali (dicatat
+        // di server, gak bisa diakalin refresh) -- begitu abis, tombolnya
+        // dimatiin, mahasiswa cuma bisa lanjut kirim skor yang ada sekarang.
+        $btnUlang.prop("disabled", percobaanHabis);
+
+        if (percobaanHabis) {
+          $note.attr("class", lulus ? "result-note" : "result-note gagal");
+          $note.text(
+            `Sudah mencapai batas ${MAX_PERCOBAAN}x percobaan untuk kuis ini` +
+            (lulus ? ". Silakan kirim hasil ini." : " — dan skor belum memenuhi minimal. Hubungi panitia kalau ada kendala."),
+          );
+        } else if (lulus) {
           $note.attr("class", "result-note");
           $note.text(
-            "Skormu sudah memenuhi syarat. Kamu tetap boleh mengulang untuk skor lebih tinggi sebelum mengirim.",
+            `Skormu sudah memenuhi syarat. Kamu tetap boleh mengulang (sisa ${MAX_PERCOBAAN - kuisAktif.attemptsUsed}x percobaan) untuk skor lebih tinggi sebelum mengirim.`,
           );
         } else {
           $note.attr("class", "result-note gagal");
-          $note.text(`Skormu masih di bawah ${SKOR_LULUS}. Tombol "Kirim Hasil" terkunci — silakan ulangi kuis.`);
+          $note.text(
+            `Skormu masih di bawah ${kuisAktif.passingGrade}. Tombol "Kirim Hasil" terkunci — silakan ulangi kuis (sisa ${MAX_PERCOBAAN - kuisAktif.attemptsUsed}x percobaan).`,
+          );
         }
 
         $runnerBody.css("display", "none");
@@ -1186,13 +1230,32 @@
         });
       }
 
-      /* ---------- ULANGI KUIS DARI AWAL ---------- */
+      /* ---------- ULANGI KUIS DARI AWAL ----------
+       * Lapor dulu ke server (sama kayak mulaiKuis) buat naikkan hitungan
+       * percobaan dan mastiin belum kepake 3x. */
       function ulangiKuis() {
-        indexSoal = 0;
-        jawabanUser = new Array(kuisAktif.soal.length).fill(null);
-        $runnerResult.removeClass("show");
-        $runnerBody.css("display", "flex");
-        tampilkanSoal();
+        if (!kuisAktif) return;
+
+        $.ajax({
+          url: `${URL_EVAL_BASE}/${kuisAktif.id}/mulai`,
+          method: "POST",
+          headers: { "X-CSRF-TOKEN": CSRF_TOKEN_EVAL },
+        })
+          .done(function(res) {
+            kuisAktif.attemptsUsed = res.attemptsUsed;
+            const kuisAsli = DAFTAR_KUIS.find((k) => String(k.id) === String(kuisAktif.id));
+            if (kuisAsli) kuisAsli.attemptsUsed = res.attemptsUsed;
+
+            indexSoal = 0;
+            jawabanUser = new Array(kuisAktif.soal.length).fill(null);
+            $runnerResult.removeClass("show");
+            $runnerBody.css("display", "flex");
+            tampilkanSoal();
+          })
+          .fail(function(xhr) {
+            const res = xhr.responseJSON || {};
+            alert(res.message || "Gagal mengulang kuis. Coba lagi.");
+          });
       }
 
       /* ---------- KIRIM HASIL (hanya bila lulus) ---------- */

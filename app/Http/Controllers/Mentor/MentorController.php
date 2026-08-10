@@ -248,31 +248,48 @@ class MentorController extends Controller
     {
         $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
 
-        $categories = \App\Models\EvaluationCategory::orderBy('urutan')->get();
-        $kategoriEvaluasi = $categories->map(fn($c) => ['id' => (string) $c->id, 'nama' => $c->name]);
+        // "Kategori" di halaman ini = tiap Paket Evaluasi (Exam/kuis) yang
+        // dikerjakan mahasiswa sendiri -- BUKAN EvaluationCategory (itu
+        // sistem rubrik terpisah, gak ada hubungannya sama kuis mahasiswa).
+        $exams = \App\Models\Exam::with('details')->orderBy('title')->get();
+        $kategoriEvaluasi = $exams->map(fn($e) => ['id' => (string) $e->id, 'nama' => $e->title]);
 
         $anggotaKelompok = collect();
         if ($group) {
             $studentIds = \App\Models\Member::where('group_id', $group->id)->pluck('student_id');
 
-            $evaluations = \App\Models\Evaluation::whereIn('student_id', $studentIds)
-                ->with('details')
+            $studentExams = \App\Models\StudentExam::whereIn('student_id', $studentIds)
+                ->whereIn('exam_id', $exams->pluck('id'))
                 ->get()
-                ->keyBy('student_id');
+                ->groupBy(fn($r) => $r->student_id . '-' . $r->exam_id);
 
             $anggotaKelompok = \App\Models\Member::where('group_id', $group->id)
                 ->with('student')
                 ->get()
-                ->map(function ($m) use ($categories, $evaluations) {
-                    $evaluation = $evaluations->get($m->student_id);
-                    $detailByCategory = $evaluation ? $evaluation->details->keyBy('evaluation_category_id') : collect();
+                ->map(function ($m) use ($exams, $studentExams) {
+                    $hasil = $exams->mapWithKeys(function ($exam) use ($m, $studentExams) {
+                        $rows = $studentExams->get($m->student_id . '-' . $exam->id);
+                        $selesai = $rows && $rows->count() > 0;
+                        $skor = null;
+                        $waktu = null;
 
-                    $hasil = $categories->mapWithKeys(function ($cat) use ($detailByCategory, $evaluation) {
-                        $detail = $detailByCategory->get($cat->id);
-                        return [(string) $cat->id => [
-                            'selesai' => $detail !== null,
-                            'skor' => $detail?->value,
-                            'waktu' => $detail ? $evaluation->updated_at?->translatedFormat('d M Y, H:i') : null,
+                        if ($selesai) {
+                            $total = $exam->details->count();
+                            $benar = 0;
+                            foreach ($rows as $r) {
+                                $detail = $exam->details->firstWhere('id', $r->exam_detail_id);
+                                if ($detail && $r->value && strtolower((string) $r->value) === strtolower((string) $detail->key)) {
+                                    $benar++;
+                                }
+                            }
+                            $skor = $total ? (int) round($benar / $total * 100) : 0;
+                            $waktu = $rows->max('updated_at')?->translatedFormat('d M Y, H:i');
+                        }
+
+                        return [(string) $exam->id => [
+                            'selesai' => $selesai,
+                            'skor' => $skor,
+                            'waktu' => $waktu,
                         ]];
                     });
 

@@ -204,6 +204,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/denah-kampus', 'denahKampus')->name('role.student.denah-kampus');
             Route::get('/evaluasi', 'evaluasi')->name('role.student.evaluasi');
             Route::post('/evaluasi/{exam}/submit', 'evaluasiSubmit')->name('role.student.evaluasi.submit');
+            Route::post('/evaluasi/{exam}/mulai', 'evaluasiMulaiAttempt')->name('role.student.evaluasi.mulai');
             Route::get('/absensi', 'absensi')->name('role.student.absensi');
         });
     });

@@ -118,6 +118,13 @@ class StudentController extends Controller
             ->get()
             ->groupBy('exam_id');
 
+        // Berapa kali mahasiswa ini udah "Mulai/Ulangi Kuis" per paket evaluasi
+        // -- dipakai buat batasin maksimal 3x percobaan (lihat evaluasiMulaiAttempt()).
+        $attemptMap = \App\Models\ExamAttempt::where('student_id', auth()->id())
+            ->whereIn('exam_id', $exams->pluck('id'))
+            ->get()
+            ->keyBy('exam_id');
+
         $hurufKeIndex = ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3];
         $warnaPalet = [
             'linear-gradient(135deg,#f59e0b,#c2410c)', 'linear-gradient(135deg,#0d9488,#1e40af)',
@@ -125,12 +132,14 @@ class StudentController extends Controller
             'linear-gradient(135deg,#2563eb,#1e3a8f)', 'linear-gradient(135deg,#16a34a,#14532d)',
         ];
 
-        $daftarKuis = $exams->values()->map(function ($exam, $idx) use ($hurufKeIndex, $warnaPalet) {
+        $daftarKuis = $exams->values()->map(function ($exam, $idx) use ($hurufKeIndex, $warnaPalet, $attemptMap) {
             return [
                 'id' => (string) $exam->id,
                 'judul' => $exam->title,
                 'deskripsi' => $exam->subtitle ?? '-',
                 'warna' => $warnaPalet[$idx % count($warnaPalet)],
+                'passingGrade' => (int) $exam->passing_grade,
+                'attemptsUsed' => (int) ($attemptMap->get($exam->id)->attempts ?? 0),
                 'soal' => $exam->details->map(function ($d) use ($hurufKeIndex) {
                     $options = array_values(array_filter([$d->option_a, $d->option_b, $d->option_c, $d->option_d], fn($o) => $o !== null && $o !== ''));
                     return [
@@ -163,6 +172,39 @@ class StudentController extends Controller
         }
 
         return view('role.student.evaluasi', compact('daftarKuis', 'statusAwal'));
+    }
+
+    /**
+     * Dipanggil tiap kali mahasiswa klik "Mulai Kuis" ATAU "Ulangi Kuis" --
+     * naikkan hitungan percobaan dan tolak kalau udah kepake 3x. Sengaja
+     * dicatat di server (bukan cuma JS) supaya gak bisa diakalin dengan
+     * refresh halaman.
+     */
+    public function evaluasiMulaiAttempt(\Illuminate\Http\Request $request, \App\Models\Exam $exam)
+    {
+        $maxAttempts = 3;
+
+        $attempt = \App\Models\ExamAttempt::firstOrCreate(
+            ['exam_id' => $exam->id, 'student_id' => auth()->id()],
+            ['attempts' => 0]
+        );
+
+        if ($attempt->attempts >= $maxAttempts) {
+            return response()->json([
+                'message' => "Sudah mencapai batas maksimal {$maxAttempts}x percobaan untuk kuis ini.",
+                'attemptsUsed' => $attempt->attempts,
+                'maxAttempts' => $maxAttempts,
+                'allowed' => false,
+            ], 422);
+        }
+
+        $attempt->increment('attempts');
+
+        return response()->json([
+            'attemptsUsed' => $attempt->attempts,
+            'maxAttempts' => $maxAttempts,
+            'allowed' => true,
+        ]);
     }
 
     /**
