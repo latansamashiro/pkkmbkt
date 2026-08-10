@@ -630,31 +630,17 @@
         fotos: ["{{ asset('gambar/Peta/ParkirMobil.jpeg') }}"]
       },
       {
-        id: "parkir-motor",
-        nama: "Parkir Motor",
-        kategori: "parkir",
-        lantai: "-",
-        top: 76.7,
-        left: 78.7,
-        topMobile: 74.4,
-        leftMobile: 80.7,
-        icon: "fa-motorcycle",
-        mapsUrl: "https://maps.app.goo.gl/ZhKLZPcFxYDbWMpV6",
-        desc: "Area parkir kendaraan roda dua.",
-        fotos: ["{{ asset('gambar/Peta/ParkirMobil.jpeg') }}"]
-      },
-      {
         id: "parkir-motormahasiswa",
-        nama: "Parkir Mobil",
+        nama: "Parkir motor",
         kategori: "parkir",
         lantai: "-",
         top: 43.0,
         left: 73.0,
         topMobile: 43.0,
         leftMobile: 75.7,
-        icon: "fa-square-parking",
+        icon: "fa-motorcycle",
         mapsUrl: "https://maps.app.goo.gl/ZhKLZPcFxYDbWMpV6",
-        desc: "Area parkir kendaraan roda empat.",
+        desc: "Area parkir kendaraan roda dua.",
         fotos: ["{{ asset('gambar/Peta/ParkirMotor.jpeg') }}"]
       },
     ];

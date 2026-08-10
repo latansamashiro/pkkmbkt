@@ -476,7 +476,7 @@
         </div>
         <h1>Kebijakan Privasi</h1>
         <p class="hero-info-sub">
-          PKKMB-KT Universitas La Tansa Mashiro &middot; Terakhir diperbarui:
+          PKKMB-KT Universitas&nbsp;La&nbsp;Tansa&nbsp;Mashiro &middot; Terakhir diperbarui:
           22 Juli 2026
         </p>
       </div>
@@ -486,7 +486,7 @@
     <div class="content-wrap">
       <div class="policy-intro">
         <p>
-          PKKMB-KT Universitas La Tansa Mashiro menghargai dan melindungi
+          PKKMB-KT Universitas&nbsp;La&nbsp;Tansa&nbsp;Mashiro menghargai dan melindungi
           privasi setiap pengguna website. Kebijakan Privasi ini menjelaskan
           bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi
           informasi pribadi yang diberikan oleh mahasiswa, peserta PKKMB,
@@ -599,7 +599,7 @@
         <p>
           Kebijakan Privasi ini dapat diperbarui sewaktu-waktu sesuai
           kebutuhan layanan dan ketentuan yang berlaku. Perubahan akan
-          diumumkan melalui website PKKMB-KT Universitas La Tansa Mashiro.
+          diumumkan melalui website PKKMB-KT Universitas&nbsp;La&nbsp;Tansa&nbsp;Mashiro.
         </p>
       </div>
 
@@ -613,7 +613,7 @@
 
         <div class="policy-contact-row">
           <i class="fa-solid fa-building-columns"></i>
-          <span>PKKMB-KT Universitas La Tansa Mashiro</span>
+          <span>PKKMB-KT Universitas&nbsp;La&nbsp;Tansa&nbsp;Mashiro</span>
         </div>
         <div class="policy-contact-row">
           <i class="fa-solid fa-location-dot"></i>
