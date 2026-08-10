@@ -1016,7 +1016,11 @@
 
       /* ---------- MULAI MENGERJAKAN SEBUAH KUIS ---------- */
       function mulaiKuis(id) {
-        kuisAktif = DAFTAR_KUIS.find((k) => k.id === id);
+        // .data("kuis-id") otomatis dikonversi jQuery jadi angka kalau attribute-nya
+        // cuma angka (mis. "3" -> 3), padahal k.id di DAFTAR_KUIS itu string -> String()
+        // di sini biar perbandingannya selalu ketemu, gak peduli tipe aslinya.
+        kuisAktif = DAFTAR_KUIS.find((k) => String(k.id) === String(id));
+        if (!kuisAktif) return; // jaga-jaga kalau memang belum ada datanya sama sekali
         indexSoal = 0;
         jawabanUser = new Array(kuisAktif.soal.length).fill(null);
 

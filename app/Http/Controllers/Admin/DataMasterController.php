@@ -671,4 +671,242 @@ class DataMasterController extends Controller
         }
         return $messages;
     }
+
+    // ======================================================================
+    // ►► BANK SOAL — halaman & import khusus (terpisah dari CRUD generik
+    // di atas, karena "soal" terikat ke exam_id dan butuh alur sendiri:
+    // pilih Paket Evaluasi dulu, baru kelola/import soalnya).
+    // ======================================================================
+
+    /**
+     * Halaman kelola Bank Soal — pilih Paket Evaluasi (Exam) dulu, baru
+     * lihat/tambah/import soal untuk paket itu.
+     */
+    public function soalIndex(Request $request)
+    {
+        $daftarUjian = Exam::withCount('details')->orderBy('title')->orderBy('subtitle')->get();
+
+        return view('role.admin.data-master.soal-import', [
+            'data' => ['title' => 'Bank Soal'],
+            'daftarUjian' => $daftarUjian,
+        ]);
+    }
+
+    /**
+     * AJAX: daftar soal untuk 1 Paket Evaluasi (exam_id).
+     */
+    public function soalItems(Request $request)
+    {
+        $examId = $request->query('exam_id');
+        abort_if(!$examId, 422, 'Parameter exam_id wajib diisi.');
+
+        $rows = ExamDetail::where('exam_id', $examId)->orderBy('id')->get();
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /**
+     * Hapus 1 soal (dipakai tombol hapus per-baris di halaman Bank Soal).
+     */
+    public function soalDestroy(Request $request, int $id)
+    {
+        $row = ExamDetail::findOrFail($id);
+        $row->delete();
+
+        return response()->json(['message' => 'Soal berhasil dihapus.']);
+    }
+
+    /**
+     * Import soal secara massal ke 1 Paket Evaluasi (exam_id), dari salah
+     * satu dari 2 sumber:
+     * - 'teks'  : teks yang ditempel langsung ke textarea, format terstruktur
+     *             (lihat parseSoalTeks() buat detail formatnya).
+     * - 'docx'  : file Word (.docx) yang isinya teks dengan format yang sama
+     *             (diekstrak dulu jadi teks polos, lalu diproses sama seperti
+     *             sumber 'teks').
+     *
+     * Sengaja "all or nothing": kalau ADA soal yang formatnya salah, TIDAK
+     * ADA satu pun yang diimpor — supaya panitia bisa perbaiki dulu di teks/
+     * filenya lalu coba lagi, daripada import nyangkut setengah-setengah.
+     */
+    public function soalImport(Request $request)
+    {
+        $request->validate([
+            'exam_id' => 'required|integer|exists:exams,id',
+            'sumber' => 'required|in:teks,docx',
+            'teks' => 'required_if:sumber,teks|nullable|string',
+            'file' => 'required_if:sumber,docx|nullable|file|mimes:docx',
+        ]);
+
+        $examId = (int) $request->input('exam_id');
+
+        if ($request->input('sumber') === 'docx') {
+            $teks = $this->ekstrakTeksDocx($request->file('file')->getRealPath());
+        } else {
+            $teks = (string) $request->input('teks');
+        }
+
+        $hasil = $this->parseSoalTeks($teks);
+
+        if (!empty($hasil['errors'])) {
+            return response()->json([
+                'message' => 'Ada soal yang formatnya belum sesuai — belum ada yang diimpor. Perbaiki dulu lalu coba lagi.',
+                'errors' => $hasil['errors'],
+            ], 422);
+        }
+
+        if (empty($hasil['soal'])) {
+            return response()->json([
+                'message' => 'Tidak ada soal yang bisa dibaca dari teks/file ini. Pastikan formatnya sesuai contoh.',
+                'errors' => [],
+            ], 422);
+        }
+
+        foreach ($hasil['soal'] as $s) {
+            ExamDetail::create([
+                'exam_id' => $examId,
+                'question' => $s['pertanyaan'],
+                'question_value' => $s['bobot'],
+                'option_a' => $s['a'],
+                'option_b' => $s['b'],
+                'option_c' => $s['c'],
+                'option_d' => $s['d'],
+                'key' => $s['kunci'],
+                'created_by_id' => $request->user()?->id,
+                'updated_by_id' => $request->user()?->id,
+            ]);
+        }
+
+        return response()->json([
+            'message' => count($hasil['soal']) . ' soal berhasil diimpor.',
+            'jumlah' => count($hasil['soal']),
+        ]);
+    }
+
+    /**
+     * Ekstrak teks polos dari file .docx TANPA butuh library tambahan
+     * (docx itu sebenarnya file ZIP berisi XML) — cukup pakai ZipArchive
+     * bawaan PHP, ambil word/document.xml, lalu buang semua tag XML-nya.
+     * Cukup buat kebutuhan "baca teks yang diketik user", bukan buat
+     * mempertahankan formatting kompleks (bold/italic/gambar/dsb).
+     */
+    protected function ekstrakTeksDocx(string $path): string
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($path) !== true) {
+            abort(422, 'File .docx tidak bisa dibuka / rusak.');
+        }
+        $xml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        if ($xml === false) {
+            abort(422, 'File ini sepertinya bukan .docx yang valid.');
+        }
+
+        // Setiap akhir paragraf Word (</w:p>) -> baris baru, dan tab -> \t,
+        // biar strukturnya (baris per baris) masih kebaca setelah tag dibuang.
+        $xml = preg_replace('/<\/w:p>/', "</w:p>\n", $xml);
+        $xml = preg_replace('/<w:tab\s*\/?>/', "\t", $xml);
+        $xml = preg_replace('/<w:br\s*\/?>/', "\n", $xml);
+
+        $text = strip_tags($xml);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+        return $text;
+    }
+
+    /**
+     * Parsing teks soal terstruktur jadi array soal siap-simpan.
+     *
+     * Format per soal (dipisah antar-soal dengan baris berisi "---"):
+     *   Pertanyaan: <teks pertanyaan>
+     *   A) <opsi A>
+     *   B) <opsi B>
+     *   C) <opsi C>
+     *   D) <opsi D>
+     *   Kunci: <A/B/C/D>
+     *   Bobot: <angka>
+     *
+     * Return: ['soal' => [...], 'errors' => [...]] — kalau 'errors' tidak
+     * kosong, artinya ADA blok yang gagal diparse (lihat pesan per soal).
+     */
+    protected function parseSoalTeks(string $teks): array
+    {
+        $teks = trim(str_replace("\r\n", "\n", $teks));
+        if ($teks === '') {
+            return ['soal' => [], 'errors' => []];
+        }
+
+        $blokList = preg_split('/^[ \t]*-{3,}[ \t]*$/m', $teks);
+
+        $soal = [];
+        $errors = [];
+        $nomor = 0;
+
+        foreach ($blokList as $blok) {
+            $blok = trim($blok);
+            if ($blok === '') {
+                continue; // blok kosong (mis. separator di baris terakhir), lewati diam-diam
+            }
+            $nomor++;
+
+            $cariLabel = function (string $label) use ($blok): ?string {
+                if (preg_match('/^[ \t]*' . $label . '[ \t]*:[ \t]*(.+)$/mi', $blok, $m)) {
+                    return trim($m[1]);
+                }
+                return null;
+            };
+            $cariOpsi = function (string $huruf) use ($blok): ?string {
+                if (preg_match('/^[ \t]*' . $huruf . '[\)\.][ \t]*(.+)$/mi', $blok, $m)) {
+                    return trim($m[1]);
+                }
+                return null;
+            };
+
+            $pertanyaan = $cariLabel('Pertanyaan');
+            $optA = $cariOpsi('A');
+            $optB = $cariOpsi('B');
+            $optC = $cariOpsi('C');
+            $optD = $cariOpsi('D');
+            $kunci = $cariLabel('Kunci');
+            $bobot = $cariLabel('Bobot');
+
+            $kurang = [];
+            if (!$pertanyaan) $kurang[] = 'Pertanyaan';
+            if (!$optA) $kurang[] = 'Opsi A';
+            if (!$optB) $kurang[] = 'Opsi B';
+            if (!$optC) $kurang[] = 'Opsi C';
+            if (!$optD) $kurang[] = 'Opsi D';
+            if (!$kunci) $kurang[] = 'Kunci';
+            if (!$bobot) $kurang[] = 'Bobot';
+
+            if ($kurang) {
+                $errors[] = "Soal #{$nomor}: kekurangan " . implode(', ', $kurang) . '.';
+                continue;
+            }
+
+            $kunciUpper = strtoupper($kunci);
+            if (!in_array($kunciUpper, ['A', 'B', 'C', 'D'], true)) {
+                $errors[] = "Soal #{$nomor}: Kunci harus A/B/C/D, yang tertulis \"{$kunci}\".";
+                continue;
+            }
+
+            if (!is_numeric($bobot)) {
+                $errors[] = "Soal #{$nomor}: Bobot harus angka, yang tertulis \"{$bobot}\".";
+                continue;
+            }
+
+            $soal[] = [
+                'pertanyaan' => $pertanyaan,
+                'a' => $optA,
+                'b' => $optB,
+                'c' => $optC,
+                'd' => $optD,
+                'kunci' => $kunciUpper,
+                'bobot' => (int) $bobot,
+            ];
+        }
+
+        return ['soal' => $soal, 'errors' => $errors];
+    }
 }

@@ -78,6 +78,14 @@ Route::middleware(['auth'])->group(function () {
 
         // ===== Kelola Data Master =====
         Route::controller(DataMasterController::class)->prefix('data-master')->group(function () {
+            // Bank Soal — didaftarkan SEBELUM rute generik {type} di bawah,
+            // supaya /soal/items, /soal/import, dst tidak "kesamber" duluan
+            // oleh wildcard {type} generik (Laravel match urutan pertama menang).
+            Route::get('/soal', 'soalIndex')->name('admin.data-master.soal.index');
+            Route::get('/soal/items', 'soalItems')->name('admin.data-master.soal.items');
+            Route::post('/soal/import', 'soalImport')->name('admin.data-master.soal.import');
+            Route::delete('/soal/{id}', 'soalDestroy')->whereNumber('id')->name('admin.data-master.soal.destroy');
+
             Route::get('/', 'index')->name('admin.data-master.index');
             Route::get('/{type}/items', 'items')->name('admin.data-master.items');
             Route::post('/{type}', 'store')->name('admin.data-master.store');
@@ -267,6 +275,12 @@ Route::middleware(['auth'])->group(function () {
 
         // ===== Jadwal, Informasi, Modul PKKMB, Materi, Evaluasi, Kelompok (reuse DataMasterController, dibatasi per tipe) =====
         Route::controller(\App\Http\Controllers\Admin\DataMasterController::class)->group(function () use ($withDefaults) {
+            // Import Bank Soal — WAJIB didaftarkan SEBELUM loop $sections di bawah,
+            // karena loop itu bikin rute generik POST /evaluasi/{type} yang, kalau
+            // didaftarkan duluan, bakal "nyamber" /evaluasi/soal-import (dianggap
+            // {type} = "soal-import") sebelum sempat ke rute spesifik ini.
+            Route::post('/evaluasi/soal-import', 'soalImport')->name('committee.evaluasi.soal-import');
+
             $sections = [
                 'data-master' => ['path' => 'jadwal',      'types' => ['jadwal'],                          'title' => 'Kelola Jadwal',      'view' => 'role.committee.jadwal.index'],
                 'informasi'   => ['path' => 'informasi',   'types' => ['informasi'],                       'title' => 'Kelola Informasi',   'view' => 'role.committee.informasi.index'],

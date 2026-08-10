@@ -67,10 +67,16 @@
                 <p id="soalPanelJudul" class="text-lg font-extrabold text-slate-800 m-0">Bank Soal</p>
                 <p id="soalPanelSub" class="text-xs text-slate-400 m-0 mt-0.5">-</p>
             </div>
-            <button id="btnTambahSoal"
-                class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
-                <i data-lucide="plus" class="w-4 h-4"></i>Tambah Soal
-            </button>
+            <div class="flex items-center gap-2">
+                <button id="btnImportSoal"
+                    class="inline-flex items-center gap-2 bg-white border border-teal-600 hover:bg-teal-50 text-teal-600 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                    <i data-lucide="upload" class="w-4 h-4"></i>Import Soal
+                </button>
+                <button id="btnTambahSoal"
+                    class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                    <i data-lucide="plus" class="w-4 h-4"></i>Tambah Soal
+                </button>
+            </div>
         </div>
         <p id="soalLoading" class="text-center text-sm text-slate-400 py-6">Memuat soal...</p>
         <p id="soalEmpty" class="hidden text-center text-sm text-slate-400 py-8">Belum ada soal di paket ini.</p>
@@ -79,6 +85,65 @@
     <p id="panelSoalKosong" class="text-center text-sm text-slate-400 py-10 bg-white border border-dashed border-slate-200 rounded-2xl">
         Pilih salah satu Paket Evaluasi di atas untuk kelola soalnya.
     </p>
+
+    <!-- ===== MODAL IMPORT SOAL ===== -->
+    <div id="modalImportSoal" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex items-start justify-between gap-4 mb-5">
+                <div>
+                    <h3 class="text-lg font-extrabold text-slate-800 m-0">Import Soal</h3>
+                    <p class="text-xs text-slate-400 m-0 mt-1">Tempel teks langsung, atau upload file Word (.docx) dengan format yang sama. Diimpor ke paket yang lagi dipilih: <strong id="importPaketNama">-</strong>.</p>
+                </div>
+                <button id="btnCloseImportSoal" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
+                <p class="text-xs font-bold text-slate-600 mb-2">Format tiap soal (pisahkan antar-soal dengan baris <code>---</code>):</p>
+                <pre class="text-[11.5px] text-slate-500 whitespace-pre-wrap leading-[1.6] m-0">Pertanyaan: Apa ibu kota Indonesia?
+A) Bandung
+B) Jakarta
+C) Surabaya
+D) Medan
+Kunci: B
+Bobot: 10
+---
+Pertanyaan: 2 + 2 = ?
+A) 3
+B) 4
+C) 5
+D) 6
+Kunci: B
+Bobot: 5</pre>
+            </div>
+
+            <div class="flex items-center gap-2 mb-4 bg-slate-100 rounded-xl p-1 w-fit">
+                <button type="button" data-sumber="teks" class="tab-sumber-soal px-4 py-2 rounded-lg text-sm font-bold transition">Tempel Teks</button>
+                <button type="button" data-sumber="docx" class="tab-sumber-soal px-4 py-2 rounded-lg text-sm font-bold transition">Upload Word (.docx)</button>
+            </div>
+
+            <div id="panelTeksSoal">
+                <textarea id="inputTeksSoal" rows="10" placeholder="Tempel teks soal sesuai format di atas..."
+                    class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 font-mono focus:outline-none focus:border-teal-600"></textarea>
+            </div>
+            <div id="panelDocxSoal" class="hidden">
+                <input type="file" id="inputFileSoal" accept=".docx"
+                    class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600" />
+                <p class="text-xs text-slate-400 mt-2">File Word (.docx) yang isinya teks soal dengan format sama seperti contoh di atas.</p>
+            </div>
+
+            <div id="importSoalErrorBox" class="hidden mt-4 bg-rose-50 border border-rose-100 rounded-xl p-4">
+                <p class="text-xs font-bold text-rose-600 mb-2" id="importSoalErrorTitle"></p>
+                <ul id="importSoalErrorList" class="text-xs text-rose-600 pl-4 list-disc space-y-1"></ul>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 mt-6">
+                <button type="button" id="btnBatalImportSoal" class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm px-4 py-2.5 rounded-xl transition">Batal</button>
+                <button type="button" id="btnSubmitImportSoal" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition disabled:opacity-60">Import Sekarang</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== MODAL KELOLA KATEGORI (daftar + form tambah/edit jadi satu) ===== -->
     <div id="modalKategori" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
@@ -523,6 +588,79 @@
                         $("#daftarSoal").removeClass("hidden");
                     });
             }
+
+            // ----- Import Soal (tempel teks / upload .docx) -----
+            const $modalImportSoal = $("#modalImportSoal");
+            const URL_IMPORT_SOAL = "{{ route('committee.evaluasi.soal-import') }}";
+            let sumberImportSoal = "teks";
+
+            $("#btnImportSoal").on("click", function () {
+                if (!activeExamId) return;
+                const p = allPaket.find((x) => x.id === activeExamId);
+                $("#importPaketNama").text(p ? `Evaluasi ${p.title}` : "-");
+                $("#inputTeksSoal").val("");
+                $("#inputFileSoal").val("");
+                $("#importSoalErrorBox").addClass("hidden");
+                pilihTabSumberSoal("teks");
+                $modalImportSoal.removeClass("hidden").addClass("flex");
+            });
+            $("#btnCloseImportSoal, #btnBatalImportSoal").on("click", () => $modalImportSoal.addClass("hidden").removeClass("flex"));
+            $modalImportSoal.on("click", function (e) { if (e.target === this) $modalImportSoal.addClass("hidden").removeClass("flex"); });
+
+            function pilihTabSumberSoal(sumber) {
+                sumberImportSoal = sumber;
+                $(".tab-sumber-soal").removeClass("bg-white text-teal-600 shadow-sm").addClass("text-slate-500");
+                $(`.tab-sumber-soal[data-sumber="${sumber}"]`).addClass("bg-white text-teal-600 shadow-sm").removeClass("text-slate-500");
+                $("#panelTeksSoal").toggleClass("hidden", sumber !== "teks");
+                $("#panelDocxSoal").toggleClass("hidden", sumber !== "docx");
+            }
+            $(".tab-sumber-soal").on("click", function () { pilihTabSumberSoal($(this).data("sumber")); });
+
+            $("#btnSubmitImportSoal").on("click", function () {
+                const $btn = $(this);
+                $("#importSoalErrorBox").addClass("hidden");
+
+                const formData = new FormData();
+                formData.append("exam_id", activeExamId);
+                formData.append("sumber", sumberImportSoal);
+                if (sumberImportSoal === "teks") {
+                    const teks = $("#inputTeksSoal").val().trim();
+                    if (!teks) { tampilkanToast("Teks soal masih kosong."); return; }
+                    formData.append("teks", teks);
+                } else {
+                    const file = $("#inputFileSoal")[0].files[0];
+                    if (!file) { tampilkanToast("Pilih file .docx dulu."); return; }
+                    formData.append("file", file);
+                }
+
+                $btn.prop("disabled", true).text("Mengimpor...");
+                $.ajax({
+                    url: URL_IMPORT_SOAL,
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: { "X-CSRF-TOKEN": CSRF_TOKEN },
+                })
+                    .done(function (res) {
+                        $modalImportSoal.addClass("hidden").removeClass("flex");
+                        tampilkanToast(res.message);
+                        muatSoal();
+                    })
+                    .fail(function (xhr) {
+                        const res = xhr.responseJSON || {};
+                        if (res.errors && res.errors.length) {
+                            $("#importSoalErrorTitle").text(res.message || "Ada soal yang formatnya belum sesuai:");
+                            $("#importSoalErrorList").html(res.errors.map((e) => `<li>${e}</li>`).join(""));
+                            $("#importSoalErrorBox").removeClass("hidden");
+                        } else {
+                            tampilkanToast(res.message || "Gagal mengimpor soal.");
+                        }
+                    })
+                    .always(function () {
+                        $btn.prop("disabled", false).text("Import Sekarang");
+                    });
+            });
 
             function renderDaftarSoal() {
                 if (allSoal.length === 0) {

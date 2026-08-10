@@ -119,7 +119,17 @@
                     </div>`).join("");
                 $("#masterGrid").html(html);
                 lucide.createIcons();
-                $(".master-card").on("click", function () { bukaList($(this).data("key")); });
+                $(".master-card").on("click", function () {
+                    const key = $(this).data("key");
+                    // "soal" (Bank Soal) punya halaman & alur sendiri (terikat ke
+                    // Paket Evaluasi/exam_id), jadi diarahkan ke halaman terpisah,
+                    // bukan modal generik di halaman ini.
+                    if (key === "soal") {
+                        window.location.href = "{{ route('admin.data-master.soal.index') }}";
+                        return;
+                    }
+                    bukaList(key);
+                });
             }
 
             const $modalList = $("#modalList");
