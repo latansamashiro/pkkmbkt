@@ -13,7 +13,26 @@ class StudentController extends Controller
 
     public function leaderboard()
     {
-        return view('role.student.leaderboard');
+        $dataMahasiswa = \App\Models\User::where('role_name', 'STUDENT')
+            ->get(['id', 'name', 'gender'])
+            ->map(function ($u) {
+                $skor = (int) \App\Models\Activity::where('student_id', $u->id)->sum('activity_value');
+                // Data gender formatnya beda-beda tergantung cara input akunnya:
+                // form manual admin pakai 'L'/'P', tapi hasil import Excel pakai
+                // 'laki-laki'/'perempuan' -- disamakan dulu di sini.
+                $genderMentah = strtolower((string) $u->gender);
+                $gender = in_array($genderMentah, ['p', 'perempuan'], true) ? 'P' : 'L';
+
+                return [
+                    'nama' => $u->name,
+                    'skor' => $skor,
+                    'gender' => $gender,
+                ];
+            })
+            ->sortByDesc('skor')
+            ->values();
+
+        return view('role.student.leaderboard', compact('dataMahasiswa'));
     }
 
     public function dashboard()

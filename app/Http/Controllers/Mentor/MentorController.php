@@ -13,7 +13,36 @@ class MentorController extends Controller
 
     public function leaderboard()
     {
-        return view('role.mentor.leaderboard');
+        $dataMahasiswa = $this->hitungLeaderboardMahasiswa();
+
+        return view('role.mentor.leaderboard', compact('dataMahasiswa'));
+    }
+
+    /**
+     * Ranking SEMUA mahasiswa (bukan cuma 1 kelompok) berdasarkan total poin
+     * (activities.activity_value, keaktifan + pelanggaran digabung jadi net
+     * skor) -- dipakai bareng oleh Mentor & Student leaderboard.
+     */
+    protected function hitungLeaderboardMahasiswa()
+    {
+        return \App\Models\User::where('role_name', 'STUDENT')
+            ->get(['id', 'name', 'gender'])
+            ->map(function ($u) {
+                $skor = (int) \App\Models\Activity::where('student_id', $u->id)->sum('activity_value');
+                // Data gender formatnya beda-beda tergantung cara input akunnya:
+                // form manual admin pakai 'L'/'P', tapi hasil import Excel pakai
+                // 'laki-laki'/'perempuan' -- disamakan dulu di sini.
+                $genderMentah = strtolower((string) $u->gender);
+                $gender = in_array($genderMentah, ['p', 'perempuan'], true) ? 'P' : 'L';
+
+                return [
+                    'nama' => $u->name,
+                    'skor' => $skor,
+                    'gender' => $gender,
+                ];
+            })
+            ->sortByDesc('skor')
+            ->values();
     }
 
     public function dashboard()
@@ -311,7 +340,99 @@ class MentorController extends Controller
 
     public function keaktifan()
     {
-        return view('role.mentor.keaktifan');
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+
+        $anggotaKelompok = collect();
+        if ($group) {
+            $anggotaKelompok = \App\Models\Member::where('group_id', $group->id)
+                ->with('student')
+                ->get()
+                ->map(fn ($m) => [
+                    'id' => $m->student_id,
+                    'nama' => $m->student->name ?? '-',
+                    'npm' => $m->student->npm ?? '-',
+                ])
+                ->values();
+        }
+
+        return view('role.mentor.keaktifan', compact('group', 'anggotaKelompok'));
+    }
+
+    /**
+     * Simpan 1 catatan poin keaktifan (positif) atau pelanggaran (negatif)
+     * buat 1 mahasiswa anggota kelompok mentor yang login.
+     */
+    public function keaktifanStore(\Illuminate\Http\Request $request)
+    {
+        $data = $request->validate([
+            'student_id' => 'required|integer|exists:users,id',
+            'kategori' => 'required|string|max:100',
+            'indikator' => 'required|string',
+            'poin' => 'required|integer',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+        if (!$group) {
+            return response()->json(['message' => 'Kamu belum punya kelompok bimbingan.'], 403);
+        }
+
+        $isAnggota = \App\Models\Member::where('group_id', $group->id)
+            ->where('student_id', $data['student_id'])
+            ->exists();
+        if (!$isAnggota) {
+            return response()->json(['message' => 'Mahasiswa ini bukan anggota kelompokmu.'], 403);
+        }
+
+        $deskripsi = $data['indikator'];
+        if (!empty($data['catatan'])) {
+            $deskripsi .= ' — ' . $data['catatan'];
+        }
+
+        \App\Models\Activity::create([
+            'student_id' => $data['student_id'],
+            'category' => $data['kategori'],
+            'activity_value' => $data['poin'],
+            'description' => $deskripsi,
+            'created_by_id' => auth()->id(),
+            'updated_by_id' => auth()->id(),
+        ]);
+
+        return response()->json(['message' => 'Poin berhasil disimpan.']);
+    }
+
+    /**
+     * Riwayat poin (keaktifan + pelanggaran) 1 mahasiswa -- dipanggil AJAX
+     * pas mentor pilih mahasiswa dari combobox.
+     */
+    public function keaktifanRiwayat(\Illuminate\Http\Request $request, int $studentId)
+    {
+        $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
+        if (!$group) {
+            return response()->json(['message' => 'Kamu belum punya kelompok bimbingan.'], 403);
+        }
+
+        $isAnggota = \App\Models\Member::where('group_id', $group->id)
+            ->where('student_id', $studentId)
+            ->exists();
+        if (!$isAnggota) {
+            return response()->json(['message' => 'Mahasiswa ini bukan anggota kelompokmu.'], 403);
+        }
+
+        $rows = \App\Models\Activity::where('student_id', $studentId)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn ($a) => [
+                'kategori' => $a->category,
+                'deskripsi' => $a->description,
+                'poin' => $a->activity_value,
+                'tanggal' => $a->created_at->translatedFormat('d M Y, H:i'),
+            ]);
+
+        return response()->json([
+            'total' => $rows->sum('poin'),
+            'riwayat' => $rows,
+        ]);
     }
 
     public function monitoringTugas()

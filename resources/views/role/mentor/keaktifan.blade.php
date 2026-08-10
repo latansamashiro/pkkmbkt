@@ -48,11 +48,13 @@
       }
     }
 
-    .mhs-list-scroll::-webkit-scrollbar {
+    .dropdown-scroll::-webkit-scrollbar,
+    .riwayat-scroll::-webkit-scrollbar {
       width: 6px;
     }
 
-    .mhs-list-scroll::-webkit-scrollbar-thumb {
+    .dropdown-scroll::-webkit-scrollbar-thumb,
+    .riwayat-scroll::-webkit-scrollbar-thumb {
       background: #e1e5f1;
       border-radius: 10px;
     }
@@ -86,10 +88,10 @@
         <span class="w-1.5 h-1.5 rounded-full bg-lime-500" style="animation: pulse 2s infinite;"></span> Input Poin
       </div>
       <h1 class="font-display font-bold text-white mb-3 leading-[1.2] m-0" style="font-size: clamp(24px,4vw,38px);">Keaktifan &amp; Pelanggaran</h1>
-      <p class="text-sm text-white/75 leading-[1.7] m-0" style="max-width: 560px;">
-        Klik salah satu tombol untuk menambah poin keaktifan atau mengurangi
-        poin karena pelanggaran. Semua pilihan poin sudah ditentukan
-        jumlahnya, jadi tidak bisa diubah bebas oleh mentor.
+      <p class="text-sm text-white/75 leading-[1.7] m-0" style="max-width: 620px;">
+        Cari dan pilih mahasiswa dulu, lalu pilih indikator keaktifan atau
+        pelanggaran yang sesuai — poinnya sudah ditentukan otomatis sesuai
+        Ketentuan Poin Keaktifan, mentor tidak bisa mengubahnya bebas.
       </p>
     </div>
   </section>
@@ -104,19 +106,116 @@
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       </span>
-      <strong class="text-[13.5px] font-extrabold text-navy-900" id="kelompokNama">Kelompok 01</strong>
+      <strong class="text-[13.5px] font-extrabold text-navy-900" id="kelompokNama">{{ $group->name ?? 'Belum ada kelompok' }}</strong>
     </div>
 
-    <div class="relative mb-[18px]">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-ink-400">
+    {{-- ===== CARI & PILIH MAHASISWA ===== --}}
+    <div class="relative mb-5" style="z-index: 20;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-ink-400 pointer-events-none">
         <circle cx="11" cy="11" r="8" />
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
       </svg>
-      <input type="text" id="searchInput" placeholder="Cari nama atau NPM mahasiswa..." class="w-full bg-surface border-[1.5px] border-border rounded-full font-sans text-[13.5px] font-medium shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] outline-none focus:border-teal-500 focus:shadow-[0_0_0_3px_rgba(22,160,161,0.12)]" style="padding: 12px 16px 12px 40px;" />
+      <input type="text" id="searchInput" autocomplete="off" placeholder="Cari nama atau NPM mahasiswa..." class="w-full bg-surface border-[1.5px] border-border rounded-full font-sans text-[13.5px] font-medium shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] outline-none focus:border-teal-500 focus:shadow-[0_0_0_3px_rgba(22,160,161,0.12)]" style="padding: 12px 16px 12px 40px;" />
+
+      <div id="searchDropdown" class="hidden dropdown-scroll absolute left-0 right-0 mt-2 bg-surface border-[1.5px] border-border rounded-2xl shadow-[0_10px_24px_rgba(21,33,89,0.16)] divide-y divide-border overflow-y-auto" style="max-height: 320px;"></div>
+      <p id="searchEmptyState" class="hidden text-[12px] text-ink-400 font-semibold mt-2.5 pl-1">Tidak ada mahasiswa yang cocok. Coba kata kunci lain.</p>
     </div>
 
-    <div class="mhs-list-scroll" style="max-height: 620px; overflow-y: auto; padding-right: 2px;">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="mhsGrid"></div>
+    {{-- ===== BELUM PILIH MAHASISWA ===== --}}
+    <div id="belumPilihState" class="text-center bg-surface border border-dashed border-border rounded-2xl" style="padding: 48px 24px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-10 h-10 mx-auto mb-3 text-ink-400">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <p class="text-[13.5px] font-bold text-ink-600 m-0">Cari nama mahasiswa dulu di atas</p>
+      <p class="text-[12px] text-ink-400 mt-1 m-0">Baru form catat poinnya muncul di sini.</p>
+    </div>
+
+    {{-- ===== KONTEN SETELAH MAHASISWA DIPILIH ===== --}}
+    <div id="kontenMahasiswa" class="hidden">
+      {{-- Kartu ringkas mahasiswa terpilih --}}
+      <div class="flex items-center gap-3.5 bg-surface border-[1.5px] border-border rounded-2xl mb-5" style="padding: 16px 18px;">
+        <span class="w-11 h-11 rounded-full bg-navy-tint text-navy-700 flex items-center justify-center font-extrabold text-[14px] flex-shrink-0" id="selMhsAvatar"></span>
+        <div class="min-w-0">
+          <p class="text-[14px] font-bold m-0 truncate" id="selMhsNama"></p>
+          <p class="text-[11.5px] text-ink-400 mt-0.5 mb-0" id="selMhsNpm"></p>
+        </div>
+        <div class="ml-auto text-right shrink-0">
+          <div class="font-display text-xl font-bold leading-none" id="selMhsTotal">0</div>
+          <div class="text-[9px] text-ink-400 font-bold uppercase tracking-wide">Total Poin</div>
+        </div>
+        <button type="button" id="btnGantiMhs" class="shrink-0 text-[11px] font-bold text-ink-400 hover:text-teal-600 bg-bg hover:bg-teal-tint border border-border rounded-lg transition-colors" style="padding: 8px 12px;">
+          Ganti
+        </button>
+      </div>
+
+      {{-- 2 panel: Keaktifan & Pelanggaran --}}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {{-- PANEL KEAKTIFAN --}}
+        <div class="bg-surface border-[1.5px] border-border rounded-2xl flex flex-col" style="padding: 20px;">
+          <div class="flex items-center gap-2.5 mb-4 pb-4 border-b border-border">
+            <span class="w-9 h-9 rounded-xl bg-teal-tint text-teal-600 flex items-center justify-center flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px]"><path d="M12 2l2.9 6.3 6.9.9-5 4.8 1.3 6.8L12 17.6 5.9 20.8l1.3-6.8-5-4.8 6.9-.9z" /></svg>
+            </span>
+            <div>
+              <p class="text-[14.5px] font-bold m-0">Apresiasi Keaktifan</p>
+              <p class="text-[11px] text-ink-400 mt-0.5 m-0">Penambahan poin</p>
+            </div>
+          </div>
+
+          <label class="block text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 mb-2">Pilih Indikator</label>
+          <select id="selectKeaktifan" class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[13px] font-medium text-ink-900 outline-none focus:border-teal-500 mb-4" style="padding: 11px 13px;"></select>
+
+          <div id="poinKeaktifanBox" class="hidden items-center gap-2 rounded-xl mb-4" style="padding: 10px 13px; background: var(--teal-tint);">
+            <span class="font-display text-lg font-bold text-teal-600" id="poinKeaktifanVal">+0</span>
+            <span class="text-[11px] text-teal-600 font-semibold">poin akan ditambahkan</span>
+          </div>
+
+          <label class="block text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 mb-2">Catatan Tambahan (opsional)</label>
+          <textarea id="catatanKeaktifan" rows="2" placeholder="Tambahkan detail kejadian kalau perlu..." class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[13px] text-ink-900 outline-none focus:border-teal-500 resize-none mb-4" style="padding: 11px 13px;"></textarea>
+
+          <button type="button" id="btnSimpanKeaktifan" disabled class="mt-auto w-full bg-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] rounded-xl transition-colors flex items-center justify-center gap-2" style="padding: 13px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" /></svg>
+            Simpan &amp; Tambah Poin
+          </button>
+        </div>
+
+        {{-- PANEL PELANGGARAN --}}
+        <div class="bg-surface border-[1.5px] border-border rounded-2xl flex flex-col" style="padding: 20px;">
+          <div class="flex items-center gap-2.5 mb-4 pb-4 border-b border-border">
+            <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#fef2f2; color:#dc2626;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px]"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 17h.01" /></svg>
+            </span>
+            <div>
+              <p class="text-[14.5px] font-bold m-0">Log Pelanggaran</p>
+              <p class="text-[11px] text-ink-400 mt-0.5 m-0">Pengurangan poin</p>
+            </div>
+          </div>
+
+          <label class="block text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 mb-2">Pilih Indikator</label>
+          <select id="selectPelanggaran" class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[13px] font-medium text-ink-900 outline-none mb-4" style="padding: 11px 13px;"></select>
+
+          <div id="poinPelanggaranBox" class="hidden items-center gap-2 rounded-xl mb-4" style="padding: 10px 13px; background:#fef2f2;">
+            <span class="font-display text-lg font-bold" style="color:#dc2626;" id="poinPelanggaranVal">-0</span>
+            <span class="text-[11px] font-semibold" style="color:#dc2626;">poin akan dikurangi</span>
+          </div>
+
+          <label class="block text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 mb-2">Catatan / Kronologi (opsional)</label>
+          <textarea id="catatanPelanggaran" rows="2" placeholder="Tambahkan detail kejadian kalau perlu..." class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[13px] text-ink-900 outline-none resize-none mb-4" style="padding: 11px 13px;"></textarea>
+
+          <button type="button" id="btnSimpanPelanggaran" disabled class="mt-auto w-full disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] rounded-xl transition-colors flex items-center justify-center gap-2" style="padding: 13px; background:#dc2626;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M8 12h8" /></svg>
+            Simpan &amp; Kurangi Poin
+          </button>
+        </div>
+      </div>
+
+      {{-- Riwayat --}}
+      <div class="bg-surface border-[1.5px] border-border rounded-2xl mt-5" style="padding: 18px 20px;">
+        <p class="text-[13px] font-bold m-0 mb-3">Riwayat Poin</p>
+        <p id="riwayatLoading" class="text-center text-[12px] text-ink-400 font-semibold" style="padding: 14px 0;">Memuat riwayat...</p>
+        <div id="riwayatList" class="riwayat-scroll" style="max-height: 260px; overflow-y: auto;"></div>
+      </div>
     </div>
   </main>
 
@@ -176,214 +275,250 @@
 
   <script>
     $(function() {
+      const CSRF_TOKEN = @json(csrf_token());
+      const URL_BASE = "{{ url('mentor/keaktifan') }}"; // POST simpan | GET /{id}/riwayat
+
       // ======================================================================
-      // ►► KELOMPOK MENTOR — satu kelompok saja.
+      // ►► ANGGOTA KELOMPOK — dari database (real), bukan dummy lagi.
       // ======================================================================
-      const KELOMPOK_MENTOR = "Kelompok 01";
-      const ANGGOTA_KELOMPOK = [{
-          nama: "Alexander Arul Husein",
-          npm: "525241019"
-        },
-        {
-          nama: "Bunga Citra Lestari",
-          npm: "525241020"
-        },
-        {
-          nama: "Dimas Prakoso",
-          npm: "525241021"
-        },
-        {
-          nama: "Eka Putri Ramadhani",
-          npm: "525241022"
-        },
-        {
-          nama: "Farhan Maulana",
-          npm: "525241023"
-        },
-        {
-          nama: "Gita Ayu Saputri",
-          npm: "525241024"
-        },
+      const ANGGOTA_KELOMPOK = @json($anggotaKelompok);
+
+      // ======================================================================
+      // ►► DAFTAR INDIKATOR KEAKTIFAN & PELANGGARAN — sumber: Excel "Kriteria
+      // Penambahan dan Pengurangan Poin Keaktifan Peserta" (REVISI 07/08/2026).
+      // Poinnya FIXED sesuai dokumen ini, mentor tinggal pilih indikatornya.
+      // ======================================================================
+      const KATEGORI_KEAKTIFAN = [
+        { kategori: "Apresiasi Khusus", indikator: "Menjadi Petugas Protokoler/Acara Pembukaan Resmi (Pembaca Janji Mahasiswa, Panca Jiwa, Visi-Misi, Moto UNILAM, Tridarma, Dirigen, atau Pembaca Doa).", poin: 20 },
+        { kategori: "Kepemimpinan", indikator: "Terpilih dan menjalankan tanggung jawab sebagai Ketua Kelompok yang dedikatif.", poin: 20 },
+        { kategori: "Partisipasi Aktif", indikator: "Aktif bertanya secara kritis, logis, dan santun dalam sesi diskusi materi.", poin: 15 },
+        { kategori: "Partisipasi Aktif", indikator: "Aktif memberikan jawaban, tanggapan, atau opini yang solutif atas pemantik narasumber.", poin: 15 },
+        { kategori: "Kelengkapan Tugas", indikator: "Mengerjakan seluruh tugas individu dan kelompok secara jujur, mandiri, dan bebas plagiarisme tepat waktu.", poin: 15 },
+        { kategori: "Tugas & Disiplin", indikator: "Mengunggah Video Perkenalan diri kreatif di media sosial tepat waktu sesuai ketentuan.", poin: 10 },
+        { kategori: "Tugas & Disiplin", indikator: "Video terbaik dengan jumlah like dan komen terbanyak, tag medsosnya Unilam.", poin: 15 },
+        { kategori: "Tugas & Disiplin", indikator: "Hadir dan tepat waktu di setiap sesi kegiatan.", poin: 15 },
+        { kategori: "Kerapian & Atribut", indikator: "Lengkap memakai atribut resmi dan standar pakaian peserta PKKMB-KT UNILAM.", poin: 5 },
+        { kategori: "Kerapian & Atribut", indikator: "Membawa seluruh perlengkapan wajib harian yang telah ditentukan oleh panitia.", poin: 5 },
+        { kategori: "Partisipasi Aktif", indikator: "Menunjukan sikap proaktif dan sukarelawan selama kegiatan PKKMB-KT berlangsung.", poin: 5 },
       ];
 
-      // 🏷️ DAFTAR POIN TETAP — mentor cuma bisa PILIH dari daftar ini.
-      const PRESET_PLUS = [{
-          label: "Aktif bertanya",
-          poin: 5
-        },
-        {
-          label: "Membantu teman",
-          poin: 5
-        },
-        {
-          label: "Jadi perwakilan kelompok",
-          poin: 10
-        },
-      ];
-      const PRESET_MINUS = [{
-          label: "Ribut",
-          poin: 10
-        },
-        {
-          label: "Terlambat",
-          poin: 5
-        },
-        {
-          label: "Atribut tidak lengkap",
-          poin: 5
-        },
+      const KATEGORI_PELANGGARAN = [
+        { kategori: "Pelanggaran Berat", indikator: "Melakukan tindakan pencurian, penggelapan, perusakan fasilitas secara sengaja, atau tindak kriminalitas lainnya yang melanggar hukum pidana.", poin: 20 },
+        { kategori: "Pelanggaran Berat", indikator: "Membawa, menggunakan, atau mengonsumsi rokok, vape, minuman keras, dan Narkotika/zat terlarang di lingkungan kampus.", poin: 20 },
+        { kategori: "Pelanggaran Berat", indikator: "Melakukan segala bentuk kekerasan fisik, verbal, psikologis, perundungan (bullying), maupun tekanan berbasis gender dan kekuasaan.", poin: 20 },
+        { kategori: "Pelanggaran Berat", indikator: "Melakukan tindakan pelecehan seksual baik dalam bentuk candaan, komentar, gestur, maupun perbuatan tidak pantas lainnya.", poin: 20 },
+        { kategori: "Pelanggaran Berat", indikator: "Menyebarkan berita bohong (hoax), provokasi isu SARA, atau ujaran kebencian di lingkungan PKKMB-KT.", poin: 20 },
+        { kategori: "Pelanggaran Etika", indikator: "Bertindak tidak sopan atau menunjukkan perilaku tidak menghormati panitia, dosen, mentor, pembimbing, dan narasumber.", poin: 15 },
+        { kategori: "Pelanggaran Etika", indikator: "Tidak menghargai pendapat, mencela perbedaan, atau memicu konflik horizontal sesama peserta.", poin: 15 },
+        { kategori: "Pelanggaran Etika", indikator: "Menimbulkan keonaran, kegaduhan, atau melakukan aktivitas yang mengganggu jalannya proses kegiatan.", poin: 15 },
+        { kategori: "Pelanggaran Disiplin", indikator: "Datang terlambat atau tidak tepat waktu tanpa alasan yang dibenarkan.", poin: 10 },
+        { kategori: "Pelanggaran Disiplin", indikator: "Menggunakan gawai/handphone selama sesi materi berlangsung, kecuali atas instruksi resmi panitia.", poin: 10 },
+        { kategori: "Pelanggaran Disiplin", indikator: "Meninggalkan area atau sesi acara PKKMB-KT tanpa izin resmi dari Pembimbing dan Mentor kelompok.", poin: 10 },
+        { kategori: "Pelanggaran Disiplin", indikator: "Menerima tamu kunjungan selama acara berlangsung tanpa izin resmi.", poin: 10 },
+        { kategori: "Pelanggaran Tugas", indikator: "Terlambat/tidak mengumpulkan tugas individu/kelompok dari batas waktu ditentukan.", poin: 5 },
+        { kategori: "Pelanggaran Umum", indikator: "Tidak menjaga kebersihan lingkungan (nyampah), keindahan, kerapian, atau tidak ikut merawat fasilitas kampus.", poin: 5 },
+        { kategori: "Pelanggaran Umum", indikator: "Tidak lengkap memakai atribut resmi atau melanggar standar pakaian peserta PKKMB-KT UNILAM.", poin: 5 },
       ];
 
-      $("#kelompokNama").text(KELOMPOK_MENTOR);
+      let mhsAktif = null;
 
-      let kataKunciCari = "";
-      let riwayatKelompok = {}; // { "Nama": [ {tipe,judul,poin,tanggal} ] }
-
-      function storageKeyPoin() {
-        return `poin:${KELOMPOK_MENTOR}`;
+      function getInitials(nama) {
+        return nama.split(" ").filter(Boolean).slice(0, 2).map((s) => s[0]).join("").toUpperCase();
       }
 
-      async function muatRiwayat() {
-        riwayatKelompok = {};
-        try {
-          const res = await window.storage.get(storageKeyPoin(), true);
-          if (res && res.value) {
-            const arr = JSON.parse(res.value);
-            if (Array.isArray(arr)) {
-              arr.forEach((item) => {
-                if (!riwayatKelompok[item.nama]) riwayatKelompok[item.nama] = [];
-                riwayatKelompok[item.nama].push(item);
-              });
-            }
-          }
-        } catch (e) {
-          // belum ada riwayat tersimpan untuk kelompok ini — normal di awal
-        }
-      }
-
-      async function simpanRiwayat() {
-        const gabung = [];
-        Object.keys(riwayatKelompok).forEach((nama) => riwayatKelompok[nama].forEach((item) => gabung.push(item)));
-        try {
-          await window.storage.set(storageKeyPoin(), JSON.stringify(gabung), true);
-        } catch (e) {
-          alert("Gagal menyimpan poin. Coba lagi.");
-        }
-      }
-
-      function tambahPoin(nama, tipe, judul, poin) {
-        if (!riwayatKelompok[nama]) riwayatKelompok[nama] = [];
-        riwayatKelompok[nama].push({
-          nama,
-          tipe,
-          judul,
-          poin,
-          tanggal: new Date().toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-          }),
+      // ---------- Isi dropdown indikator (dikelompokkan pakai <optgroup>) ----------
+      function isiDropdownIndikator($select, daftar) {
+        const grup = {};
+        daftar.forEach((it) => {
+          if (!grup[it.kategori]) grup[it.kategori] = [];
+          grup[it.kategori].push(it);
         });
-        simpanRiwayat();
-        tampilkanToast(`${tipe === "keaktifan" ? "+" : "-"}${poin} poin untuk ${nama}`);
-        renderMhsGrid();
-      }
-
-      function totalPoin(nama) {
-        const list = riwayatKelompok[nama] || [];
-        let plus = 0,
-          minus = 0;
-        list.forEach((r) => {
-          if (r.tipe === "keaktifan") plus += r.poin;
-          else minus += r.poin;
+        let html = `<option value="">— Pilih indikator —</option>`;
+        Object.keys(grup).forEach((kat) => {
+          html += `<optgroup label="${kat}">`;
+          grup[kat].forEach((it) => {
+            html += `<option value="${it.indikator.replace(/"/g, "&quot;")}" data-poin="${it.poin}" data-kategori="${kat}">${it.indikator}</option>`;
+          });
+          html += `</optgroup>`;
         });
-        return {
-          bersih: plus - minus,
-          list
-        };
+        $select.html(html);
+      }
+      isiDropdownIndikator($("#selectKeaktifan"), KATEGORI_KEAKTIFAN);
+      isiDropdownIndikator($("#selectPelanggaran"), KATEGORI_PELANGGARAN);
+
+      $("#selectKeaktifan").on("change", function() {
+        const $opt = $(this).find("option:selected");
+        const poin = $opt.data("poin");
+        $("#btnSimpanKeaktifan").prop("disabled", !poin);
+        if (poin) {
+          $("#poinKeaktifanVal").text(`+${poin}`);
+          $("#poinKeaktifanBox").removeClass("hidden").addClass("flex");
+        } else {
+          $("#poinKeaktifanBox").addClass("hidden").removeClass("flex");
+        }
+      });
+
+      $("#selectPelanggaran").on("change", function() {
+        const $opt = $(this).find("option:selected");
+        const poin = $opt.data("poin");
+        $("#btnSimpanPelanggaran").prop("disabled", !poin);
+        if (poin) {
+          $("#poinPelanggaranVal").text(`-${poin}`);
+          $("#poinPelanggaranBox").removeClass("hidden").addClass("flex");
+        } else {
+          $("#poinPelanggaranBox").addClass("hidden").removeClass("flex");
+        }
+      });
+
+      // ---------- Combobox cari & pilih mahasiswa ----------
+      const $searchInput = $("#searchInput");
+      const $dropdown = $("#searchDropdown");
+      const $emptyState = $("#searchEmptyState");
+
+      function filterMhs(q) {
+        q = q.trim().toLowerCase();
+        if (!q) return ANGGOTA_KELOMPOK;
+        return ANGGOTA_KELOMPOK.filter((m) => m.nama.toLowerCase().includes(q) || m.npm.includes(q));
       }
 
-      function renderMhsGrid() {
-        const $grid = $("#mhsGrid");
-        const anggota = ANGGOTA_KELOMPOK.filter(
-          (m) => m.nama.toLowerCase().includes(kataKunciCari.toLowerCase()) || m.npm.includes(kataKunciCari),
-        );
-
-        if (anggota.length === 0) {
-          $grid.html(`<div class="text-center text-[12.5px] text-ink-400 font-semibold col-span-full" style="padding:30px 20px;">Tidak ada mahasiswa yang cocok dengan pencarian.</div>`);
+      function renderDropdown(list) {
+        if (list.length === 0) {
+          $dropdown.addClass("hidden").html("");
+          $emptyState.removeClass("hidden");
           return;
         }
-
-        const html = anggota
-          .map((m) => {
-            const inisial = m.nama.split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
-            const t = totalPoin(m.nama);
-            const presetPlusHtml = PRESET_PLUS.map(
-              (p) => `<button class="text-[11.5px] font-bold rounded-full border-[1.5px] cursor-pointer transition-all bg-surface border-[#bbf7d0] text-[#15803d] hover:bg-[#f0fdf4] hover:-translate-y-px" style="padding:8px 13px;" data-nama="${m.nama}" data-tipe="keaktifan" data-judul="${p.label}" data-poin="${p.poin}">+${p.poin} ${p.label}</button>`,
-            ).join("");
-            const presetMinusHtml = PRESET_MINUS.map(
-              (p) => `<button class="text-[11.5px] font-bold rounded-full border-[1.5px] cursor-pointer transition-all bg-surface border-[#fecaca] text-[#b91c1c] hover:bg-[#fef2f2] hover:-translate-y-px" style="padding:8px 13px;" data-nama="${m.nama}" data-tipe="pelanggaran" data-judul="${p.label}" data-poin="${p.poin}">-${p.poin} ${p.label}</button>`,
-            ).join("");
-            const riwayatHtml = t.list.length ?
-              t.list.slice().reverse().map(
-                (r) => `
-                      <div class="flex justify-between gap-2 text-[11px] border-t border-dashed border-border first:border-t-0" style="padding:6px 0;">
-                        <span class="text-ink-600">${r.judul} · ${r.tanggal}</span>
-                        <span class="font-extrabold ${r.tipe === "keaktifan" ? "text-[#15803d]" : "text-[#b91c1c]"}">${r.tipe === "keaktifan" ? "+" : "-"}${r.poin}</span>
-                      </div>
-                    `,
-              ).join("") :
-              `<div class="flex justify-between gap-2 text-[11px]" style="padding:6px 0;"><span class="text-ink-600">Belum ada catatan.</span></div>`;
-
-            return `
-                <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)]" style="padding:16px;">
-                  <div class="flex items-center gap-2.5 mb-3">
-                    <span class="w-[38px] h-[38px] rounded-full bg-navy-tint text-navy-700 flex items-center justify-center font-extrabold text-[13px] flex-shrink-0">${inisial}</span>
-                    <div>
-                      <p class="text-[13.5px] font-bold m-0">${m.nama}</p>
-                      <p class="text-[11px] text-ink-400 mt-0.5 mb-0">NPM ${m.npm}</p>
-                    </div>
-                    <div class="ml-auto text-right">
-                      <div class="font-display text-lg font-bold leading-none" style="color:${t.bersih >= 0 ? "#16a34a" : "#dc2626"}">${t.bersih >= 0 ? "+" : ""}${t.bersih}</div>
-                      <div class="text-[9px] text-ink-400 font-bold uppercase">Total Poin</div>
-                    </div>
-                  </div>
-
-                  <div class="text-[10px] font-extrabold uppercase tracking-[0.04em] text-ink-400" style="margin:10px 0 6px;">Tambah Poin Keaktifan</div>
-                  <div class="flex gap-1.5 flex-wrap">${presetPlusHtml}</div>
-
-                  <div class="text-[10px] font-extrabold uppercase tracking-[0.04em] text-ink-400" style="margin:10px 0 6px;">Kurangi Poin (Pelanggaran)</div>
-                  <div class="flex gap-1.5 flex-wrap">${presetMinusHtml}</div>
-
-                  <button class="riwayat-toggle flex items-center gap-1.5 text-[11px] font-bold text-teal-600 mt-3 cursor-pointer bg-none border-none p-0 [&.open>svg]:rotate-180" data-nama="${m.nama}">
-                    Lihat riwayat (${t.list.length})
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 transition-transform"><path d="M6 9l6 6 6-6" /></svg>
-                  </button>
-                  <div class="riwayat-list overflow-hidden transition-[max-height] duration-[250ms] ease-in-out" style="max-height:0;">${riwayatHtml}</div>
-                </div>
-              `;
-          })
-          .join("");
-
-        $grid.html(html);
-
-        $grid.find(".preset-chip, button[data-tipe]").on("click", function() {
-          const $btn = $(this);
-          tambahPoin($btn.data("nama"), $btn.data("tipe"), $btn.data("judul"), Number($btn.data("poin")));
-        });
-
-        $grid.find(".riwayat-toggle").on("click", function() {
-          const $btn = $(this);
-          const $list = $btn.next(".riwayat-list");
-          const opening = !$btn.hasClass("open");
-          $btn.toggleClass("open");
-          if (opening) {
-            $list.css("max-height", "220px").css("overflow-y", "auto").css("margin-top", "8px");
-          } else {
-            $list.css("max-height", "0").css("overflow-y", "hidden").css("margin-top", "0");
-          }
+        $emptyState.addClass("hidden");
+        const html = list.map((m) => `
+          <button type="button" data-id="${m.id}" class="mhs-option w-full flex items-center gap-3 text-left hover:bg-teal-tint transition-colors" style="padding: 12px 16px;">
+            <span class="w-9 h-9 shrink-0 rounded-lg bg-navy-tint text-navy-700 flex items-center justify-center font-extrabold text-[12px]">${getInitials(m.nama)}</span>
+            <span class="min-w-0">
+              <span class="block text-[13px] font-bold text-ink-900 truncate">${m.nama}</span>
+              <span class="block text-[11px] text-ink-400">NPM ${m.npm}</span>
+            </span>
+          </button>
+        `).join("");
+        $dropdown.html(html).removeClass("hidden");
+        $dropdown.find(".mhs-option").on("click", function() {
+          pilihMhs($(this).data("id"));
         });
       }
+
+      function pilihMhs(id) {
+        const m = ANGGOTA_KELOMPOK.find((x) => String(x.id) === String(id));
+        if (!m) return;
+        mhsAktif = m;
+
+        $searchInput.val(m.nama);
+        $dropdown.addClass("hidden");
+        $emptyState.addClass("hidden");
+
+        $("#selMhsAvatar").text(getInitials(m.nama));
+        $("#selMhsNama").text(m.nama);
+        $("#selMhsNpm").text(`NPM ${m.npm}`);
+
+        $("#belumPilihState").addClass("hidden");
+        $("#kontenMahasiswa").removeClass("hidden");
+
+        // reset form tiap ganti mahasiswa
+        $("#selectKeaktifan, #selectPelanggaran").val("").trigger("change");
+        $("#catatanKeaktifan, #catatanPelanggaran").val("");
+
+        muatRiwayat();
+      }
+
+      $searchInput.on("focus", () => renderDropdown(filterMhs($searchInput.val())));
+      $searchInput.on("input", () => renderDropdown(filterMhs($searchInput.val())));
+      $(document).on("click", (e) => {
+        if (!$searchInput.is(e.target) && !$dropdown.is(e.target) && $dropdown.has(e.target).length === 0) {
+          $dropdown.addClass("hidden");
+        }
+      });
+
+      $("#btnGantiMhs").on("click", function() {
+        mhsAktif = null;
+        $searchInput.val("").focus();
+        $("#kontenMahasiswa").addClass("hidden");
+        $("#belumPilihState").removeClass("hidden");
+      });
+
+      // ---------- Riwayat ----------
+      function muatRiwayat() {
+        if (!mhsAktif) return;
+        $("#riwayatLoading").removeClass("hidden");
+        $("#riwayatList").html("");
+
+        $.get(`${URL_BASE}/${mhsAktif.id}/riwayat`)
+          .done(function(res) {
+            $("#selMhsTotal").text(res.total >= 0 ? `+${res.total}` : res.total)
+              .css("color", res.total >= 0 ? "#16a34a" : "#dc2626");
+
+            if (!res.riwayat || res.riwayat.length === 0) {
+              $("#riwayatList").html(`<p class="text-center text-[12px] text-ink-400 font-semibold" style="padding:14px 0;">Belum ada catatan poin.</p>`);
+              return;
+            }
+            const html = res.riwayat.map((r) => `
+              <div class="flex justify-between gap-3 border-t border-dashed border-border first:border-t-0" style="padding: 10px 2px;">
+                <div class="min-w-0">
+                  <p class="text-[12px] font-bold text-ink-900 m-0 truncate">${r.kategori}</p>
+                  <p class="text-[11px] text-ink-400 m-0 mt-0.5">${r.deskripsi}</p>
+                  <p class="text-[10px] text-ink-400 m-0 mt-0.5">${r.tanggal}</p>
+                </div>
+                <span class="font-extrabold text-[13px] shrink-0" style="color: ${r.poin >= 0 ? '#16a34a' : '#dc2626'};">${r.poin >= 0 ? '+' : ''}${r.poin}</span>
+              </div>
+            `).join("");
+            $("#riwayatList").html(html);
+          })
+          .fail(function() {
+            $("#riwayatList").html(`<p class="text-center text-[12px] text-ink-400 font-semibold" style="padding:14px 0;">Gagal memuat riwayat.</p>`);
+          })
+          .always(function() {
+            $("#riwayatLoading").addClass("hidden");
+          });
+      }
+
+      // ---------- Simpan poin ----------
+      function simpanPoin(tipe, $select, $catatan, $btn) {
+        if (!mhsAktif) return;
+        const $opt = $select.find("option:selected");
+        const poinAsli = $opt.data("poin");
+        if (!poinAsli) return;
+
+        const poin = tipe === "pelanggaran" ? -Math.abs(poinAsli) : Math.abs(poinAsli);
+
+        $btn.prop("disabled", true);
+        $.ajax({
+          url: URL_BASE,
+          method: "POST",
+          headers: { "X-CSRF-TOKEN": CSRF_TOKEN },
+          data: {
+            student_id: mhsAktif.id,
+            kategori: $opt.data("kategori"),
+            indikator: $opt.val(),
+            poin: poin,
+            catatan: $catatan.val().trim(),
+          },
+        })
+          .done(function() {
+            tampilkanToast(`${poin >= 0 ? "+" : ""}${poin} poin untuk ${mhsAktif.nama}`);
+            $select.val("").trigger("change");
+            $catatan.val("");
+            muatRiwayat();
+          })
+          .fail(function(xhr) {
+            const res = xhr.responseJSON || {};
+            alert(res.message || "Gagal menyimpan poin. Coba lagi.");
+          })
+          .always(function() {
+            $btn.prop("disabled", !$select.find("option:selected").data("poin"));
+          });
+      }
+
+      $("#btnSimpanKeaktifan").on("click", function() {
+        simpanPoin("keaktifan", $("#selectKeaktifan"), $("#catatanKeaktifan"), $(this));
+      });
+      $("#btnSimpanPelanggaran").on("click", function() {
+        simpanPoin("pelanggaran", $("#selectPelanggaran"), $("#catatanPelanggaran"), $(this));
+      });
 
       function tampilkanToast(teks) {
         const $toast = $("#saveToast");
@@ -395,17 +530,6 @@
           $toast.css("transform", "translateX(-50%) translateY(20px)");
         }, 2200);
       }
-
-      $("#searchInput").on("input", function() {
-        kataKunciCari = $(this).val();
-        renderMhsGrid();
-      });
-
-      async function init() {
-        await muatRiwayat();
-        renderMhsGrid();
-      }
-      init();
 
       // ======================================================================
       // ►► SLIDESHOW LATAR HERO — sama seperti halaman lain.

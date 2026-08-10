@@ -184,6 +184,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/evaluasi', 'evaluasi')->name('role.mentor.evaluasi');
             Route::get('/evaluasi/detail', 'evaluasiDetail')->name('role.mentor.evaluasi.detail');
             Route::get('/keaktifan', 'keaktifan')->name('role.mentor.keaktifan');
+            Route::post('/keaktifan', 'keaktifanStore')->name('role.mentor.keaktifan.store');
+            Route::get('/keaktifan/{studentId}/riwayat', 'keaktifanRiwayat')->name('role.mentor.keaktifan.riwayat');
             Route::get('/monitoring-tugas', 'monitoringTugas')->name('role.mentor.monitoring-tugas');
             Route::post('/monitoring-tugas/submit', 'monitoringTugasSubmit')->name('role.mentor.monitoring-tugas.submit');
         });
