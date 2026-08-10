@@ -157,19 +157,19 @@
         </tr>
         <tr class="even:[&>td]:bg-bg">
           <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Aktif bertanya dan menjawab</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-plus-500 font-extrabold bg-plus-tint rounded-full text-xs inline-block" style="padding:3px 10px;">+10</span></td>
+          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#059669] font-extrabold bg-[#ecfdf5] rounded-full text-xs inline-block" style="padding:3px 10px;">+10</span></td>
         </tr>
         <tr class="even:[&>td]:bg-bg">
           <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Membantu teman</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-plus-500 font-extrabold bg-plus-tint rounded-full text-xs inline-block" style="padding:3px 10px;">+5</span></td>
+          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#059669] font-extrabold bg-[#ecfdf5] rounded-full text-xs inline-block" style="padding:3px 10px;">+5</span></td>
         </tr>
         <tr class="even:[&>td]:bg-bg">
           <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Menjadi sukarelawan saat kegiatan</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-plus-500 font-extrabold bg-plus-tint rounded-full text-xs inline-block" style="padding:3px 10px;">+7</span></td>
+          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#059669] font-extrabold bg-[#ecfdf5] rounded-full text-xs inline-block" style="padding:3px 10px;">+7</span></td>
         </tr>
         <tr class="even:[&>td]:bg-bg">
           <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;">Menjaga kebersihan</td>
-          <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;"><span class="text-plus-500 font-extrabold bg-plus-tint rounded-full text-xs inline-block" style="padding:3px 10px;">+3</span></td>
+          <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;"><span class="text-[#059669] font-extrabold bg-[#ecfdf5] rounded-full text-xs inline-block" style="padding:3px 10px;">+3</span></td>
         </tr>
       </table>
 
@@ -181,15 +181,15 @@
         </tr>
         <tr class="even:[&>td]:bg-bg">
           <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Tidak mengikuti kegiatan tanpa izin</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-minus-500 font-extrabold bg-minus-tint rounded-full text-xs inline-block" style="padding:3px 10px;">-15</span></td>
+          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#dc2626] font-extrabold bg-[#fef2f2] rounded-full text-xs inline-block" style="padding:3px 10px;">-15</span></td>
         </tr>
         <tr class="even:[&>td]:bg-bg">
           <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Tidak rapi / atribut tidak lengkap</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-minus-500 font-extrabold bg-minus-tint rounded-full text-xs inline-block" style="padding:3px 10px;">-5</span></td>
+          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#dc2626] font-extrabold bg-[#fef2f2] rounded-full text-xs inline-block" style="padding:3px 10px;">-5</span></td>
         </tr>
         <tr class="even:[&>td]:bg-bg">
           <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;">Mengganggu jalannya kegiatan</td>
-          <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;"><span class="text-minus-500 font-extrabold bg-minus-tint rounded-full text-xs inline-block" style="padding:3px 10px;">-10</span></td>
+          <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;"><span class="text-[#dc2626] font-extrabold bg-[#fef2f2] rounded-full text-xs inline-block" style="padding:3px 10px;">-10</span></td>
         </tr>
       </table>
 
