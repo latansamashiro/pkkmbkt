@@ -9,6 +9,7 @@
   <title>Materi PKKMB-KT UNILAM 2026</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -344,7 +345,7 @@
         @apply -translate-y-[3px] shadow-[0_10px_24px_rgba(21,33,89,0.16)];
       }
       .video-thumb {
-        @apply relative overflow-hidden bg-navy-900;
+        @apply relative overflow-hidden bg-navy-900 cursor-pointer;
         height: 130px;
       }
       .video-thumb img {
@@ -656,6 +657,51 @@
       .btn-modal-disabled {
         @apply block w-full text-center rounded-[13px] text-[13.5px] font-extrabold bg-border text-ink-400 border-none cursor-not-allowed;
         padding: 12px;
+      }
+
+      /* ============ VIDEO PLAYER MODAL (embed langsung di web) ============ */
+      .player-modal-box {
+        @apply bg-surface rounded-[20px] max-w-[820px] w-full overflow-hidden shadow-[0_10px_24px_rgba(21,33,89,0.16)];
+        animation: modal-in 0.22s ease;
+      }
+      .player-modal-header {
+        @apply flex items-center justify-between gap-3;
+        padding: 14px 18px;
+      }
+      .player-modal-title {
+        @apply font-display text-sm font-bold text-ink-900 m-0 truncate;
+      }
+      .player-modal-close {
+        @apply w-8 h-8 rounded-full border-none text-ink-400 text-lg leading-none cursor-pointer flex items-center justify-center transition-colors shrink-0;
+        background: var(--bg);
+      }
+      .player-modal-close:hover {
+        @apply text-ink-900;
+        background: var(--border);
+      }
+      .player-modal-frame-wrap {
+        @apply relative w-full bg-black;
+        padding-top: 56.25%; /* rasio 16:9 */
+      }
+      .player-modal-frame-wrap iframe {
+        @apply absolute inset-0 w-full h-full border-none;
+      }
+      .player-modal-fallback {
+        @apply absolute inset-0 flex flex-col items-center justify-center text-center gap-3;
+        padding: 24px;
+      }
+      .player-modal-fallback svg {
+        @apply w-9 h-9 text-white/60;
+      }
+      .player-modal-fallback p {
+        @apply text-white/85 text-[13.5px] leading-[1.6] m-0 max-w-[380px];
+      }
+      .player-modal-fallback a {
+        @apply inline-flex items-center gap-2 bg-lime-500 text-navy-900 text-[12.5px] font-extrabold rounded-full no-underline transition-[filter];
+        padding: 10px 20px;
+      }
+      .player-modal-fallback a:hover {
+        filter: brightness(1.08);
       }
 
       /* ============ FOOTER ============ */
@@ -977,6 +1023,17 @@
     </div>
   </div>
 
+  <!-- ============ VIDEO PLAYER MODAL (nonton langsung di web) ============ -->
+  <div class="modal-backdrop" id="videoPlayerModal">
+    <div class="player-modal-box">
+      <div class="player-modal-header">
+        <h3 class="player-modal-title" id="videoPlayerTitle">Video</h3>
+        <button class="player-modal-close" id="btnCloseVideoPlayer">×</button>
+      </div>
+      <div class="player-modal-frame-wrap" id="videoPlayerFrameWrap"></div>
+    </div>
+  </div>
+
   <!-- ============ FOOTER ============ -->
   <footer class="footer">
     <p>© 2026 PKKMB-KT UNILAM. Semua hak dilindungi.</p>
@@ -1184,13 +1241,18 @@
         const html = items
           .map((v) => {
             const isDone = v.progress === 100;
-            const thumbHtml = v.thumbnailImg ?
-              `<img src="${v.thumbnailImg}" alt="${v.judul}" />` :
-              `<div class="video-thumb-gradient" style="background:${getGradientStyle(v.gradientFallback)}"></div>`;
+            const ytId = ekstrakYoutubeId(v.youtube);
+            // Prioritas thumbnail: gambar manual (kalau ada) > auto dari YouTube > gradasi warna.
+            const autoThumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+            const thumbSrc = v.thumbnailImg || autoThumbUrl;
+            const gradientCss = getGradientStyle(v.gradientFallback);
+            const thumbHtml = thumbSrc ?
+              `<img src="${thumbSrc}" alt="${v.judul}" onerror="gantiKeGradasi(this, '${gradientCss.replace(/'/g, "\\'")}')" />` :
+              `<div class="video-thumb-gradient" style="background:${gradientCss}"></div>`;
 
             return `
               <div class="video-card">
-                <div class="video-thumb">
+                <div class="video-thumb" data-detail-id="${v.id}">
                   ${thumbHtml}
                   <div class="video-thumb-overlay"></div>
                   <div class="video-play-btn">
@@ -1220,10 +1282,150 @@
           .join("");
 
         $videoGridContainer.html(html);
-        $videoGridContainer.find(".btn-watch").on("click", function() {
-          triggerDetailModalEngine($(this).data("detail-id"));
+        // Klik thumbnail ATAU tombol "Tonton Materi" -> langsung buka videonya,
+        // tidak perlu buka modal dulu. Modal cuma tampil sebagai fallback kalau
+        // link videonya memang belum tersedia (kasih tahu, bukan buka tab kosong).
+        $videoGridContainer.find(".btn-watch, .video-thumb").on("click", function() {
+          bukaVideoLangsung($(this).data("detail-id"));
         });
       }
+
+      function ekstrakYoutubeId(url) {
+        if (!url) return null;
+        // Nangkep berbagai format link YouTube: watch?v=, youtu.be/, embed/, shorts/
+        const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        return m ? m[1] : null;
+      }
+
+      // Dipanggil dari atribut onerror di tag <img> thumbnail (lihat renderVideos)
+      // kalau gambar thumbnail auto dari YouTube gagal dimuat -> ganti ke gradasi
+      // warna biasa. Ditaruh di window supaya bisa dipanggil dari inline HTML.
+      window.gantiKeGradasi = function(imgEl, gradientCss) {
+        const div = document.createElement("div");
+        div.className = "video-thumb-gradient";
+        div.style.background = gradientCss;
+        imgEl.replaceWith(div);
+      };
+
+      // ======================================================================
+      // ►► YOUTUBE IFRAME API — dipakai supaya bisa DETEKSI kalau pemilik video
+      // mematikan izin embed (bukan cuma render iframe polos yang nampilin
+      // kotak error mentah dari YouTube kalau gagal).
+      // ======================================================================
+      let currentYtPlayer = null;
+
+      // PENTING: dulu sempat pakai window.onYouTubeIframeAPIReady doang, tapi
+      // itu race condition -- skrip iframe_api kadang selesai load & manggil
+      // callback-nya SEBELUM baris ini sempat jalan buat "daftar" dengerin,
+      // jadi sinyalnya kelewat & gak pernah ke-tangkep (macet permanen).
+      // Makanya sekarang polling tiap 100ms, jauh lebih aman dari soal timing.
+      function whenYtApiReady(fn) {
+        if (window.YT && window.YT.Player) {
+          fn();
+          return;
+        }
+        const iv = setInterval(function() {
+          if (window.YT && window.YT.Player) {
+            clearInterval(iv);
+            fn();
+          }
+        }, 100);
+        setTimeout(function() {
+          clearInterval(iv);
+        }, 6000); // nyerah setelah 6 detik, biar gak nunggu selamanya kalau emang API-nya gagal total
+      }
+
+      function tampilkanFallbackVideo(item) {
+        $("#videoPlayerFrameWrap").html(`
+          <div class="player-modal-fallback">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+            <p>Video ini tidak mengizinkan pemutaran langsung di halaman ini (dimatikan oleh pemilik video). Tonton langsung di YouTube ya.</p>
+            <a href="${item.youtube}" target="_blank">Tonton di YouTube</a>
+          </div>
+        `);
+      }
+
+      function bukaVideoLangsung(id) {
+        const item = GABUNGAN.find((x) => x.id === id);
+        if (!item) return;
+        if (!item.youtube || item.youtube === "#") {
+          triggerDetailModalEngine(id); // videonya belum ada linknya, kasih tau lewat modal
+          return;
+        }
+
+        const ytId = ekstrakYoutubeId(item.youtube);
+        if (!ytId) {
+          // Bukan link YouTube yang dikenali (mis. Google Drive) -> gak bisa
+          // dijamin bisa di-embed, jadi tetap buka di tab baru.
+          window.open(item.youtube, "_blank");
+          return;
+        }
+
+        // Video YouTube -> tampilkan embed langsung di web, gak usah pindah tab.
+        $("#videoPlayerTitle").text(item.judul);
+        $("#videoPlayerFrameWrap").html('<div id="ytPlayerHost"></div>');
+        $videoPlayerModal.addClass("open");
+
+        let playerSudahDibuat = false;
+
+        whenYtApiReady(function() {
+          playerSudahDibuat = true;
+          // Kalau modal ditutup terus dibuka lagi sebelum player lama beres di-destroy
+          if (currentYtPlayer) {
+            try {
+              currentYtPlayer.destroy();
+            } catch (e) {}
+            currentYtPlayer = null;
+          }
+          // #ytPlayerHost mungkin sudah diganti isinya (mis. modal sempat ditutup,
+          // atau fallback timeout di bawah sudah kepakai duluan) -> pastikan
+          // elemennya masih ada & masih kosong sebelum bikin player baru.
+          const $host = $("#ytPlayerHost");
+          if (!$host.length || !$host.is(":empty")) return;
+
+          currentYtPlayer = new YT.Player("ytPlayerHost", {
+            videoId: ytId,
+            playerVars: { autoplay: 1, rel: 0 },
+            events: {
+              onError: function() {
+                // Kode error 101/150 = pemilik video matiin izin embed, 100 = video
+                // private/dihapus. Semua kasus itu -> tampilkan fallback yang rapi.
+                tampilkanFallbackVideo(item);
+              },
+            },
+          });
+        });
+
+        // Fallback kalau script youtube.com/iframe_api gagal/lambat dimuat
+        // (mis. diblokir ekstensi/ad-blocker seperti Brave Shields) -> jangan
+        // biarkan modal-nya kosong melompong, balik pakai <iframe> polos biasa.
+        setTimeout(function() {
+          if (playerSudahDibuat) return;
+          const $host = $("#ytPlayerHost");
+          if (!$host.length || !$host.is(":empty")) return; // modal sudah ditutup/diisi duluan
+
+          $("#videoPlayerFrameWrap").html(
+            `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" title="${item.judul}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+          );
+        }, 2500);
+      }
+
+      function tutupVideoPlayer() {
+        $videoPlayerModal.removeClass("open");
+        if (currentYtPlayer) {
+          try {
+            currentYtPlayer.destroy();
+          } catch (e) {}
+          currentYtPlayer = null;
+        }
+        $("#videoPlayerFrameWrap").html(""); // stop video-nya (hapus iframe biar suara berhenti)
+      }
+
+      const $videoPlayerModal = $("#videoPlayerModal");
+      $("#btnCloseVideoPlayer").on("click", tutupVideoPlayer);
+      $videoPlayerModal.on("click", function(e) {
+        if (e.target === this) tutupVideoPlayer();
+      });
 
       function renderEbooks(items) {
         if (items.length === 0) {
