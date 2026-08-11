@@ -141,10 +141,10 @@
           class="w-full h-full object-cover" />
       </div>
       <div>
-        <p class="font-display text-[17px] font-bold text-ink-900 m-0" id="identityName">Alexander Arul Husein</p>
+        <p class="font-display text-[17px] font-bold text-ink-900 m-0" id="identityName">{{ $identitas['nama'] }}</p>
         <p class="text-xs text-ink-600 mt-1 flex items-center gap-2 flex-wrap">
-          NPM <span id="identityNPM">525241019</span>
-          <span class="text-[10px] bg-navy-tint text-navy-900 px-2.5 py-[3px] rounded-full font-extrabold font-mono" id="identityKelompok">Kelompok 01</span>
+          NPM <span id="identityNPM">{{ $identitas['npm'] ?? '-' }}</span>
+          <span class="text-[10px] bg-navy-tint text-navy-900 px-2.5 py-[3px] rounded-full font-extrabold font-mono" id="identityKelompok">{{ $identitas['kelompok'] }}</span>
         </p>
       </div>
       <span class="ml-auto inline-flex items-center gap-1.5 text-[11px] font-bold text-teal-600 bg-teal-tint px-3.5 py-[7px] rounded-full flex-shrink-0 [&_svg]:w-3 [&_svg]:h-3 max-[520px]:px-2">
@@ -201,7 +201,7 @@
         </h3>
       </div>
       <div class="flex gap-2 px-[22px] py-3 border-b border-border bg-bg flex-wrap">
-        <button type="button" class="poin-chip px-3.5 py-1.5 rounded-full text-[11.5px] font-bold border-[1.5px] border-border bg-surface text-ink-600 cursor-pointer transition-all hover:border-teal-500 hover:text-teal-600 active bg-navy-900 border-navy-900 text-white" data-filter="semua">Semua</button>
+        <button type="button" class="poin-chip px-3.5 py-1.5 rounded-full text-[11.5px] font-bold border-[1.5px] cursor-pointer transition-all active bg-navy-900 border-navy-900 text-white" data-filter="semua">Semua</button>
         <button type="button" class="poin-chip px-3.5 py-1.5 rounded-full text-[11.5px] font-bold border-[1.5px] border-border bg-surface text-ink-600 cursor-pointer transition-all hover:border-teal-500 hover:text-teal-600" data-filter="keaktifan">Keaktifan</button>
         <button type="button" class="poin-chip px-3.5 py-1.5 rounded-full text-[11.5px] font-bold border-[1.5px] border-border bg-surface text-ink-600 cursor-pointer transition-all hover:border-teal-500 hover:text-teal-600" data-filter="pelanggaran">Pelanggaran</button>
       </div>
@@ -294,57 +294,10 @@
   <script>
     $(function() {
       // ======================================================================
-      // ►► IDENTITAS AKUN YANG SEDANG LOGIN — GANTI DENGAN DATA ASLI
-      //    Saat ini masih hardcode karena belum ada sistem login/backend
-      //    beneran. Kalau nanti sudah ada, gantikan blok ini dengan data
-      //    yang diambil dari sesi login, supaya tidak mungkin ada mahasiswa
-      //    lain yang bisa melihat data orang lain.
+      // ►► POIN KEAKTIFAN & PELANGGARAN — dari database (tabel activities),
+      //    cuma punya akun yang lagi login (dibatasi di controller).
       // ======================================================================
-      const CURRENT_STUDENT = {
-        nama: "Alexander Arul Husein",
-        npm: "525241019",
-        kelompok: "Kelompok 01",
-      };
-      $("#identityName").text(CURRENT_STUDENT.nama);
-      $("#identityNPM").text(CURRENT_STUDENT.npm);
-      $("#identityKelompok").text(CURRENT_STUDENT.kelompok);
-
-      // ======================================================================
-      // ►► POIN KEAKTIFAN & PELANGGARAN — ISI / EDIT CATATAN DI SINI
-      //    - "tipe": "keaktifan" (menambah poin) atau "pelanggaran" (mengurangi poin)
-      //    - "poin": nilai positif (angka besarnya saja, tanda +/- otomatis)
-      // ======================================================================
-      const riwayatPoin = [{
-          tipe: "keaktifan",
-          judul: "Aktif bertanya saat sesi materi akademik",
-          poin: 5,
-          tanggal: "07 Sep 2026",
-        },
-        {
-          tipe: "keaktifan",
-          judul: "Menjadi perwakilan kelompok saat diskusi kelas",
-          poin: 10,
-          tanggal: "08 Sep 2026",
-        },
-        {
-          tipe: "keaktifan",
-          judul: "Membantu mentor mengondisikan barisan kelompok",
-          poin: 5,
-          tanggal: "09 Sep 2026",
-        },
-        {
-          tipe: "pelanggaran",
-          judul: "Terlambat mengikuti sesi pagi",
-          poin: 5,
-          tanggal: "08 Sep 2026",
-        },
-        {
-          tipe: "pelanggaran",
-          judul: "Tidak memakai atribut lengkap sesuai ketentuan",
-          poin: 10,
-          tanggal: "09 Sep 2026",
-        },
-      ];
+      const riwayatPoin = @json($riwayatPoin);
 
       const iconKeaktifan = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>`;
       const iconPelanggaran = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>`;
@@ -410,8 +363,12 @@
       }
 
       $(".poin-chip").on("click", function() {
-        $(".poin-chip").removeClass("active bg-navy-900 border-navy-900 text-white");
-        $(this).addClass("active bg-navy-900 border-navy-900 text-white");
+        $(".poin-chip")
+          .removeClass("active bg-navy-900 border-navy-900 text-white")
+          .addClass("border-border bg-surface text-ink-600");
+        $(this)
+          .removeClass("border-border bg-surface text-ink-600")
+          .addClass("active bg-navy-900 border-navy-900 text-white");
         filterPoinAktif = $(this).data("filter");
         renderRiwayatPoin();
       });

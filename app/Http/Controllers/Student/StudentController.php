@@ -13,24 +13,7 @@ class StudentController extends Controller
 
     public function leaderboard()
     {
-        $dataMahasiswa = \App\Models\User::where('role_name', 'STUDENT')
-            ->get(['id', 'name', 'gender'])
-            ->map(function ($u) {
-                $skor = (int) \App\Models\Activity::where('student_id', $u->id)->sum('activity_value');
-                // Data gender formatnya beda-beda tergantung cara input akunnya:
-                // form manual admin pakai 'L'/'P', tapi hasil import Excel pakai
-                // 'laki-laki'/'perempuan' -- disamakan dulu di sini.
-                $genderMentah = strtolower((string) $u->gender);
-                $gender = in_array($genderMentah, ['p', 'perempuan'], true) ? 'P' : 'L';
-
-                return [
-                    'nama' => $u->name,
-                    'skor' => $skor,
-                    'gender' => $gender,
-                ];
-            })
-            ->sortByDesc('skor')
-            ->values();
+        $dataMahasiswa = \App\Support\Leaderboard::hitungRanking();
 
         return view('role.student.leaderboard', compact('dataMahasiswa'));
     }
@@ -86,7 +69,28 @@ class StudentController extends Controller
 
     public function keaktifan()
     {
-        return view('role.student.keaktifan');
+        $user = auth()->user();
+        $member = \App\Models\Member::where('student_id', $user->id)->with('group')->first();
+
+        $riwayatPoin = \App\Models\Activity::where('student_id', $user->id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn ($a) => [
+                'tipe' => $a->activity_value >= 0 ? 'keaktifan' : 'pelanggaran',
+                'judul' => $a->description ?: $a->category,
+                'poin' => abs((int) $a->activity_value),
+                'tanggal' => $a->created_at?->translatedFormat('d M Y'),
+            ])
+            ->values();
+
+        return view('role.student.keaktifan', [
+            'identitas' => [
+                'nama' => $user->name,
+                'npm' => $user->npm,
+                'kelompok' => $member?->group?->name ?? '-',
+            ],
+            'riwayatPoin' => $riwayatPoin,
+        ]);
     }
 
     public function materi()

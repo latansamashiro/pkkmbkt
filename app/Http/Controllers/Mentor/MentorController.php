@@ -19,30 +19,12 @@ class MentorController extends Controller
     }
 
     /**
-     * Ranking SEMUA mahasiswa (bukan cuma 1 kelompok) berdasarkan total poin
-     * (activities.activity_value, keaktifan + pelanggaran digabung jadi net
-     * skor) -- dipakai bareng oleh Mentor & Student leaderboard.
+     * Ranking SEMUA mahasiswa -- rumus lengkapnya ada di App\Support\Leaderboard
+     * (dipakai bareng sama Student\StudentController::leaderboard()).
      */
     protected function hitungLeaderboardMahasiswa()
     {
-        return \App\Models\User::where('role_name', 'STUDENT')
-            ->get(['id', 'name', 'gender'])
-            ->map(function ($u) {
-                $skor = (int) \App\Models\Activity::where('student_id', $u->id)->sum('activity_value');
-                // Data gender formatnya beda-beda tergantung cara input akunnya:
-                // form manual admin pakai 'L'/'P', tapi hasil import Excel pakai
-                // 'laki-laki'/'perempuan' -- disamakan dulu di sini.
-                $genderMentah = strtolower((string) $u->gender);
-                $gender = in_array($genderMentah, ['p', 'perempuan'], true) ? 'P' : 'L';
-
-                return [
-                    'nama' => $u->name,
-                    'skor' => $skor,
-                    'gender' => $gender,
-                ];
-            })
-            ->sortByDesc('skor')
-            ->values();
+        return \App\Support\Leaderboard::hitungRanking();
     }
 
     public function dashboard()

@@ -144,7 +144,7 @@
           <button
             id="tab-all"
             data-kategori="ALL"
-            class="board-tab text-center text-[11.5px] font-bold text-ink-600 py-[9px] px-2 rounded-[10px] border-none bg-transparent cursor-pointer transition-colors hover:text-navy-900 active bg-navy-900 text-white shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)]">
+            class="board-tab text-center text-[11.5px] font-bold text-white py-[9px] px-2 rounded-[10px] border-none cursor-pointer transition-colors active bg-navy-900 shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)]">
             Leaderboard
           </button>
           <button
@@ -292,7 +292,7 @@
             <div class="flex-1 flex flex-col items-center">
               <div class="relative mb-2">
                 <div class="podium-avatar w-14 h-14 rounded-full bg-white border-2 border-border p-0.5 flex items-center justify-center overflow-hidden text-[13px]">
-                  <div class="w-full h-full rounded-full bg-bg flex items-center justify-center">${juara2.gender === "L" ? "👦" : "👧"}</div>
+                  <div class="w-full h-full rounded-full bg-bg flex items-center justify-center overflow-hidden">${juara2.foto ? `<img src="${juara2.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${juara2.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara2.gender === "L" ? "👦" : "👧"}</span>` : (juara2.gender === "L" ? "👦" : "👧")}</div>
                 </div>
                 <span class="absolute -bottom-[3px] -right-[3px] w-5 h-5 text-[10px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white bg-ink-400">2</span>
               </div>
@@ -307,7 +307,7 @@
               <i data-lucide="crown" class="text-[#d4a017] mb-0.5"></i>
               <div class="relative mb-2">
                 <div class="podium-avatar w-[72px] h-[72px] rounded-full bg-white border-[3px] border-[#d4a017] p-0.5 flex items-center justify-center overflow-hidden text-[13px] shadow-[0_10px_24px_rgba(21,33,89,0.16)]">
-                  <div class="w-full h-full rounded-full bg-gold-tint flex items-center justify-center">${juara1.gender === "L" ? "👑" : "👸"}</div>
+                  <div class="w-full h-full rounded-full bg-gold-tint flex items-center justify-center overflow-hidden">${juara1.foto ? `<img src="${juara1.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${juara1.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara1.gender === "L" ? "👑" : "👸"}</span>` : (juara1.gender === "L" ? "👑" : "👸")}</div>
                 </div>
                 <span class="absolute -bottom-[3px] -right-[3px] w-6 h-6 text-[11px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white bg-[#d4a017]">1</span>
               </div>
@@ -321,7 +321,7 @@
             <div class="flex-1 flex flex-col items-center">
               <div class="relative mb-2">
                 <div class="podium-avatar w-14 h-14 rounded-full bg-white border-2 border-[#a9743a]/40 p-0.5 flex items-center justify-center overflow-hidden text-[13px]">
-                  <div class="w-full h-full rounded-full bg-[#a9743a]/[0.08] flex items-center justify-center">${juara3.gender === "L" ? "👦" : "👧"}</div>
+                  <div class="w-full h-full rounded-full bg-[#a9743a]/[0.08] flex items-center justify-center overflow-hidden">${juara3.foto ? `<img src="${juara3.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${juara3.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara3.gender === "L" ? "👦" : "👧"}</span>` : (juara3.gender === "L" ? "👦" : "👧")}</div>
                 </div>
                 <span class="absolute -bottom-[3px] -right-[3px] w-5 h-5 text-[10px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white bg-[#a9743a]">3</span>
               </div>
@@ -352,7 +352,7 @@
               <div class="board-row flex items-center justify-between px-3.5 py-3 bg-bg border border-border rounded-[13px] transition-colors hover:border-teal-500 ${sembunyikan ? "hidden" : ""}">
                 <div class="flex items-center gap-2.5">
                   <span class="w-[18px] text-center font-display text-[11px] font-bold text-ink-400">${nomorPeringkat}</span>
-                  <div class="w-[30px] h-[30px] rounded-full bg-navy-tint text-navy-900 text-[10.5px] font-extrabold flex items-center justify-center">${inisial}</div>
+                  <div class="w-[30px] h-[30px] rounded-full bg-navy-tint text-navy-900 text-[10.5px] font-extrabold flex items-center justify-center overflow-hidden">${mhs.foto ? `<img src="${mhs.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${mhs.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${inisial}</span>` : inisial}</div>
                   <span class="text-[12.5px] font-bold text-ink-900">${mhs.nama}</span>
                 </div>
                 <span class="text-[12.5px] font-extrabold text-teal-600">${mhs.skor}</span>
@@ -375,14 +375,18 @@
         kategoriAktif = kategori;
         statusLimit = true;
 
-        $(".board-tab").removeClass("active bg-navy-900 text-white shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)]");
+        $(".board-tab")
+          .removeClass("active bg-navy-900 text-white shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)]")
+          .addClass("bg-transparent text-ink-600");
 
         let $target;
         if (kategori === "ALL") $target = $("#tab-all");
         else if (kategori === "L") $target = $("#tab-male");
         else $target = $("#tab-female");
 
-        $target.addClass("active bg-navy-900 text-white shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)]");
+        $target
+          .removeClass("bg-transparent text-ink-600")
+          .addClass("active bg-navy-900 text-white shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)]");
 
         renderLeaderboard();
       }

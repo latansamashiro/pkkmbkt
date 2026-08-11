@@ -189,7 +189,7 @@
               <div class="flex-1 flex flex-col items-center">
                 <div class="${PODIUM_AVATAR_WRAP}">
                   <div class="rounded-full bg-white flex items-center justify-center overflow-hidden text-[13px] w-14 h-14 border-2 border-border p-0.5">
-                    <div style="width:100%;height:100%;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;">${juara2.gender === "L" ? "👦" : "👧"}</div>
+                    <div style="width:100%;height:100%;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;">${juara2.foto ? `<img src="${juara2.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;" alt="${juara2.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara2.gender === "L" ? "👦" : "👧"}</span>` : (juara2.gender === "L" ? "👦" : "👧")}</div>
                   </div>
                   <span class="absolute -bottom-[3px] -right-[3px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white w-5 h-5 text-[10px] bg-ink-400">2</span>
                 </div>
@@ -202,7 +202,7 @@
                 <i data-lucide="crown" class="text-gold-500 mb-0.5"></i>
                 <div class="${PODIUM_AVATAR_WRAP}">
                   <div class="rounded-full bg-white flex items-center justify-center overflow-hidden text-[13px] w-[72px] h-[72px] border-[3px] border-gold-500 p-0.5 shadow-[0_10px_24px_rgba(21,33,89,0.16)]">
-                    <div style="width:100%;height:100%;border-radius:50%;background:var(--gold-tint);display:flex;align-items:center;justify-content:center;">${juara1.gender === "L" ? "👑" : "👸"}</div>
+                    <div style="width:100%;height:100%;border-radius:50%;background:var(--gold-tint);display:flex;align-items:center;justify-content:center;overflow:hidden;">${juara1.foto ? `<img src="${juara1.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;" alt="${juara1.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara1.gender === "L" ? "👑" : "👸"}</span>` : (juara1.gender === "L" ? "👑" : "👸")}</div>
                   </div>
                   <span class="absolute -bottom-[3px] -right-[3px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white w-6 h-6 text-[11px] bg-gold-500">1</span>
                 </div>
@@ -214,7 +214,7 @@
               <div class="flex-1 flex flex-col items-center">
                 <div class="${PODIUM_AVATAR_WRAP}">
                   <div class="rounded-full bg-white flex items-center justify-center overflow-hidden text-[13px] w-14 h-14 p-0.5" style="border: 2px solid rgba(169, 116, 58, 0.4);">
-                    <div style="width:100%;height:100%;border-radius:50%;background:rgba(169,116,58,0.08);display:flex;align-items:center;justify-content:center;">${juara3.gender === "L" ? "👦" : "👧"}</div>
+                    <div style="width:100%;height:100%;border-radius:50%;background:rgba(169,116,58,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;">${juara3.foto ? `<img src="${juara3.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;" alt="${juara3.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara3.gender === "L" ? "👦" : "👧"}</span>` : (juara3.gender === "L" ? "👦" : "👧")}</div>
                   </div>
                   <span class="absolute -bottom-[3px] -right-[3px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white w-5 h-5 text-[10px] bg-bronze-500">3</span>
                 </div>
@@ -247,7 +247,7 @@
             .html(`
                 <div class="flex items-center gap-2.5">
                   <span class="w-[18px] text-center font-display text-[11px] font-bold text-ink-400">${nomorPeringkat}</span>
-                  <div class="w-[30px] h-[30px] rounded-full bg-navy-tint text-navy-900 text-[10.5px] font-extrabold flex items-center justify-center">${inisial}</div>
+                  <div class="w-[30px] h-[30px] rounded-full bg-navy-tint text-navy-900 text-[10.5px] font-extrabold flex items-center justify-center overflow-hidden">${mhs.foto ? `<img src="${mhs.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${mhs.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${inisial}</span>` : inisial}</div>
                   <span class="text-[12.5px] font-bold text-ink-900">${mhs.nama}</span>
                 </div>
                 <span class="text-[12.5px] font-extrabold text-teal-600">${mhs.skor}</span>
