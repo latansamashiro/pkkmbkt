@@ -30,19 +30,28 @@
     </div>
 
     <nav class="bottom-nav">
-        <a href="{{ route('dashboard') }}" class="active">
-            <span class="ic"><i data-lucide="layout-dashboard"></i></span>
-            <span>Home</span>
-        </a>
-        <a href="{{ route('role.advisor.kelompok-binaan') }}">
-            <span class="ic"><i data-lucide="users"></i></span>
+        <a href="{{ route('role.advisor.kelompok-binaan') }}" class="{{ request()->routeIs('role.advisor.kelompok-binaan*') ? 'active' : '' }}">
+            <span class="ic"><i data-lucide="users-round"></i></span>
             <span>Kelompok</span>
         </a>
-        <a href="{{ route('role.advisor.monitoring.absensi') }}" class="home">
+        <a href="{{ route('role.advisor.monitoring.absensi') }}" class="{{ request()->routeIs('role.advisor.monitoring.absensi*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="calendar-check"></i></span>
             <span>Absensi</span>
         </a>
-        <a href="{{ route('role.advisor.profil') }}">
+        <a href="{{ route('dashboard') }}" class="home" aria-label="Beranda">
+            <span class="ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 11.5 12 4l8 7.5" />
+                    <path d="M6 10v9.5a.5.5 0 0 0 .5.5H10v-6h4v6h3.5a.5.5 0 0 0 .5-.5V10" />
+                </svg>
+            </span>
+            <span>Beranda</span>
+        </a>
+        <a href="{{ route('role.advisor.monitoring.evaluasi') }}" class="{{ request()->routeIs('role.advisor.monitoring.evaluasi*') ? 'active' : '' }}">
+            <span class="ic"><i data-lucide="clipboard-check"></i></span>
+            <span>Evaluasi</span>
+        </a>
+        <a href="{{ route('role.advisor.profil') }}" class="{{ request()->routeIs('role.advisor.profil*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="user-circle"></i></span>
             <span>Profil</span>
         </a>

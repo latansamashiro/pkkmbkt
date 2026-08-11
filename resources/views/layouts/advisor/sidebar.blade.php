@@ -36,6 +36,11 @@
                 <span class="ic"><i data-lucide="clipboard-check"></i></span>
                 <span class="label">Evaluasi</span>
             </a>
+            <a href="{{ route('role.advisor.monitoring.tugas') }}"
+                class="{{ request()->routeIs('role.advisor.monitoring.tugas*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="clipboard-list"></i></span>
+                <span class="label">Pengumpulan Tugas</span>
+            </a>
             <a href="{{ route('role.advisor.monitoring.keaktifan') }}"
                 class="{{ request()->routeIs('role.advisor.monitoring.keaktifan*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="activity"></i></span>
@@ -45,11 +50,6 @@
                 class="{{ request()->routeIs('role.advisor.monitoring.pelanggaran*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="alert-triangle"></i></span>
                 <span class="label">Pelanggaran</span>
-            </a>
-            <a href="{{ route('role.advisor.monitoring.tugas') }}"
-                class="{{ request()->routeIs('role.advisor.monitoring.tugas*') ? 'active' : '' }}">
-                <span class="ic"><i data-lucide="clipboard-list"></i></span>
-                <span class="label">Pengumpulan Tugas</span>
             </a>
             <a href="#" class="disabled" aria-disabled="true">
                 <span class="ic"><i data-lucide="trophy"></i></span>

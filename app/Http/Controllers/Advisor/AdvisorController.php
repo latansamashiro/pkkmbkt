@@ -41,12 +41,19 @@ class AdvisorController extends Controller
     public function dashboard()
     {
         $groupIds = $this->myGroups()->pluck('id');
+        $studentIds = \App\Models\Member::whereIn('group_id', $groupIds)->pluck('student_id');
+
+        $totalSesi = \App\Models\AttendanceTemplate::count();
+        $totalSlot = $totalSesi * $studentIds->count();
+        $hadirCount = \App\Models\AttendanceDetail::whereIn('student_id', $studentIds)
+            ->where('status_presence', 'hadir')
+            ->count();
 
         $stats = [
             'total_kelompok' => $groupIds->count(),
             'total_mentor' => Group::whereIn('id', $groupIds)->whereNotNull('mentor_id')->distinct('mentor_id')->count('mentor_id'),
-            'total_mahasiswa' => \App\Models\Member::whereIn('group_id', $groupIds)->count(),
-            'rata_kehadiran' => null, // TODO: hitung dari data absensi setelah query absensi difinalkan
+            'total_mahasiswa' => $studentIds->count(),
+            'rata_kehadiran' => $totalSlot > 0 ? (int) round($hadirCount / $totalSlot * 100) : 0,
         ];
 
         return view('role.advisor.dashboard', compact('stats'));
