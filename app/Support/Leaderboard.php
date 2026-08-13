@@ -49,16 +49,10 @@ class Leaderboard
                         continue;
                     }
                     $rows = $semuaStudentExam->get($u->id . '-' . $exam->id);
-                    if (!$rows || $rows->isEmpty()) {
+                    if (!\App\Support\ExamScoring::sudahDikerjakan($rows)) {
                         continue; // paket ini belum dikerjakan mahasiswa ini -> 0 poin dari paket ini
                     }
-                    $benar = 0;
-                    foreach ($rows as $r) {
-                        $detail = $exam->details->firstWhere('id', $r->exam_detail_id);
-                        if ($detail && $r->value && strtolower((string) $r->value) === strtolower((string) $detail->key)) {
-                            $benar++;
-                        }
-                    }
+                    $benar = \App\Support\ExamScoring::hitungBenar($exam, $rows);
                     $poinEvaluasi += $poinPerPaketEvaluasi * ($benar / $totalSoal);
                 }
 

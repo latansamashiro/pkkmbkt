@@ -184,17 +184,9 @@ class StudentController extends Controller
         $statusAwal = [];
         foreach ($exams as $exam) {
             $rows = $studentExams->get($exam->id);
-            if ($rows && $rows->count() > 0) {
-                $total = $exam->details->count();
-                $benar = 0;
-                foreach ($rows as $r) {
-                    $detail = $exam->details->firstWhere('id', $r->exam_detail_id);
-                    if ($detail && strtolower($r->value) === strtolower($detail->key)) {
-                        $benar++;
-                    }
-                }
+            if (\App\Support\ExamScoring::sudahDikerjakan($rows)) {
                 $statusAwal[(string) $exam->id] = [
-                    'skorTerbaik' => $total ? (int) round($benar / $total * 100) : 0,
+                    'skorTerbaik' => \App\Support\ExamScoring::hitungSkor($exam, $rows),
                     'sudahKirim' => true,
                 ];
             }

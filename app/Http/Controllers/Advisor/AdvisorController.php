@@ -233,22 +233,30 @@ class AdvisorController extends Controller
     {
         $cari = $request->query('cari');
 
+        // Paket Evaluasi (Exam/kuis) yang mahasiswa kerjakan sendiri -- BUKAN
+        // EvaluationCategory (itu sistem rubrik terpisah, gak ada isinya).
+        $examIds = \App\Models\Exam::pluck('id');
+        $totalExams = $examIds->count();
+
         $laporan = $this->myGroups()
             ->with('mentor')
             ->when($cari, fn ($q) => $q->where('name', 'like', "%{$cari}%"))
             ->get()
-            ->map(function ($group) {
+            ->map(function ($group) use ($examIds, $totalExams) {
                 $totalAnggota = Member::where('group_id', $group->id)->count();
                 $studentIds = Member::where('group_id', $group->id)->pluck('student_id');
 
-                $sudahIsi = Evaluation::whereIn('student_id', $studentIds)
-                    ->whereNotNull('status')
-                    ->where('status', '!=', 'Belum Mengisi')
-                    ->count();
+                $sudahIsi = \App\Models\StudentExam::whereIn('student_id', $studentIds)
+                    ->whereIn('exam_id', $examIds)
+                    ->distinct('student_id')
+                    ->count('student_id');
 
-                $tanggalTerakhir = Evaluation::whereIn('student_id', $studentIds)->max('updated_at');
+                $tanggalTerakhir = \App\Models\StudentExam::whereIn('student_id', $studentIds)
+                    ->whereIn('exam_id', $examIds)
+                    ->max('updated_at');
 
                 $status = match (true) {
+                    $totalExams === 0 => 'Belum ada paket evaluasi',
                     $sudahIsi === 0 => 'Belum dimulai',
                     $sudahIsi >= $totalAnggota && $totalAnggota > 0 => "Selesai {$sudahIsi}/{$totalAnggota}",
                     default => "Berjalan {$sudahIsi}/{$totalAnggota}",
@@ -261,8 +269,7 @@ class AdvisorController extends Controller
                     'status'     => $status,
                 ];
             })
-            ->filter(fn ($g) => $g['tanggal'] !== null)
-            ->values();
+            ->values(); // semua kelompok binaan tetap tampil, termasuk yang belum ada evaluasi sama sekali
 
         $filters = compact('cari');
 
@@ -274,30 +281,49 @@ class AdvisorController extends Controller
         // findOrFail lewat myGroups() -> 404 kalau kelompok ini bukan binaan advisor ini
         $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
 
-        $categories = EvaluationCategory::orderBy('urutan')->get();
+        // "categories" di view generik ini isinya daftar Paket Evaluasi (Exam).
+        $categories = \App\Models\Exam::with('details')->orderBy('title')->get();
+
         $studentIds = Member::where('group_id', $groupId)->pluck('student_id');
 
-        $evaluations = Evaluation::whereIn('student_id', $studentIds)
-            ->with('details')
+        $studentExams = \App\Models\StudentExam::whereIn('student_id', $studentIds)
+            ->whereIn('exam_id', $categories->pluck('id'))
             ->get()
-            ->keyBy('student_id');
+            ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id);
 
         $rows = Member::where('group_id', $groupId)
             ->with('student')
             ->get()
-            ->map(function ($m) use ($categories, $evaluations) {
-                $evaluation = $evaluations->get($m->student_id);
-                $detailByCategory = $evaluation ? $evaluation->details->keyBy('evaluation_category_id') : collect();
+            ->map(function ($m) use ($categories, $studentExams) {
+                $nilai = [];
+                $skorList = [];
+                $adaYangBelumLulus = false;
+                $sudahMengisi = false;
 
-                $nilai = $categories->mapWithKeys(
-                    fn ($cat) => [$cat->id => $detailByCategory->get($cat->id)?->value]
-                );
+                foreach ($categories as $exam) {
+                    $rowsUntukExam = $studentExams->get($m->student_id . '-' . $exam->id);
+                    if (!\App\Support\ExamScoring::sudahDikerjakan($rowsUntukExam)) {
+                        $nilai[$exam->id] = null;
+                        continue;
+                    }
+
+                    $sudahMengisi = true;
+                    $skor = \App\Support\ExamScoring::hitungSkor($exam, $rowsUntukExam);
+                    $nilai[$exam->id] = $skor;
+                    $skorList[] = $skor;
+                    if ($skor < $exam->passing_grade) {
+                        $adaYangBelumLulus = true;
+                    }
+                }
+
+                $rata = count($skorList) ? (int) round(array_sum($skorList) / count($skorList)) : null;
+                $status = !$sudahMengisi ? 'Belum Mengisi' : ($adaYangBelumLulus ? 'Belum Lulus' : 'Lulus');
 
                 return [
                     'nama'   => $m->student->name ?? '-',
                     'nilai'  => $nilai,
-                    'rata'   => $evaluation?->rata_rata,
-                    'status' => $evaluation->status ?? 'Belum Mengisi',
+                    'rata'   => $rata,
+                    'status' => $status,
                 ];
             });
 

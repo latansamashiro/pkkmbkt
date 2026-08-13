@@ -503,21 +503,13 @@ public function evaluasiDetail(Request $request, $groupId)
 
             foreach ($categories as $exam) {
                 $rowsUntukExam = $studentExams->get($m->student_id . '-' . $exam->id);
-                if (!$rowsUntukExam || $rowsUntukExam->isEmpty()) {
+                if (!\App\Support\ExamScoring::sudahDikerjakan($rowsUntukExam)) {
                     $nilai[$exam->id] = null;
                     continue;
                 }
 
                 $sudahMengisi = true;
-                $total = $exam->details->count();
-                $benar = 0;
-                foreach ($rowsUntukExam as $r) {
-                    $detail = $exam->details->firstWhere('id', $r->exam_detail_id);
-                    if ($detail && $r->value && strtolower((string) $r->value) === strtolower((string) $detail->key)) {
-                        $benar++;
-                    }
-                }
-                $skor = $total ? (int) round($benar / $total * 100) : 0;
+                $skor = \App\Support\ExamScoring::hitungSkor($exam, $rowsUntukExam);
                 $nilai[$exam->id] = $skor;
                 $skorList[] = $skor;
                 if ($skor < $exam->passing_grade) {

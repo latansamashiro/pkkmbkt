@@ -290,20 +290,12 @@ class MentorController extends Controller
                 ->map(function ($m) use ($exams, $studentExams) {
                     $hasil = $exams->mapWithKeys(function ($exam) use ($m, $studentExams) {
                         $rows = $studentExams->get($m->student_id . '-' . $exam->id);
-                        $selesai = $rows && $rows->count() > 0;
+                        $selesai = \App\Support\ExamScoring::sudahDikerjakan($rows);
                         $skor = null;
                         $waktu = null;
 
                         if ($selesai) {
-                            $total = $exam->details->count();
-                            $benar = 0;
-                            foreach ($rows as $r) {
-                                $detail = $exam->details->firstWhere('id', $r->exam_detail_id);
-                                if ($detail && $r->value && strtolower((string) $r->value) === strtolower((string) $detail->key)) {
-                                    $benar++;
-                                }
-                            }
-                            $skor = $total ? (int) round($benar / $total * 100) : 0;
+                            $skor = \App\Support\ExamScoring::hitungSkor($exam, $rows);
                             $waktu = $rows->max('updated_at')?->translatedFormat('d M Y, H:i');
                         }
 
