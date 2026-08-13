@@ -93,6 +93,11 @@
                 <span class="ic"><i data-lucide="file-bar-chart-2"></i></span>
                 <span class="label">Monitoring Laporan</span>
             </a>
+            <a href="{{ route('admin.leaderboard') }}"
+                class="{{ request()->routeIs('admin.leaderboard') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="trophy"></i></span>
+                <span class="label">Leaderboard</span>
+            </a>
         </div>
 
         <button type="button" class="sidebar-group-toggle" data-group="lainnya">

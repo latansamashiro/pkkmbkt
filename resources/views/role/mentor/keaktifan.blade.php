@@ -48,6 +48,27 @@
       }
     }
 
+    @keyframes fadeInPreview {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .preview-card-anim {
+      animation: fadeInPreview .25s ease;
+    }
+
+    .select-chevron-wrap select {
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
     .dropdown-scroll::-webkit-scrollbar,
     .riwayat-scroll::-webkit-scrollbar {
       width: 6px;
@@ -84,9 +105,6 @@
   <section class="relative overflow-hidden" style="padding: clamp(36px,6vw,56px) clamp(16px,5vw,48px);">
     <div class="absolute inset-0 z-0 overflow-hidden after:content-[''] after:absolute after:inset-0 after:bg-gradient-to-br after:from-navy-900/[0.94] after:to-teal-600/[0.85]" id="heroSlideshow"></div>
     <div class="relative z-[1] max-w-[1200px] mx-auto">
-      <div class="inline-flex items-center gap-[7px] text-[#c8e46a] text-[11px] font-bold rounded-full mb-4 tracking-[0.06em] uppercase" style="background: rgba(169,199,59,.15); border: 1px solid rgba(169,199,59,.35); padding: 5px 14px;">
-        <span class="w-1.5 h-1.5 rounded-full bg-lime-500" style="animation: pulse 2s infinite;"></span> Input Poin
-      </div>
       <h1 class="font-display font-bold text-white mb-3 leading-[1.2] m-0" style="font-size: clamp(24px,4vw,38px);">Keaktifan &amp; Pelanggaran</h1>
       <p class="text-sm text-white/75 leading-[1.7] m-0" style="max-width: 620px;">
         Cari dan pilih mahasiswa dulu, lalu pilih indikator keaktifan atau
@@ -150,61 +168,79 @@
       </div>
 
       {{-- 2 panel: Keaktifan & Pelanggaran --}}
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {{-- PANEL KEAKTIFAN --}}
-        <div class="bg-surface border-[1.5px] border-border rounded-2xl flex flex-col" style="padding: 20px;">
-          <div class="flex items-center gap-2.5 mb-4 pb-4 border-b border-border">
-            <span class="w-9 h-9 rounded-xl bg-teal-tint text-teal-600 flex items-center justify-center flex-shrink-0">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px]"><path d="M12 2l2.9 6.3 6.9.9-5 4.8 1.3 6.8L12 17.6 5.9 20.8l1.3-6.8-5-4.8 6.9-.9z" /></svg>
+        <div class="bg-surface border border-border rounded-2xl flex flex-col shadow-[0_4px_18px_rgba(21,33,89,0.06)]" style="padding: 28px 26px 26px;">
+          <div class="flex items-center gap-3.5 mb-5">
+            <span class="w-11 h-11 rounded-full bg-teal-tint text-teal-600 flex items-center justify-center flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M12 2l2.9 6.3 6.9.9-5 4.8 1.3 6.8L12 17.6 5.9 20.8l1.3-6.8-5-4.8 6.9-.9z" /></svg>
             </span>
             <div>
-              <p class="text-[14.5px] font-bold m-0">Apresiasi Keaktifan</p>
-              <p class="text-[11px] text-ink-400 mt-0.5 m-0">Penambahan poin</p>
+              <p class="font-display text-[19px] font-bold text-navy-900 m-0">Apresiasi Keaktifan</p>
+              <p class="text-[13px] text-ink-400 mt-0.5 m-0">Penambahan poin</p>
             </div>
           </div>
 
-          <label class="block text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 mb-2">Pilih Indikator</label>
-          <select id="selectKeaktifan" class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[13px] font-medium text-ink-900 outline-none focus:border-teal-500 mb-4" style="padding: 11px 13px;"></select>
-
-          <div id="poinKeaktifanBox" class="hidden items-center gap-2 rounded-xl mb-4" style="padding: 10px 13px; background: var(--teal-tint);">
-            <span class="font-display text-lg font-bold text-teal-600" id="poinKeaktifanVal">+0</span>
-            <span class="text-[11px] text-teal-600 font-semibold">poin akan ditambahkan</span>
+          <label class="block text-[11.5px] font-bold uppercase tracking-wide text-ink-400 mb-2">Pilih Indikator</label>
+          <div class="relative mb-4">
+            <button type="button" id="triggerKeaktifan" class="w-full flex items-center justify-between gap-2 bg-bg border-[1.5px] border-border rounded-xl text-[14.5px] font-semibold text-ink-900 outline-none focus:border-teal-500 cursor-pointer text-left" style="padding: 13px 14px;">
+              <span id="triggerKeaktifanLabel" class="truncate text-ink-400">— Pilih indikator —</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] text-ink-400 flex-shrink-0"><path d="m6 9 6 6 6-6" /></svg>
+            </button>
+            <div id="panelKeaktifan" class="hidden absolute left-0 right-0 mt-2 bg-surface border-[1.5px] border-border rounded-xl shadow-[0_10px_24px_rgba(21,33,89,0.16)] overflow-y-auto z-20 dropdown-scroll" style="max-height: 320px;"></div>
           </div>
 
-          <label class="block text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 mb-2">Catatan Tambahan (opsional)</label>
-          <textarea id="catatanKeaktifan" rows="2" placeholder="Tambahkan detail kejadian kalau perlu..." class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[13px] text-ink-900 outline-none focus:border-teal-500 resize-none mb-4" style="padding: 11px 13px;"></textarea>
+          <div id="poinKeaktifanBox" class="hidden flex-col rounded-xl mb-4 border-[1.5px] border-teal-500/30 bg-teal-tint preview-card-anim" style="padding: 16px 16px 15px;">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-[14.5px] text-navy-900" id="poinKeaktifanKategori">-</span>
+              <span class="font-display font-bold text-[16px] text-teal-600" id="poinKeaktifanVal">+0</span>
+            </div>
+            <p class="text-[13px] leading-[1.5] text-ink-600 m-0" id="poinKeaktifanDesc">-</p>
+          </div>
 
-          <button type="button" id="btnSimpanKeaktifan" disabled class="mt-auto w-full bg-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] rounded-xl transition-colors flex items-center justify-center gap-2" style="padding: 13px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" /></svg>
+          <label class="block text-[11.5px] font-bold uppercase tracking-wide text-ink-400 mb-2">Catatan (Opsional)</label>
+          <textarea id="catatanKeaktifan" rows="3" placeholder="Tambahkan catatan..." class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[14px] text-ink-900 outline-none focus:border-teal-500 resize-y mb-5" style="padding: 13px 14px; min-height: 78px;"></textarea>
+
+          <button type="button" id="btnSimpanKeaktifan" disabled class="mt-auto w-full disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[14.5px] rounded-xl transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2" style="padding: 15px 18px; background: linear-gradient(180deg, #16a0a1 0%, #0f8a8c 100%); box-shadow: 0 8px 18px -6px rgba(15,138,140,.45);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="w-[18px] h-[18px]"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" /></svg>
             Simpan &amp; Tambah Poin
           </button>
         </div>
 
         {{-- PANEL PELANGGARAN --}}
-        <div class="bg-surface border-[1.5px] border-border rounded-2xl flex flex-col" style="padding: 20px;">
-          <div class="flex items-center gap-2.5 mb-4 pb-4 border-b border-border">
-            <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#fef2f2; color:#dc2626;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px]"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 17h.01" /></svg>
+        <div class="bg-surface border border-border rounded-2xl flex flex-col shadow-[0_4px_18px_rgba(21,33,89,0.06)]" style="padding: 28px 26px 26px;">
+          <div class="flex items-center gap-3.5 mb-5">
+            <span class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style="background:#fdeeec; color:#d9695a;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4M12 17h.01" /></svg>
             </span>
             <div>
-              <p class="text-[14.5px] font-bold m-0">Log Pelanggaran</p>
-              <p class="text-[11px] text-ink-400 mt-0.5 m-0">Pengurangan poin</p>
+              <p class="font-display text-[19px] font-bold text-navy-900 m-0">Log Pelanggaran</p>
+              <p class="text-[13px] text-ink-400 mt-0.5 m-0">Pengurangan poin</p>
             </div>
           </div>
 
-          <label class="block text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 mb-2">Pilih Indikator</label>
-          <select id="selectPelanggaran" class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[13px] font-medium text-ink-900 outline-none mb-4" style="padding: 11px 13px;"></select>
-
-          <div id="poinPelanggaranBox" class="hidden items-center gap-2 rounded-xl mb-4" style="padding: 10px 13px; background:#fef2f2;">
-            <span class="font-display text-lg font-bold" style="color:#dc2626;" id="poinPelanggaranVal">-0</span>
-            <span class="text-[11px] font-semibold" style="color:#dc2626;">poin akan dikurangi</span>
+          <label class="block text-[11.5px] font-bold uppercase tracking-wide text-ink-400 mb-2">Pilih Indikator</label>
+          <div class="relative mb-4">
+            <button type="button" id="triggerPelanggaran" class="w-full flex items-center justify-between gap-2 bg-bg border-[1.5px] border-border rounded-xl text-[14.5px] font-semibold text-ink-900 outline-none cursor-pointer text-left" style="padding: 13px 14px;">
+              <span id="triggerPelanggaranLabel" class="truncate text-ink-400">— Pilih indikator —</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] text-ink-400 flex-shrink-0"><path d="m6 9 6 6 6-6" /></svg>
+            </button>
+            <div id="panelPelanggaran" class="hidden absolute left-0 right-0 mt-2 bg-surface border-[1.5px] border-border rounded-xl shadow-[0_10px_24px_rgba(21,33,89,0.16)] overflow-y-auto z-20 dropdown-scroll" style="max-height: 320px;"></div>
           </div>
 
-          <label class="block text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 mb-2">Catatan / Kronologi (opsional)</label>
-          <textarea id="catatanPelanggaran" rows="2" placeholder="Tambahkan detail kejadian kalau perlu..." class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[13px] text-ink-900 outline-none resize-none mb-4" style="padding: 11px 13px;"></textarea>
+          <div id="poinPelanggaranBox" class="hidden flex-col rounded-xl mb-4 preview-card-anim" style="padding: 16px 16px 15px; background:#fdeeec; border: 1.5px solid #f5d3cd;">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-[14.5px] text-navy-900" id="poinPelanggaranKategori">-</span>
+              <span class="font-display font-bold text-[16px]" style="color:#d9695a;" id="poinPelanggaranVal">-0</span>
+            </div>
+            <p class="text-[13px] leading-[1.5] text-ink-600 m-0" id="poinPelanggaranDesc">-</p>
+          </div>
 
-          <button type="button" id="btnSimpanPelanggaran" disabled class="mt-auto w-full disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] rounded-xl transition-colors flex items-center justify-center gap-2" style="padding: 13px; background:#dc2626;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="M8 12h8" /></svg>
+          <label class="block text-[11.5px] font-bold uppercase tracking-wide text-ink-400 mb-2">Catatan / Kronologi</label>
+          <textarea id="catatanPelanggaran" rows="3" placeholder="Tambahkan kronologi..." class="w-full bg-bg border-[1.5px] border-border rounded-xl text-[14px] text-ink-900 outline-none resize-y mb-5" style="padding: 13px 14px; min-height: 78px;" onfocus="this.style.borderColor='#d9695a'" onblur="this.style.borderColor=''"></textarea>
+
+          <button type="button" id="btnSimpanPelanggaran" disabled class="mt-auto w-full disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[14.5px] rounded-xl transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2" style="padding: 15px 18px; background: linear-gradient(180deg, #e8877a 0%, #d9695a 100%); box-shadow: 0 8px 18px -6px rgba(217,105,90,.5);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="w-[18px] h-[18px]"><circle cx="12" cy="12" r="10" /><path d="M8 12h8" /></svg>
             Simpan &amp; Kurangi Poin
           </button>
         </div>
@@ -259,8 +295,9 @@
     </a>
     <a href="{{ route('role.mentor.info') }}" class="flex flex-col items-center gap-1 text-ink-400 text-[10px] font-bold flex-1 py-1.5 no-underline">
       <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-        <path d="M9 17a3 3 0 0 0 6 0" />
+        <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5" />
+            <path d="M12 8h.01" />
       </svg>
       <span>Info</span>
     </a>
@@ -321,52 +358,96 @@
       ];
 
       let mhsAktif = null;
+      let keaktifanTerpilih = null;
+      let pelanggaranTerpilih = null;
 
       function getInitials(nama) {
         return nama.split(" ").filter(Boolean).slice(0, 2).map((s) => s[0]).join("").toUpperCase();
       }
 
-      // ---------- Isi dropdown indikator (dikelompokkan pakai <optgroup>) ----------
-      function isiDropdownIndikator($select, daftar) {
+      // ---------- Dropdown indikator kustom (ganti <select> bawaan browser
+      // biar tampilannya bisa diatur penuh & senada sama desain kartu) ----------
+      function bangunDropdownIndikator(opts) {
+        const { $trigger, $label, $panel, daftar, warnaAktif, onPilih } = opts;
+
+        // Kelompokkan per kategori, render sebagai daftar dengan judul grup.
         const grup = {};
         daftar.forEach((it) => {
           if (!grup[it.kategori]) grup[it.kategori] = [];
           grup[it.kategori].push(it);
         });
-        let html = `<option value="">— Pilih indikator —</option>`;
+        let html = "";
         Object.keys(grup).forEach((kat) => {
-          html += `<optgroup label="${kat}">`;
-          grup[kat].forEach((it) => {
-            html += `<option value="${it.indikator.replace(/"/g, "&quot;")}" data-poin="${it.poin}" data-kategori="${kat}">${it.indikator}</option>`;
+          html += `<p class="text-[10.5px] font-extrabold uppercase tracking-wide text-ink-400 px-3.5 pt-3 pb-1">${kat}</p>`;
+          grup[kat].forEach((it, idx) => {
+            const indeksGlobal = daftar.indexOf(it);
+            html += `
+              <button type="button" data-indeks="${indeksGlobal}" class="opsi-indikator w-full text-left px-3.5 py-2.5 text-[13px] text-ink-900 hover:bg-bg transition-colors leading-snug">
+                ${it.indikator}
+              </button>
+            `;
           });
-          html += `</optgroup>`;
         });
-        $select.html(html);
-      }
-      isiDropdownIndikator($("#selectKeaktifan"), KATEGORI_KEAKTIFAN);
-      isiDropdownIndikator($("#selectPelanggaran"), KATEGORI_PELANGGARAN);
+        $panel.html(html);
 
-      $("#selectKeaktifan").on("change", function() {
-        const $opt = $(this).find("option:selected");
-        const poin = $opt.data("poin");
-        $("#btnSimpanKeaktifan").prop("disabled", !poin);
-        if (poin) {
-          $("#poinKeaktifanVal").text(`+${poin}`);
-          $("#poinKeaktifanBox").removeClass("hidden").addClass("flex");
-        } else {
-          $("#poinKeaktifanBox").addClass("hidden").removeClass("flex");
+        function pilihIndikator(indeks, tutupPanel = true) {
+          const it = daftar[indeks];
+          $label.text(it.indikator).removeClass("text-ink-400");
+          if (tutupPanel) $panel.addClass("hidden");
+          onPilih(it);
         }
+
+        $panel.find(".opsi-indikator").on("click", function() {
+          pilihIndikator($(this).data("indeks"));
+        });
+
+        $trigger.on("click", function(e) {
+          e.stopPropagation();
+          const sedangTerbuka = !$panel.hasClass("hidden");
+          $(".panel-indikator-kustom").addClass("hidden");
+          if (!sedangTerbuka) $panel.removeClass("hidden");
+        });
+
+        // Default: belum ada yang kepilih -- mentor harus pilih manual dulu.
+      }
+
+      const $panelKeaktifan = $("#panelKeaktifan").addClass("panel-indikator-kustom");
+      const $panelPelanggaran = $("#panelPelanggaran").addClass("panel-indikator-kustom");
+
+      bangunDropdownIndikator({
+        $trigger: $("#triggerKeaktifan"),
+        $label: $("#triggerKeaktifanLabel"),
+        $panel: $panelKeaktifan,
+        daftar: KATEGORI_KEAKTIFAN,
+        onPilih: function(it) {
+          keaktifanTerpilih = it;
+          $("#btnSimpanKeaktifan").prop("disabled", false);
+          $("#poinKeaktifanVal").text(`+${it.poin}`);
+          $("#poinKeaktifanKategori").text(it.kategori);
+          $("#poinKeaktifanDesc").text(it.indikator);
+          $("#poinKeaktifanBox").removeClass("hidden").addClass("flex");
+        },
       });
 
-      $("#selectPelanggaran").on("change", function() {
-        const $opt = $(this).find("option:selected");
-        const poin = $opt.data("poin");
-        $("#btnSimpanPelanggaran").prop("disabled", !poin);
-        if (poin) {
-          $("#poinPelanggaranVal").text(`-${poin}`);
+      bangunDropdownIndikator({
+        $trigger: $("#triggerPelanggaran"),
+        $label: $("#triggerPelanggaranLabel"),
+        $panel: $panelPelanggaran,
+        daftar: KATEGORI_PELANGGARAN,
+        onPilih: function(it) {
+          pelanggaranTerpilih = it;
+          $("#btnSimpanPelanggaran").prop("disabled", false);
+          $("#poinPelanggaranVal").text(`-${it.poin}`);
+          $("#poinPelanggaranKategori").text(it.kategori);
+          $("#poinPelanggaranDesc").text(it.indikator);
           $("#poinPelanggaranBox").removeClass("hidden").addClass("flex");
-        } else {
-          $("#poinPelanggaranBox").addClass("hidden").removeClass("flex");
+        },
+      });
+
+      // Tutup panel kalau klik di luar area dropdown.
+      $(document).on("click", function(e) {
+        if (!$(e.target).closest("#triggerKeaktifan, #panelKeaktifan, #triggerPelanggaran, #panelPelanggaran").length) {
+          $(".panel-indikator-kustom").addClass("hidden");
         }
       });
 
@@ -419,8 +500,14 @@
         $("#belumPilihState").addClass("hidden");
         $("#kontenMahasiswa").removeClass("hidden");
 
-        // reset form tiap ganti mahasiswa
-        $("#selectKeaktifan, #selectPelanggaran").val("").trigger("change");
+        // reset pilihan indikator & catatan tiap ganti mahasiswa -- balik ke
+        // "belum pilih apa-apa" biar gak kebawa pilihan mahasiswa sebelumnya.
+        keaktifanTerpilih = null;
+        pelanggaranTerpilih = null;
+        $("#triggerKeaktifanLabel").text("— Pilih indikator —").addClass("text-ink-400");
+        $("#triggerPelanggaranLabel").text("— Pilih indikator —").addClass("text-ink-400");
+        $("#poinKeaktifanBox, #poinPelanggaranBox").addClass("hidden").removeClass("flex");
+        $("#btnSimpanKeaktifan, #btnSimpanPelanggaran").prop("disabled", true);
         $("#catatanKeaktifan, #catatanPelanggaran").val("");
 
         muatRiwayat();
@@ -477,13 +564,10 @@
       }
 
       // ---------- Simpan poin ----------
-      function simpanPoin(tipe, $select, $catatan, $btn) {
-        if (!mhsAktif) return;
-        const $opt = $select.find("option:selected");
-        const poinAsli = $opt.data("poin");
-        if (!poinAsli) return;
+      function simpanPoin(tipe, itemTerpilih, $catatan, $btn) {
+        if (!mhsAktif || !itemTerpilih) return;
 
-        const poin = tipe === "pelanggaran" ? -Math.abs(poinAsli) : Math.abs(poinAsli);
+        const poin = tipe === "pelanggaran" ? -Math.abs(itemTerpilih.poin) : Math.abs(itemTerpilih.poin);
 
         $btn.prop("disabled", true);
         $.ajax({
@@ -492,15 +576,14 @@
           headers: { "X-CSRF-TOKEN": CSRF_TOKEN },
           data: {
             student_id: mhsAktif.id,
-            kategori: $opt.data("kategori"),
-            indikator: $opt.val(),
+            kategori: itemTerpilih.kategori,
+            indikator: itemTerpilih.indikator,
             poin: poin,
             catatan: $catatan.val().trim(),
           },
         })
           .done(function() {
             tampilkanToast(`${poin >= 0 ? "+" : ""}${poin} poin untuk ${mhsAktif.nama}`);
-            $select.val("").trigger("change");
             $catatan.val("");
             muatRiwayat();
           })
@@ -509,15 +592,15 @@
             alert(res.message || "Gagal menyimpan poin. Coba lagi.");
           })
           .always(function() {
-            $btn.prop("disabled", !$select.find("option:selected").data("poin"));
+            $btn.prop("disabled", false);
           });
       }
 
       $("#btnSimpanKeaktifan").on("click", function() {
-        simpanPoin("keaktifan", $("#selectKeaktifan"), $("#catatanKeaktifan"), $(this));
+        simpanPoin("keaktifan", keaktifanTerpilih, $("#catatanKeaktifan"), $(this));
       });
       $("#btnSimpanPelanggaran").on("click", function() {
-        simpanPoin("pelanggaran", $("#selectPelanggaran"), $("#catatanPelanggaran"), $(this));
+        simpanPoin("pelanggaran", pelanggaranTerpilih, $("#catatanPelanggaran"), $(this));
       });
 
       function tampilkanToast(teks) {

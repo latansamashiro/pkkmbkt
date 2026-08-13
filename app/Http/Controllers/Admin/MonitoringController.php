@@ -609,7 +609,12 @@ public function tugasExportExcel($groupId)
 
         $header = ['No', 'Mahasiswa', 'NPM'];
         foreach ($tasks as $t) {
-            $header[] = $t->title . ' (' . ($t->task_type === 'kelompok' ? 'Kelompok' : 'Individu') . ')';
+            $jenisLabel = match ($t->task_type) {
+                'kelompok' => 'Kelompok',
+                'atk_almet' => 'ATK & Almet',
+                default => 'Individu',
+            };
+            $header[] = $t->title . ' (' . $jenisLabel . ')';
         }
         $header[] = 'Selesai';
         fputcsv($out, $header);
@@ -639,9 +644,9 @@ protected function siapkanDataTugasDetail($groupId): array
 {
     $group = Group::with('mentor')->findOrFail($groupId);
 
-    // Individu duluan, baru kelompok — biar kolomnya gampang dikelompokkan di tampilan.
+    // Individu duluan, lalu kelompok, lalu ATK & Almet -- biar kolomnya gampang dikelompokkan di tampilan.
     $tasks = Task::where('status', '!=', 'draft')
-        ->orderByRaw("FIELD(task_type, 'individu', 'kelompok')")
+        ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk_almet')")
         ->orderBy('deadline')
         ->get();
 

@@ -650,9 +650,9 @@
             stroke-width="1.7"
             stroke-linecap="round"
             stroke-linejoin="round">
-            <path
-              d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-            <path d="M9 17a3 3 0 0 0 6 0" />
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5" />
+            <path d="M12 8h.01" />
           </svg>
           <span class="label">Info</span>
         </a>
@@ -873,9 +873,9 @@
                     stroke-width="1.7"
                     stroke-linecap="round"
                     stroke-linejoin="round">
-                    <path
-                      d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-                    <path d="M9 17a3 3 0 0 0 6 0" />
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 11v5" />
+                    <path d="M12 8h.01" />
                   </svg>
                 </span>
                 <span class="menu-label">Info</span>
@@ -1108,9 +1108,9 @@
         stroke-width="1.7"
         stroke-linecap="round"
         stroke-linejoin="round">
-        <path
-          d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-        <path d="M9 17a3 3 0 0 0 6 0" />
+        <circle cx="12" cy="12" r="9" />
+                    <path d="M12 11v5" />
+                    <path d="M12 8h.01" />
       </svg>
       <span>Info</span>
     </a>

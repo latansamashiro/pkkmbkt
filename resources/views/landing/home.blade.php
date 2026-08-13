@@ -848,11 +848,6 @@ background: rgba(20, 20, 20, 0.9);
            Warna judul pakai gradasi brand: #004a8f → #00a79d → #a6ce39
       ====================================================================== -->
       <div class="hero-panel text-center md:text-left max-w-2xl mx-auto md:mx-0">
-        <div class="hero-eyebrow">
-          <span class="dot"></span>
-          Tahun Akademik 2026
-        </div>
-
         <p class="font-display text-lg md:text-2xl text-white/90 tracking-wide leading-none mb-1">
           Selamat Datang di
         </p>

@@ -95,7 +95,7 @@
   <header
     class="sticky top-0 z-40 flex items-center justify-between gap-4 px-4 sm:px-8 md:px-12 py-3.5 bg-navy-900 border-b border-white/10">
     <a
-      href="#"
+      href="{{ route('dashboard') }}"
       class="flex items-center gap-2.5 z-50 no-underline"
       aria-label="PKKMB-KT UNILAM Beranda">
       <div
@@ -137,12 +137,6 @@
       class="hero-slideshow absolute inset-0 z-0 overflow-hidden after:content-[''] after:absolute after:inset-0 after:bg-gradient-to-br after:from-navy-900/90 after:to-teal-600/[0.78]"
       id="heroSlideshow"></div>
     <div class="relative z-[1] max-w-[640px] mx-0 text-left">
-      <div
-        class="inline-flex items-center gap-[7px] bg-lime-500/[0.15] border border-lime-500/[0.35] text-[#c8e46a] text-[11px] font-bold px-3.5 py-[5px] rounded-full mb-4 tracking-[0.06em] uppercase">
-        <span
-          class="w-1.5 h-1.5 rounded-full bg-lime-500 animate-[dotpulse_2s_infinite]"></span>
-        Orientasi Lokasi
-      </div>
       <h1
         class="font-display text-2xl sm:text-3xl md:text-[38px] font-bold text-white mb-3 leading-[1.2]">
         Denah Kampus<br />UNILAM Rangkasbitung
@@ -362,9 +356,9 @@
         stroke-width="1.7"
         stroke-linecap="round"
         stroke-linejoin="round">
-        <path
-          d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-        <path d="M9 17a3 3 0 0 0 6 0" />
+        <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5" />
+            <path d="M12 8h.01" />
       </svg>
       <span>Info</span>
     </a>
@@ -630,17 +624,31 @@
         fotos: ["{{ asset('gambar/Peta/ParkirMobil.jpeg') }}"]
       },
       {
+        id: "parkir-motor",
+        nama: "Parkir Motor",
+        kategori: "parkir",
+        lantai: "-",
+        top: 76.7,
+        left: 78.7,
+        topMobile: 74.4,
+        leftMobile: 80.7,
+        icon: "fa-motorcycle",
+        mapsUrl: "https://maps.app.goo.gl/ZhKLZPcFxYDbWMpV6",
+        desc: "Area parkir kendaraan roda dua.",
+        fotos: ["{{ asset('gambar/Peta/ParkirMobil.jpeg') }}"]
+      },
+      {
         id: "parkir-motormahasiswa",
-        nama: "Parkir motor",
+        nama: "Parkir Mobil",
         kategori: "parkir",
         lantai: "-",
         top: 43.0,
         left: 73.0,
         topMobile: 43.0,
         leftMobile: 75.7,
-        icon: "fa-motorcycle",
+        icon: "fa-square-parking",
         mapsUrl: "https://maps.app.goo.gl/ZhKLZPcFxYDbWMpV6",
-        desc: "Area parkir kendaraan roda dua.",
+        desc: "Area parkir kendaraan roda empat.",
         fotos: ["{{ asset('gambar/Peta/ParkirMotor.jpeg') }}"]
       },
     ];

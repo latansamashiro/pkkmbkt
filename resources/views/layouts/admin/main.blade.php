@@ -30,23 +30,23 @@
     </div>
 
     <nav class="bottom-nav">
-        <a href="{{ route('dashboard') }}" class="active">
-            <span class="ic"><i data-lucide="layout-dashboard"></i></span>
-            <span>Home</span>
+        <a href="{{ route('admin.monitoring.laporan') }}" class="{{ request()->routeIs('admin.monitoring.laporan') ? 'active' : '' }}">
+            <span class="ic"><i data-lucide="file-bar-chart-2"></i></span>
+            <span>Monitoring Laporan</span>
         </a>
-        <a href="{{ route('admin.user.index') }}">
-            <span class="ic"><i data-lucide="users"></i></span>
-            <span>Pengguna</span>
-        </a>
-        <a href="{{ route('admin.data-master.index') }}" class="home">
+        <a href="{{ route('admin.data-master.index') }}" class="{{ request()->routeIs('admin.data-master.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="database"></i></span>
             <span>Master</span>
         </a>
-        <a href="{{ route('admin.monitoring.pkkmb') }}">
+        <a href="{{ route('dashboard') }}" class="home" aria-label="Beranda">
+            <span class="ic"><i data-lucide="layout-dashboard"></i></span>
+            <span>Home</span>
+        </a>
+        <a href="{{ route('admin.monitoring.pkkmb') }}" class="{{ request()->routeIs('admin.monitoring.pkkmb') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="bar-chart-3"></i></span>
             <span>Monitor</span>
         </a>
-        <a href="{{ route('admin.profil.index') }}">
+        <a href="{{ route('admin.profil.index') }}" class="{{ request()->routeIs('admin.profil.*') ? 'active' : '' }}">
             <span class="ic"><i data-lucide="user-circle"></i></span>
             <span>Profil</span>
         </a>

@@ -31,9 +31,9 @@
 
     <a href="{{ route('role.mentor.info') }}" class="{{ request()->routeIs('role.mentor.info') ? 'active' : '' }}">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 18h6" />
-        <path d="M10 21h4" />
-        <path d="M12 3a6 6 0 0 0-3.6 10.8c.4.3.6.8.6 1.3V16h6v-.9c0-.5.2-1 .6-1.3A6 6 0 0 0 12 3Z" />
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v5" />
+        <path d="M12 8h.01" />
       </svg>
       <span class="label">Info</span>
     </a>
@@ -85,9 +85,9 @@
 
   <a href="{{ route('role.mentor.info') }}" class="{{ request()->routeIs('role.mentor.info') ? 'active' : '' }}">
     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 18h6" />
-      <path d="M10 21h4" />
-      <path d="M12 3a6 6 0 0 0-3.6 10.8c.4.3.6.8.6 1.3V16h6v-.9c0-.5.2-1 .6-1.3A6 6 0 0 0 12 3Z" />
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5" />
+      <path d="M12 8h.01" />
     </svg>
     <span>Info</span>
   </a>

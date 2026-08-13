@@ -51,7 +51,7 @@
                 <span class="ic"><i data-lucide="alert-triangle"></i></span>
                 <span class="label">Pelanggaran</span>
             </a>
-            <a href="#" class="disabled" aria-disabled="true">
+            <a href="{{ route('role.advisor.leaderboard') }}" class="{{ request()->routeIs('role.advisor.leaderboard') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="trophy"></i></span>
                 <span class="label">Leaderboard</span>
             </a>

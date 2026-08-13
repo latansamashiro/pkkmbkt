@@ -308,6 +308,7 @@ class DataMasterController extends Controller
                 ['key' => 'task_type', 'label' => 'Jenis Tugas', 'type' => 'select', 'required' => true, 'options' => [
                     'individu' => 'INDIVIDU',
                     'kelompok' => 'KELOMPOK',
+                    'atk_almet' => 'ATK & ALMET',
                 ]],
                 ['key' => 'deadline', 'label' => 'Deadline', 'type' => 'date', 'required' => true],
                 ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => [

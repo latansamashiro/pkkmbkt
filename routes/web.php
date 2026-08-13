@@ -103,6 +103,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/role', [RoleController::class, 'index'])->name('admin.role.index');
         Route::get('/monitoring/pkkmb', [MonitoringController::class, 'pkkmb'])->name('admin.monitoring.pkkmb');
         Route::get('/monitoring/laporan', [MonitoringController::class, 'laporan'])->name('admin.monitoring.laporan');
+        Route::get('/leaderboard', [DashboardController::class, 'leaderboard'])->name('admin.leaderboard');
         Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('admin.pengaturan.index');
         Route::get('/profil', [ProfilController::class, 'index'])->name('admin.profil.index');
         Route::post('/profil', [ProfilController::class, 'updateProfile'])->name('admin.profil.update');
@@ -148,6 +149,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/profil', 'profil')->name('role.advisor.profil');
             Route::post('/profil', 'updateProfile')->name('role.advisor.profil.update');
             Route::post('/profil/password', 'updatePassword')->name('role.advisor.profil.password');
+
+            Route::get('/leaderboard', 'leaderboard')->name('role.advisor.leaderboard');
 
             Route::get('/monitoring/absensi', 'absensi')->name('role.advisor.monitoring.absensi');
             Route::get('/monitoring/absensi/{groupId}/{tanggal}', 'absensiDetail')->name('role.advisor.monitoring.absensi.detail');
@@ -314,13 +317,14 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/absensi-hari', 'jadwalAbsensiStoreHari')->name('committee.absensi.store-hari');
         });
 
+        Route::get('/leaderboard', [\App\Http\Controllers\Committee\DashboardController::class, 'leaderboard'])->name('committee.leaderboard');
+
         // ===== Monitoring (read-only, reuse MonitoringController & view yang sama dengan Admin —
         // view-nya otomatis mendeteksi layout Panitia/Admin sendiri) =====
         Route::controller(MonitoringController::class)->prefix('monitoring')->group(function () {
             Route::get('/laporan', 'laporan')->name('committee.monitoring.laporan');
 
-            Route::get('/absensi', 'absensi')->name('committee.monitoring.absensi');
-            Route::get('/absensi/{groupId}/{tanggal}', 'absensiDetail')->name('committee.monitoring.absensi.detail');
+            Route::get('/absensi', 'absensi')->name('committee.monitoring.absensi');            Route::get('/absensi/{groupId}/{tanggal}', 'absensiDetail')->name('committee.monitoring.absensi.detail');
             Route::get('/absensi/{groupId}/{tanggal}/export-pdf', 'absensiExportPdf')->name('committee.monitoring.absensi.export-pdf');
             Route::get('/absensi/{groupId}/{tanggal}/export-excel', 'absensiExportExcel')->name('committee.monitoring.absensi.export-excel');
 

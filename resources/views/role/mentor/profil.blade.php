@@ -660,7 +660,7 @@
         font-size: 12px;
         font-weight: 700;
         color: #c0392b;
-        margin: -10px 0 16px;
+        margin: 8px 0 16px;
         display: none;
       }
       .password-error.show {
@@ -768,14 +768,10 @@
       <div class="hero-slideshow" id="heroSlideshow"></div>
 
       <div class="hero-info-inner">
-        <div class="hero-eyebrow">
-          <span class="dot"></span>
-          Pengaturan Akun
-        </div>
         <h1>Profil <br /> Akun Mentor</h1>
-        <b class="hero-info-sub">
+        <p class="hero-info-sub">
           Kelola informasi profil, NPM, dan pembaruan data mentor
-          <p>Universitas La Tansa Mashiro.
+          Universitas La Tansa Mashiro.
         </p>
       </div>
     </section>
@@ -952,32 +948,23 @@
                       ><i class="fa-solid fa-lock"></i>Terkunci</span
                     >
                   </label>
-                  <div class="gender-toggle locked">
-                    <label>
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="laki-laki"
-                        @checked(auth()->user()->gender === 'laki-laki')
-                        disabled
-                      />
-                      <span class="gender-pill">
-                        <i class="fa-solid fa-mars"></i> Laki-laki
-                      </span>
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="perempuan"
-                        @checked(auth()->user()->gender === 'perempuan')
-                        disabled
-                      />
-                      <span class="gender-pill">
-                        <i class="fa-solid fa-venus"></i> Perempuan
-                      </span>
-                    </label>
-                  </div>
+                  @php
+                    // Data gender formatnya beda-beda tergantung cara input akunnya:
+                    // form manual admin pakai 'L'/'P', tapi hasil import Excel pakai
+                    // 'laki-laki'/'perempuan' -- disamakan dulu di sini.
+                    $genderMentah = strtolower((string) auth()->user()->gender);
+                    $isPerempuan = in_array($genderMentah, ['p', 'perempuan'], true);
+                  @endphp
+                  <input type="hidden" name="gender" value="{{ $isPerempuan ? 'perempuan' : 'laki-laki' }}" />
+                  @if ($isPerempuan)
+                    <span class="gender-pill" style="width:100%; background:#fce7f3; border-color:#ec4899; color:#ec4899; cursor:default;">
+                      <i class="fa-solid fa-venus"></i> Perempuan
+                    </span>
+                  @else
+                    <span class="gender-pill" style="width:100%; background:#dbeafe; border-color:#2563eb; color:#2563eb; cursor:default;">
+                      <i class="fa-solid fa-mars"></i> Laki-laki
+                    </span>
+                  @endif
                 </div>
               </div>
 
@@ -1002,10 +989,6 @@
               <span class="dot"></span>
               <h3>Ubah Kata Sandi</h3>
             </div>
-
-            @if ($errors->passwordUpdate->any() ?? false)
-              <p class="password-error show">{{ $errors->passwordUpdate->first() }}</p>
-            @endif
 
             <form id="passwordForm" class="form-body" method="POST" action="{{ route('role.mentor.profil.password') }}">
               @csrf
@@ -1132,10 +1115,13 @@
       });
 
       passwordForm.addEventListener("submit", function (e) {
+        // Dulu form ini submit biasa (reload halaman penuh) -> sekarang
+        // dikirim lewat fetch() supaya halaman TIDAK reload, baik pas gagal
+        // (mis. kata sandi lama salah) maupun pas berhasil.
+        e.preventDefault();
         passwordError.classList.remove("show");
 
         if (newPassword.value.length < 8) {
-          e.preventDefault();
           passwordError.textContent =
             "Kata sandi baru minimal 8 karakter.";
           passwordError.classList.add("show");
@@ -1143,7 +1129,6 @@
         }
 
         if (newPassword.value !== confirmPassword.value) {
-          e.preventDefault();
           passwordError.textContent =
             "Kata sandi baru dan konfirmasi tidak sama.";
           passwordError.classList.add("show");
@@ -1151,14 +1136,47 @@
         }
 
         if (newPassword.value === oldPassword.value) {
-          e.preventDefault();
           passwordError.textContent =
             "Kata sandi baru tidak boleh sama dengan kata sandi lama.";
           passwordError.classList.add("show");
           return;
         }
 
-        // Lolos validasi di browser -> form lanjut submit sungguhan ke server.
+        // Lolos validasi di browser -> kirim ke server (route('role.mentor.profil.password'))
+        // buat verifikasi kata sandi lama & penyimpanan kata sandi baru yang sebenarnya.
+        const submitBtn = passwordForm.querySelector('button[type="submit"]');
+        const labelAsli = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Menyimpan...";
+
+        fetch(passwordForm.action, {
+          method: "POST",
+          headers: { "Accept": "application/json" },
+          body: new FormData(passwordForm),
+        })
+          .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              let pesan = data.message || "Gagal mengubah kata sandi. Coba lagi.";
+              if (data.errors) {
+                const pesanPertama = Object.values(data.errors)[0];
+                if (pesanPertama && pesanPertama[0]) pesan = pesanPertama[0];
+              }
+              passwordError.textContent = pesan;
+              passwordError.classList.add("show");
+              return;
+            }
+            passwordForm.reset();
+            tampilkanToast(data.message || "Kata sandi berhasil diubah.");
+          })
+          .catch(() => {
+            passwordError.textContent = "Gagal mengubah kata sandi. Coba lagi.";
+            passwordError.classList.add("show");
+          })
+          .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = labelAsli;
+          });
       });
 
       const heroSlideImages = [
@@ -1211,9 +1229,6 @@
 
       @if (session('profileStatus'))
         tampilkanToast(@json(session('profileStatus')));
-      @endif
-      @if (session('passwordStatus'))
-        tampilkanToast(@json(session('passwordStatus')));
       @endif
     </script>
   </body>

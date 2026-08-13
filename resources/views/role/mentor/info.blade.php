@@ -56,7 +56,7 @@
   </style>
 </head>
 
-<body class="font-sans text-ink-900 m-0 p-0 bg-bg antialiased">
+<body class="font-sans text-ink-900 m-0 p-0 bg-bg antialiased min-h-screen flex flex-col">
   @include('layouts.mentor.topnav', ['navActive' => 'info'])
 
   <!-- ============ HERO ============ -->
@@ -67,12 +67,6 @@
       id="heroSlideshow"></div>
 
     <div class="relative z-[1] max-w-[900px] mx-auto text-center">
-      <div
-        class="inline-flex items-center gap-[7px] bg-lime-500/[0.15] border border-lime-500/[0.35] text-[#c8e46a] text-[11px] font-bold px-3.5 py-[5px] rounded-full mb-4 tracking-[0.06em] uppercase">
-        <span
-          class="w-1.5 h-1.5 rounded-full bg-lime-500 animate-[dotpulse_2s_infinite]"></span>
-        Info Terbaru
-      </div>
       <h1
         class="font-display text-2xl sm:text-3xl md:text-[38px] font-bold text-white mb-3 leading-[1.2]">
         Info<br />PKKMB-KT UNILAM 2026
@@ -86,7 +80,7 @@
 
   <!-- ============ MAIN ============ -->
   <div
-    class="max-w-[860px] mx-auto px-4 sm:px-8 md:px-12 py-10 pb-[calc(74px+28px)] md:pb-10">
+    class="max-w-[860px] mx-auto px-4 sm:px-8 md:px-12 py-10 pb-[calc(74px+28px)] md:pb-10 flex-1 w-full">
     <div class="flex items-center justify-between gap-3 flex-wrap mb-[18px]">
       <span class="text-[11px] font-extrabold tracking-[0.06em] uppercase text-ink-400">Daftar Pengumuman</span>
       <span

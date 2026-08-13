@@ -655,10 +655,6 @@
 
     <main class="content-wrapper">
       <section class="page-header">
-        <span class="page-eyebrow">
-          <span class="dot"></span>
-          PKKMB-KT UNILAM 2026
-        </span>
         <h1>Pusat Informasi &amp; Pengumuman</h1>
         <p>
   Pantau terus informasi berkala terkait pelaksanaan PKKMB-KT

@@ -55,6 +55,59 @@
       }
     }
 
+    @keyframes crownFloat {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    .crown-float {
+      animation: crownFloat 2.2s ease-in-out infinite;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(220px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: 0;
+      width: 7px;
+      height: 12px;
+      pointer-events: none;
+      animation: confettiFall 1.6s ease-in forwards;
+    }
+
+    @keyframes podiumIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .podium-in {
+      animation: podiumIn .45s ease both;
+    }
+
     .board-scroll::-webkit-scrollbar {
       width: 5px;
     }
@@ -75,6 +128,7 @@
 </head>
 
 <body class="font-sans text-ink-900 m-0 p-0 bg-bg antialiased">
+  <div id="confettiLayer" style="position:fixed;inset:0 0 auto 0;height:0;overflow:visible;pointer-events:none;z-index:70;"></div>
   @include('layouts.mentor.topnav', ['navActive' => 'leaderboard'])
 
   <!-- ============ HERO ============ -->
@@ -82,10 +136,6 @@
     <div class="absolute inset-0 z-0 overflow-hidden after:content-[''] after:absolute after:inset-0 after:bg-gradient-to-br after:from-navy-900/90 after:to-teal-600/[0.78]" id="heroSlideshow"></div>
 
     <div class="relative z-[1] max-w-[900px] mx-auto text-center">
-      <div class="inline-flex items-center gap-[7px] bg-lime-500/[0.15] border border-lime-500/[0.35] text-[#c8e46a] text-[11px] font-bold px-3.5 py-[5px] rounded-full mb-4 tracking-[0.06em] uppercase">
-        <span class="w-1.5 h-1.5 rounded-full bg-lime-500" style="animation: pulse 2s infinite;"></span>
-        Statistik Peserta
-      </div>
       <h1 class="font-display text-2xl sm:text-3xl md:text-[38px] font-bold text-white mb-3 leading-[1.2] m-0">Papan Peringkat<br />PKKMB-KT UNILAM 2026</h1>
       <p class="text-sm text-white/75 leading-[1.7] max-w-[520px] mx-auto">
         Pantau posisimu dan lihat siapa yang paling unggul di antara seluruh
@@ -95,7 +145,7 @@
   </section>
 
   <!-- ============ MAIN ============ -->
-  <div class="max-w-[560px] mx-auto" style="padding: 32px clamp(16px, 5vw, 48px) calc(74px + 28px);">
+  <div class="max-w-[560px] lg:max-w-[720px] mx-auto" style="padding: 32px clamp(16px, 5vw, 48px) calc(74px + 28px);">
     <div class="bg-surface rounded-[28px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] overflow-hidden">
       <div style="padding: 20px 20px 16px;">
         <div class="grid grid-cols-3 gap-1.5 bg-bg border border-border rounded-[13px]" style="padding: 5px;">
@@ -185,30 +235,30 @@
 
         const $podiumContainer = $("#podium-container");
         $podiumContainer.html(`
-            <div class="flex justify-center items-end gap-2 text-center max-w-[380px] mx-auto" style="padding-top: 26px;">
+            <div class="flex justify-center items-end gap-2 text-center max-w-[380px] mx-auto podium-in" style="padding-top: 26px;">
               <div class="flex-1 flex flex-col items-center">
                 <div class="${PODIUM_AVATAR_WRAP}">
                   <div class="rounded-full bg-white flex items-center justify-center overflow-hidden text-[13px] w-14 h-14 border-2 border-border p-0.5">
-                    <div style="width:100%;height:100%;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;">${juara2.foto ? `<img src="${juara2.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;" alt="${juara2.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara2.gender === "L" ? "👦" : "👧"}</span>` : (juara2.gender === "L" ? "👦" : "👧")}</div>
+                    <div style="width:100%;height:100%;border-radius:50%;background:#f2f4fa;display:flex;align-items:center;justify-content:center;overflow:hidden;">${juara2.foto ? `<img src="${juara2.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;" alt="${juara2.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara2.gender === "L" ? "👦" : "👧"}</span>` : (juara2.gender === "L" ? "👦" : "👧")}</div>
                   </div>
                   <span class="absolute -bottom-[3px] -right-[3px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white w-5 h-5 text-[10px] bg-ink-400">2</span>
                 </div>
                 <p class="${PODIUM_NAME} max-w-[96px]">${juara2.nama}</p>
                 <p class="${PODIUM_SCORE} text-teal-600">${juara2.skor}</p>
-                <div class="${PODIUM_BLOCK} h-14 border-t border-border" style="background: linear-gradient(to top, var(--bg), var(--surface));"><span class="${PODIUM_BLOCK_SPAN} text-[24px] text-ink-400">2</span></div>
+                <div class="${PODIUM_BLOCK} h-14 border-t border-border" style="background: linear-gradient(to top, #f2f4fa, #ffffff);"><span class="${PODIUM_BLOCK_SPAN} text-[24px] text-ink-400">2</span></div>
               </div>
 
               <div class="flex-1 flex flex-col items-center z-[1] -translate-y-2">
-                <i data-lucide="crown" class="text-gold-500 mb-0.5"></i>
+                <i data-lucide="crown" class="text-gold-500 mb-0.5 crown-float"></i>
                 <div class="${PODIUM_AVATAR_WRAP}">
                   <div class="rounded-full bg-white flex items-center justify-center overflow-hidden text-[13px] w-[72px] h-[72px] border-[3px] border-gold-500 p-0.5 shadow-[0_10px_24px_rgba(21,33,89,0.16)]">
-                    <div style="width:100%;height:100%;border-radius:50%;background:var(--gold-tint);display:flex;align-items:center;justify-content:center;overflow:hidden;">${juara1.foto ? `<img src="${juara1.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;" alt="${juara1.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara1.gender === "L" ? "👑" : "👸"}</span>` : (juara1.gender === "L" ? "👑" : "👸")}</div>
+                    <div style="width:100%;height:100%;border-radius:50%;background:#fdf6e3;display:flex;align-items:center;justify-content:center;overflow:hidden;">${juara1.foto ? `<img src="${juara1.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="width:100%;height:100%;object-fit:cover;" alt="${juara1.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara1.gender === "L" ? "👑" : "👸"}</span>` : (juara1.gender === "L" ? "👑" : "👸")}</div>
                   </div>
                   <span class="absolute -bottom-[3px] -right-[3px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white w-6 h-6 text-[11px] bg-gold-500">1</span>
                 </div>
                 <p class="${PODIUM_NAME} font-extrabold max-w-[110px]">${juara1.nama}</p>
                 <p class="${PODIUM_SCORE} text-gold-500 text-[12.5px]">${juara1.skor}</p>
-                <div class="${PODIUM_BLOCK} h-[88px]" style="background: linear-gradient(to top, var(--gold-tint), #fffdf5); border-top: 2px solid rgba(212, 160, 23, 0.35);"><span class="${PODIUM_BLOCK_SPAN} text-[38px]" style="color: rgba(212, 160, 23, 0.55);">1</span></div>
+                <div class="${PODIUM_BLOCK} h-[88px]" style="background: linear-gradient(to top, #fdf6e3, #fffdf5); border-top: 2px solid rgba(212, 160, 23, 0.35);"><span class="${PODIUM_BLOCK_SPAN} text-[38px]" style="color: rgba(212, 160, 23, 0.55);">1</span></div>
               </div>
 
               <div class="flex-1 flex flex-col items-center">
@@ -220,7 +270,7 @@
                 </div>
                 <p class="${PODIUM_NAME} max-w-[96px]">${juara3.nama}</p>
                 <p class="${PODIUM_SCORE} text-teal-600">${juara3.skor}</p>
-                <div class="${PODIUM_BLOCK} h-10 border-t border-border" style="background: linear-gradient(to top, var(--bg), var(--surface));"><span class="${PODIUM_BLOCK_SPAN} text-xl text-ink-400">3</span></div>
+                <div class="${PODIUM_BLOCK} h-10 border-t border-border" style="background: linear-gradient(to top, #f2f4fa, #ffffff);"><span class="${PODIUM_BLOCK_SPAN} text-xl text-ink-400">3</span></div>
               </div>
             </div>
           `);
@@ -329,8 +379,28 @@
         }
       }
 
+      // ---------- Confetti singkat pas leaderboard selesai dimuat ----------
+      function tampilkanConfetti() {
+        const warna = ["#d4a017", "#0f8a8c", "#a9c73b", "#152159", "#a9743a"];
+        const $layer = $("#confettiLayer");
+        for (let i = 0; i < 26; i++) {
+          const kiri = 10 + Math.random() * 80;
+          const $p = $("<span>")
+            .addClass("confetti-piece")
+            .css({
+              left: kiri + "%",
+              background: warna[i % warna.length],
+              animationDelay: (Math.random() * 0.3) + "s",
+              borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+            });
+          $layer.append($p);
+        }
+        setTimeout(() => $layer.empty(), 2000);
+      }
+
       // Load pertama kali saat jendela browser terbuka
       renderLeaderboard();
+      tampilkanConfetti();
     });
   </script>
 </body>

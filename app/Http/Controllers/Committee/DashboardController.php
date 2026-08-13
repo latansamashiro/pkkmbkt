@@ -56,4 +56,14 @@ class DashboardController extends Controller
             'infoTerbaru'
         ));
     }
+
+    /**
+     * Leaderboard -- reuse view generik yang sama dengan Admin/Advisor.
+     */
+    public function leaderboard()
+    {
+        $dataMahasiswa = \App\Support\Leaderboard::hitungRanking();
+
+        return view('role.admin.leaderboard.index', compact('dataMahasiswa'));
+    }
 }

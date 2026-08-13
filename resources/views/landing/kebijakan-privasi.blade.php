@@ -470,10 +470,6 @@
     <!-- ============ HERO ============ -->
     <section class="hero-info">
       <div class="hero-info-inner">
-        <div class="hero-eyebrow">
-          <span class="dot"></span>
-          Dokumen Resmi
-        </div>
         <h1>Kebijakan Privasi</h1>
         <p class="hero-info-sub">
           PKKMB-KT Universitas&nbsp;La&nbsp;Tansa&nbsp;Mashiro &middot; Terakhir diperbarui:

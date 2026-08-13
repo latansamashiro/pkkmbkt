@@ -35,7 +35,7 @@ class Leaderboard
             ->pluck('total', 'student_id');
 
         return \App\Models\User::where('role_name', 'STUDENT')
-            ->get(['id', 'name', 'gender', 'profile_picture'])
+            ->get(['id', 'name', 'gender', 'profile_picture', 'npm', 'program_study_name'])
             ->map(function ($u) use ($poinPerSesi, $poinPerPaketEvaluasi, $exams, $semuaStudentExam, $sesiHadirPerMhs, $poinAktivitasPerMhs) {
                 $poinAktivitas = (int) ($poinAktivitasPerMhs[$u->id] ?? 0);
 
@@ -75,6 +75,8 @@ class Leaderboard
                     'skor' => (int) $skor,
                     'gender' => $gender,
                     'foto' => $u->profile_picture ? asset('storage/' . $u->profile_picture) : null,
+                    'npm' => $u->npm,
+                    'prodi' => $u->program_study_name,
                 ];
             })
             ->sortByDesc('skor')

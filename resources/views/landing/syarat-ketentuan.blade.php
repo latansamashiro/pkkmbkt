@@ -485,10 +485,6 @@
     <!-- ============ HERO ============ -->
     <section class="hero-info">
       <div class="hero-info-inner">
-        <div class="hero-eyebrow">
-          <span class="dot"></span>
-          Dokumen Resmi
-        </div>
         <h1>Syarat dan Ketentuan</h1>
         <p class="hero-info-sub">
           PKKMB-KT Universitas La Tansa Mashiro &middot; Terakhir diperbarui:

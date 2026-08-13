@@ -87,7 +87,7 @@
                 <span class="ic"><i data-lucide="clipboard-list"></i></span>
                 <span class="label">Pengumpulan Tugas</span>
             </a>
-            <a href="#">
+            <a href="{{ route('committee.leaderboard') }}" class="{{ request()->routeIs('committee.leaderboard') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="trophy"></i></span>
                 <span class="label">Leaderboard</span>
             </a>

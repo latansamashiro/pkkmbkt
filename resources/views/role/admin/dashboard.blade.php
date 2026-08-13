@@ -5,7 +5,6 @@
             <p class="greeting-eyebrow">Selamat datang kembali</p>
             <h2 class="greeting-title">Halo, {{ auth()->user()->name ?? 'Super Admin' }} 👋</h2>
         </div>
-        <span class="live-tag"><span class="dot"></span>Data real-time</span>
     </div>
 
     @php

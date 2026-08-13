@@ -21,15 +21,15 @@
 
         /* ============ KOP SURAT ============ */
         .kop {
-            display: flex; align-items: center; gap: 18px;
-            border-bottom: 3px solid #152159; padding-bottom: 14px; margin-bottom: 4px;
+            display: flex; align-items: center; gap: 16px;
+            border-bottom: 4px solid #152159; padding-bottom: 10px; margin-bottom: 3px;
         }
-        .kop img { width: 72px; height: 72px; object-fit: contain; }
-        .kop-text { flex: 1; text-align: center; }
-        .kop-text h1 { margin: 0; font-size: 18px; letter-spacing: 0.03em; text-transform: uppercase; }
-        .kop-text h2 { margin: 2px 0 0; font-size: 15px; font-weight: normal; }
-        .kop-text p { margin: 4px 0 0; font-size: 11px; }
-        .kop-line2 { border-bottom: 1px solid #152159; margin-bottom: 22px; }
+        .kop img { width: 78px; height: 78px; object-fit: contain; flex-shrink: 0; }
+        .kop-text { flex: 1; text-align: left; }
+        .kop-text .kop-sub { margin: 0; font-size: 13px; font-weight: bold; line-height: 1.25; text-transform: uppercase; }
+        .kop-text h1 { margin: 1px 0 0; font-size: 19px; font-weight: bold; letter-spacing: 0.02em; text-transform: uppercase; }
+        .kop-text p { margin: 3px 0 0; font-size: 10.5px; }
+        .kop-line2 { border-bottom: 1.5px solid #152159; margin-bottom: 22px; }
 
         h3.judul {
             text-align: center; text-decoration: underline; font-size: 15px;
@@ -65,15 +65,16 @@
     </div>
 
     <!-- ============================================================
-         ►► KOP SURAT — ganti logo & teks di sini sesuai identitas
-            resmi kampus/panitia PKKMB kamu.
+         ►► KOP SURAT — format resmi Universitas La Tansa Mashiro (UNILAM),
+            samain persis dengan kop surat panitia PKKMB-KT yang asli.
     ============================================================= -->
     <div class="kop">
-        <img src="{{ asset('assets/unilam.png') }}" alt="Logo" />
+        <img src="{{ asset('assets/unilam.png') }}" alt="Logo UNILAM" />
         <div class="kop-text">
+            <p class="kop-sub">Pengenalan Kehidupan Kampus Bagi Mahasiswa Baru<br />Dan Khutbatut-Ta'aruf (PKKMBKT)</p>
             <h1>Universitas La Tansa Mashiro</h1>
-            <h2>Panitia Pengenalan Kehidupan Kampus bagi Mahasiswa Baru (PKKMB-KT)</h2>
-            <p>Jl. Contoh No. 1, Kota Contoh — pkkmb@unilam.ac.id</p>
+            <p>Jl. Soekarno &ndash; Hatta, Pasirjati Rangkasbitung, Lebak, Banten 42317</p>
+            <p>Web : <u>https://unilam.ac.id</u> - e-mail : <u>rektorat@unilam.ac.id</u></p>
         </div>
     </div>
     <div class="kop-line2">&nbsp;</div>

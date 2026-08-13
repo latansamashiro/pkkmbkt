@@ -34,7 +34,7 @@
                     <tr class="hover:bg-slate-50">
                         <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">{{ $idx + 1 }}</td>
                         <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">{{ $r['nama'] }}</td>
-                        <td class="px-3.5 py-3 text-sm font-extrabold text-teal-600 border-b border-slate-200 text-center">{{ $r['poin'] }}</td>
+                        <td class="px-3.5 py-3 text-sm font-extrabold text-red-600 border-b border-slate-200 text-center">{{ $r['poin'] }}</td>
                         <td class="px-3.5 py-3 text-sm text-slate-600 border-b border-slate-200 whitespace-nowrap">
                             {{ \Carbon\Carbon::parse($r['update'])->translatedFormat('d M Y') }}
                         </td>

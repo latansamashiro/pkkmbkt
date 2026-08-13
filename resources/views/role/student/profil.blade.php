@@ -63,7 +63,7 @@
   <header
     class="sticky top-0 z-40 flex items-center justify-between gap-4 px-4 sm:px-8 md:px-12 py-3.5 bg-navy-900 border-b border-white/10">
     <a
-      href="#"
+      href="{{ route('dashboard') }}"
       class="flex items-center gap-2.5 z-50 no-underline"
       aria-label="PKKMB-KT UNILAM Beranda">
       <div
@@ -105,12 +105,6 @@
       id="heroSlideshow"></div>
 
     <div class="relative z-[1] max-w-[900px] mx-auto text-center">
-      <div
-        class="inline-flex items-center gap-[7px] bg-lime-500/[0.15] border border-lime-500/[0.35] text-[#c8e46a] text-[11px] font-bold px-3.5 py-[5px] rounded-full mb-4 tracking-[0.06em] uppercase">
-        <span
-          class="w-1.5 h-1.5 rounded-full bg-lime-500 animate-[dotpulse_2s_infinite]"></span>
-        Pengaturan Akun
-      </div>
       <h1
         class="font-display text-2xl sm:text-3xl md:text-[38px] font-bold text-white mb-3 leading-[1.2]">
         Profil <br /> Akun Mahasiswa
@@ -276,34 +270,23 @@
                   Jenis Kelamin
                   <span class="inline-flex items-center gap-1 text-[9.5px] font-extrabold tracking-[0.03em] normal-case text-ink-600 bg-[#e8ebf6] border border-border rounded-full px-2 py-0.5"><i class="fa-solid fa-lock text-[9px]"></i>Terkunci</span>
                 </label>
-                <div class="flex gap-2.5">
-                  <label class="flex-1">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="laki-laki"
-                      @checked(auth()->user()->gender === 'laki-laki')
-                    disabled
-                    class="peer hidden"
-                    />
-                    <span class="peer-checked:bg-[#dbeafe] peer-checked:border-[#2563eb] peer-checked:text-[#2563eb] flex items-center justify-center gap-2 py-[11px] px-3.5 rounded-xl border border-border bg-bg text-[13.5px] font-bold text-ink-600 cursor-not-allowed opacity-70 transition-all">
-                      <i class="fa-solid fa-mars text-sm"></i> Laki-laki
-                    </span>
-                  </label>
-                  <label class="flex-1">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="perempuan"
-                      @checked(auth()->user()->gender === 'perempuan')
-                    disabled
-                    class="peer hidden"
-                    />
-                    <span class="peer-checked:bg-[#fce7f3] peer-checked:border-[#ec4899] peer-checked:text-[#ec4899] flex items-center justify-center gap-2 py-[11px] px-3.5 rounded-xl border border-border bg-bg text-[13.5px] font-bold text-ink-600 cursor-not-allowed opacity-70 transition-all">
-                      <i class="fa-solid fa-venus text-sm"></i> Perempuan
-                    </span>
-                  </label>
-                </div>
+                @php
+                  // Data gender formatnya beda-beda tergantung cara input akunnya:
+                  // form manual admin pakai 'L'/'P', tapi hasil import Excel pakai
+                  // 'laki-laki'/'perempuan' -- disamakan dulu di sini.
+                  $genderMentah = strtolower((string) auth()->user()->gender);
+                  $isPerempuan = in_array($genderMentah, ['p', 'perempuan'], true);
+                @endphp
+                <input type="hidden" name="gender" value="{{ $isPerempuan ? 'perempuan' : 'laki-laki' }}" />
+                @if ($isPerempuan)
+                  <span class="w-full flex items-center justify-center gap-2 py-[11px] px-3.5 rounded-xl border border-[#ec4899] bg-[#fce7f3] text-[13.5px] font-bold text-[#ec4899]">
+                    <i class="fa-solid fa-venus text-sm"></i> Perempuan
+                  </span>
+                @else
+                  <span class="w-full flex items-center justify-center gap-2 py-[11px] px-3.5 rounded-xl border border-[#2563eb] bg-[#dbeafe] text-[13.5px] font-bold text-[#2563eb]">
+                    <i class="fa-solid fa-mars text-sm"></i> Laki-laki
+                  </span>
+                @endif
               </div>
             </div>
 
@@ -327,10 +310,6 @@
             <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
             <h3 class="font-display text-base font-bold text-ink-900 m-0">Ubah Kata Sandi</h3>
           </div>
-
-          @if ($errors->passwordUpdate->any() ?? false)
-          <p class="text-xs font-bold text-[#c0392b] mx-5 sm:mx-7 mt-5">{{ $errors->passwordUpdate->first() }}</p>
-          @endif
 
           <form id="passwordForm" class="p-5 sm:p-7" method="POST" action="{{ route('role.student.profil.password') }}">
             @csrf
@@ -385,7 +364,7 @@
               </div>
             </div>
 
-            <p id="passwordError" class="text-xs font-bold text-[#c0392b] -mt-2.5 mb-4 hidden">
+            <p id="passwordError" class="text-xs font-bold text-[#c0392b] mt-2 mb-4 hidden">
               Kata sandi baru dan konfirmasi tidak sama.
             </p>
 
@@ -396,7 +375,7 @@
                 class="py-[11px] px-[22px] rounded-xl text-[13.5px] font-bold text-ink-600 bg-transparent border-none cursor-pointer transition-colors hover:bg-bg">
                 Batal
               </button>
-              <button type="submit" class="py-3 px-[26px] rounded-xl text-[13.5px] font-bold text-white bg-navy-900 border-none cursor-pointer shadow-[0_10px_24px_rgba(21,33,89,0.16)] transition-all hover:bg-navy-700 active:scale-[0.98]">
+              <button type="submit" id="submitPasswordBtn" class="py-3 px-[26px] rounded-xl text-[13.5px] font-bold text-white bg-navy-900 border-none cursor-pointer shadow-[0_10px_24px_rgba(21,33,89,0.16)] transition-all hover:bg-navy-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed">
                 Ubah Kata Sandi
               </button>
             </div>
@@ -456,8 +435,9 @@
       href="{{ route('role.student.info') }}"
       class="flex flex-col items-center gap-1 text-ink-400 text-[10px] font-bold flex-1 py-1.5 no-underline">
       <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-        <path d="M9 17a3 3 0 0 0 6 0" />
+        <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5" />
+            <path d="M12 8h.01" />
       </svg>
       <span>Info</span>
     </a>
@@ -515,6 +495,7 @@
       const $newPassword = $("#newPassword");
       const $confirmPassword = $("#confirmPassword");
       const $passwordError = $("#passwordError");
+      const $submitPasswordBtn = $("#submitPasswordBtn");
 
       $("#cancelPasswordBtn").on("click", function() {
         $passwordForm[0].reset();
@@ -522,6 +503,10 @@
       });
 
       $passwordForm.on("submit", function(e) {
+        // Dulu form ini submit biasa (reload halaman penuh) -> sekarang
+        // dikirim lewat AJAX supaya halaman TIDAK reload, baik pas gagal
+        // (mis. kata sandi lama salah) maupun pas berhasil.
+        e.preventDefault();
         $passwordError.removeClass("block").addClass("hidden");
 
         const oldVal = $oldPassword.val();
@@ -529,26 +514,46 @@
         const confirmVal = $confirmPassword.val();
 
         if (newVal.length < 8) {
-          e.preventDefault();
           $passwordError.text("Kata sandi baru minimal 8 karakter.").removeClass("hidden").addClass("block");
           return;
         }
 
         if (newVal !== confirmVal) {
-          e.preventDefault();
           $passwordError.text("Kata sandi baru dan konfirmasi tidak sama.").removeClass("hidden").addClass("block");
           return;
         }
 
         if (newVal === oldVal) {
-          e.preventDefault();
           $passwordError.text("Kata sandi baru tidak boleh sama dengan kata sandi lama.").removeClass("hidden").addClass("block");
           return;
         }
 
-        // Lolos validasi di browser -> form lanjut submit sungguhan ke
-        // server (route('role.student.profil.password')) untuk verifikasi
-        // kata sandi lama & penyimpanan kata sandi baru yang sebenarnya.
+        // Lolos validasi di browser -> kirim ke server (route('role.student.profil.password'))
+        // buat verifikasi kata sandi lama & penyimpanan kata sandi baru yang sebenarnya.
+        $submitPasswordBtn.prop("disabled", true).text("Menyimpan...");
+
+        $.ajax({
+          url: $passwordForm.attr("action"),
+          method: "POST",
+          data: $passwordForm.serialize(),
+          dataType: "json",
+        })
+          .done(function(res) {
+            $passwordForm[0].reset();
+            tampilkanToast(res.message || "Kata sandi berhasil diubah.");
+          })
+          .fail(function(xhr) {
+            const res = xhr.responseJSON || {};
+            let pesan = res.message || "Gagal mengubah kata sandi. Coba lagi.";
+            if (res.errors) {
+              const pesanPertama = Object.values(res.errors)[0];
+              if (pesanPertama && pesanPertama[0]) pesan = pesanPertama[0];
+            }
+            $passwordError.text(pesan).removeClass("hidden").addClass("block");
+          })
+          .always(function() {
+            $submitPasswordBtn.prop("disabled", false).text("Ubah Kata Sandi");
+          });
       });
 
       // ======================================================================
@@ -598,9 +603,6 @@
 
       @if(session('profileStatus'))
       tampilkanToast(@json(session('profileStatus')));
-      @endif
-      @if(session('passwordStatus'))
-      tampilkanToast(@json(session('passwordStatus')));
       @endif
     });
   </script>

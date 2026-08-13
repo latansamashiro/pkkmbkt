@@ -457,7 +457,12 @@ class AdvisorController extends Controller
 
             $header = ['No', 'Mahasiswa', 'NPM'];
             foreach ($tasks as $t) {
-                $header[] = $t->title . ' (' . ($t->task_type === 'kelompok' ? 'Kelompok' : 'Individu') . ')';
+                $jenisLabel = match ($t->task_type) {
+                    'kelompok' => 'Kelompok',
+                    'atk_almet' => 'ATK & Almet',
+                    default => 'Individu',
+                };
+                $header[] = $t->title . ' (' . $jenisLabel . ')';
             }
             $header[] = 'Selesai';
             fputcsv($out, $header);
@@ -490,7 +495,7 @@ class AdvisorController extends Controller
         $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
 
         $tasks = Task::where('status', '!=', 'draft')
-            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok')")
+            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk_almet')")
             ->orderBy('deadline')
             ->get();
 
@@ -557,5 +562,15 @@ class AdvisorController extends Controller
         Auth::user()->update(['password' => Hash::make($validated['password'])]);
 
         return back()->with('success', 'Password berhasil diubah.');
+    }
+
+    /**
+     * Leaderboard -- reuse view generik yang sama dengan Admin/Committee.
+     */
+    public function leaderboard()
+    {
+        $dataMahasiswa = \App\Support\Leaderboard::hitungRanking();
+
+        return view('role.admin.leaderboard.index', compact('dataMahasiswa'));
     }
 }

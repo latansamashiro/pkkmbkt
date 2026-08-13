@@ -64,7 +64,7 @@
   <header
     class="sticky top-0 z-40 flex items-center justify-between gap-4 px-4 sm:px-8 md:px-12 py-3.5 bg-navy-900 border-b border-white/10">
     <a
-      href="#"
+      href="{{ route('dashboard') }}"
       class="flex items-center gap-2.5 z-50 no-underline"
       aria-label="PKKMB-KT UNILAM Beranda">
       <div
@@ -107,12 +107,6 @@
       id="heroSlideshow"></div>
 
     <div class="relative z-[1] max-w-[900px] mx-auto text-center">
-      <div
-        class="inline-flex items-center gap-[7px] bg-lime-500/[0.15] border border-lime-500/[0.35] text-[#c8e46a] text-[11px] font-bold px-3.5 py-[5px] rounded-full mb-4 tracking-[0.06em] uppercase">
-        <span
-          class="w-1.5 h-1.5 rounded-full bg-lime-500 animate-[dotpulse_2s_infinite]"></span>
-        Panduan Peserta
-      </div>
       <h1
         class="font-display text-2xl sm:text-3xl md:text-[38px] font-bold text-white mb-3 leading-[1.2]">
         Modul<br />PKKMB-KT UNILAM 2026
@@ -135,11 +129,15 @@
         Tentang PKKMB-KT
       </h2>
       <p class="leading-[1.8] text-ink-600 text-sm m-0">
-        Pengenalan Kehidupan Kampus bagi Mahasiswa Baru (PKKMB-KT) merupakan
-        kegiatan awal yang bertujuan untuk membantu mahasiswa baru mengenal
-        lingkungan kampus, budaya akademik, tata tertib, serta membangun
-        karakter yang disiplin, bertanggung jawab, dan mampu beradaptasi
-        dengan kehidupan perkuliahan.
+        @if (isset($modulData['Tentang PKKMB-KT']))
+          {!! $modulData['Tentang PKKMB-KT']->content !!}
+        @else
+          Pengenalan Kehidupan Kampus bagi Mahasiswa Baru (PKKMB-KT) merupakan
+          kegiatan awal yang bertujuan untuk membantu mahasiswa baru mengenal
+          lingkungan kampus, budaya akademik, tata tertib, serta membangun
+          karakter yang disiplin, bertanggung jawab, dan mampu beradaptasi
+          dengan kehidupan perkuliahan.
+        @endif
       </p>
     </div>
 
@@ -326,9 +324,14 @@
         Sanksi
       </h2>
       <p class="leading-[1.8] text-ink-600 text-sm m-0">
-        Mahasiswa yang melakukan pelanggaran terhadap tata tertib PKKMB-KT
-        akan diberikan sanksi sesuai tingkat pelanggaran yang dilakukan.
+        @if (isset($modulData['Sanksi']))
+          {!! $modulData['Sanksi']->content !!}
+        @else
+          Mahasiswa yang melakukan pelanggaran terhadap tata tertib PKKMB-KT
+          akan diberikan sanksi sesuai tingkat pelanggaran yang dilakukan.
+        @endif
       </p>
+      @unless (isset($modulData['Sanksi']))
       <ul class="pl-5 mt-2.5">
         <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">
           Teguran lisan dari mentor.
@@ -341,7 +344,27 @@
           berulang.
         </li>
       </ul>
+      @endunless
     </div>
+
+    {{-- Section TAMBAHAN yang panitia buat sendiri (di luar 6 section baku di
+         atas) -- otomatis muncul di sini, biar semua yang panitia publish
+         di "Kelola Modul PKKMB" beneran kelihatan mahasiswa. --}}
+    @php
+      $sectionBaku = ['Tentang PKKMB-KT', 'Tata Tertib', 'Atribut yang Harus Dibawa', 'Sistem Penilaian', 'Reward & Leaderboard', 'Sanksi'];
+    @endphp
+    @foreach ($modulData->except($sectionBaku) as $itemModul)
+      <div
+        class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] px-5 sm:px-[30px] py-[26px] mb-5">
+        <h2
+          class="font-display text-navy-900 text-[19px] font-bold mb-4 flex items-center gap-2.5 before:content-[''] before:w-[5px] before:h-5 before:rounded-full before:bg-gradient-to-b before:from-teal-500 before:to-navy-700 before:flex-shrink-0">
+          {{ $itemModul->section }}
+        </h2>
+        <div class="leading-[1.8] text-ink-600 text-sm">
+          {!! $itemModul->content !!}
+        </div>
+      </div>
+    @endforeach
   </div>
 
   <!-- ============ FOOTER ============ -->
@@ -397,8 +420,9 @@
       href="{{ route('role.student.info') }}"
       class="flex flex-col items-center gap-1 text-ink-400 text-[10px] font-bold flex-1 py-1.5 no-underline">
       <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-        <path d="M9 17a3 3 0 0 0 6 0" />
+        <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5" />
+            <path d="M12 8h.01" />
       </svg>
       <span>Info</span>
     </a>

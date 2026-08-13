@@ -629,10 +629,6 @@
     <!-- ============ HERO ============ -->
     <section class="hero-info">
       <div class="hero-info-inner">
-        <div class="hero-eyebrow">
-          <span class="dot"></span>
-          Pusat Bantuan
-        </div>
         <h1>Pusat Bantuan</h1>
         <p class="hero-info-sub">
           Selamat datang di Pusat Bantuan PKKMB-KT. Halaman ini disediakan

@@ -922,10 +922,6 @@
     <section class="hero-info">
       <div class="hero-info-inner">
         <div class="hero-info-left">
-          <span class="hero-eyebrow">
-            <span class="dot"></span>
-            Masuki Dunia Kampus
-          </span>
           <h1>Jadwal Resmi PKKMB 2026</h1>
           <p class="hero-info-sub">
             Persiapkan dirimu, Mahasiswa Baru Universitas La Tansa Mashiro!

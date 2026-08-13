@@ -498,10 +498,6 @@
 
     <section id="kontak" class="py-12 px-4 max-w-6xl mx-auto flex-grow w-full">
       <div class="text-center mb-10">
-        <span class="page-eyebrow">
-          <span class="dot"></span>
-          PKKMB-KT UNILAM 2026
-        </span>
         <h1 class="text-3xl font-extrabold text-[#11235a] sm:text-4xl">
           Hubungi Kami
         </h1>

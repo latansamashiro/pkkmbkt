@@ -55,6 +55,59 @@
       }
     }
 
+    @keyframes crownFloat {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    .crown-float {
+      animation: crownFloat 2.2s ease-in-out infinite;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(220px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: 0;
+      width: 7px;
+      height: 12px;
+      pointer-events: none;
+      animation: confettiFall 1.6s ease-in forwards;
+    }
+
+    @keyframes podiumIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .podium-in {
+      animation: podiumIn .45s ease both;
+    }
+
     .scroll-thin::-webkit-scrollbar {
       width: 5px;
     }
@@ -71,11 +124,12 @@
 </head>
 
 <body class="font-sans text-ink-900 m-0 p-0 bg-bg antialiased">
+  <div id="confettiLayer" class="fixed inset-x-0 top-0 h-0 overflow-visible pointer-events-none z-[70]"></div>
   <!-- ============ NAVBAR — IDENTIK HALAMAN LAIN ============ -->
   <header
     class="sticky top-0 z-40 flex items-center justify-between gap-4 px-4 sm:px-8 md:px-12 py-3.5 bg-navy-900 border-b border-white/10">
     <a
-      href="#"
+      href="{{ route('dashboard') }}"
       class="flex items-center gap-2.5 z-50 no-underline"
       aria-label="PKKMB-KT UNILAM Beranda">
       <div
@@ -118,12 +172,6 @@
       id="heroSlideshow"></div>
 
     <div class="relative z-[1] max-w-[900px] mx-auto text-center">
-      <div
-        class="inline-flex items-center gap-[7px] bg-lime-500/[0.15] border border-lime-500/[0.35] text-[#c8e46a] text-[11px] font-bold px-3.5 py-[5px] rounded-full mb-4 tracking-[0.06em] uppercase">
-        <span
-          class="w-1.5 h-1.5 rounded-full bg-lime-500 animate-[dotpulse_2s_infinite]"></span>
-        Statistik Peserta
-      </div>
       <h1
         class="font-display text-2xl sm:text-3xl md:text-[38px] font-bold text-white mb-3 leading-[1.2]">
         Papan Peringkat<br />PKKMB-KT UNILAM 2026
@@ -137,7 +185,7 @@
 
   <!-- ============ MAIN ============ -->
   <div
-    class="max-w-[560px] mx-auto px-4 sm:px-8 md:px-12 py-8 pb-[calc(74px+28px)] md:pb-8">
+    class="max-w-[560px] lg:max-w-[720px] mx-auto px-4 sm:px-8 md:px-12 py-8 pb-[calc(74px+28px)] md:pb-8">
     <div class="bg-surface rounded-[28px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] overflow-hidden">
       <div class="px-5 pt-5 pb-4">
         <div class="grid grid-cols-3 gap-1.5 bg-bg border border-border p-[5px] rounded-[13px]">
@@ -231,8 +279,9 @@
       href="{{ route('role.student.info') }}"
       class="flex flex-col items-center gap-1 text-ink-400 text-[10px] font-bold flex-1 py-1.5 no-underline">
       <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-        <path d="M9 17a3 3 0 0 0 6 0" />
+        <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5" />
+            <path d="M12 8h.01" />
       </svg>
       <span>Info</span>
     </a>
@@ -286,52 +335,56 @@
         $podiumContainer
           .removeClass()
           .addClass(
-            "pt-[26px] flex justify-center items-end gap-2 text-center max-w-[380px] mx-auto"
+            "pt-[26px] flex justify-center items-end gap-2 sm:gap-4 text-center max-w-[380px] lg:max-w-[560px] mx-auto podium-in"
           )
           .html(`
             <div class="flex-1 flex flex-col items-center">
               <div class="relative mb-2">
-                <div class="podium-avatar w-14 h-14 rounded-full bg-white border-2 border-border p-0.5 flex items-center justify-center overflow-hidden text-[13px]">
+                <div class="podium-avatar w-14 h-14 lg:w-[76px] lg:h-[76px] rounded-full bg-white border-2 border-border p-0.5 flex items-center justify-center overflow-hidden text-[13px] transition-transform lg:hover:scale-105">
                   <div class="w-full h-full rounded-full bg-bg flex items-center justify-center overflow-hidden">${juara2.foto ? `<img src="${juara2.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${juara2.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara2.gender === "L" ? "👦" : "👧"}</span>` : (juara2.gender === "L" ? "👦" : "👧")}</div>
                 </div>
                 <span class="absolute -bottom-[3px] -right-[3px] w-5 h-5 text-[10px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white bg-ink-400">2</span>
               </div>
-              <p class="text-[11.5px] font-bold text-ink-900 leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px]">${juara2.nama}</p>
-              <p class="text-[11px] font-extrabold mt-0.5 text-teal-600">${juara2.skor}</p>
-              <div class="w-full mt-2.5 rounded-t-xl flex items-center justify-center h-14 bg-gradient-to-t from-bg to-surface border-t border-border">
-                <span class="font-display font-bold text-2xl text-ink-400">2</span>
+              <p class="text-[11.5px] lg:text-[13px] font-bold text-ink-900 leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px] lg:max-w-[130px]">${juara2.nama}</p>
+              <p class="hidden lg:block text-[10.5px] text-ink-400 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis max-w-[130px]">${juara2.prodi || "&nbsp;"}</p>
+              <p class="text-[11px] lg:text-[13px] font-extrabold mt-0.5 text-teal-600">${juara2.skor}</p>
+              <div class="w-full mt-2.5 rounded-t-xl flex items-center justify-center h-14 lg:h-20 bg-gradient-to-t from-bg to-surface border-t border-border">
+                <span class="font-display font-bold text-2xl lg:text-3xl text-ink-400">2</span>
               </div>
             </div>
 
             <div class="flex-1 flex flex-col items-center z-[1] -translate-y-2">
-              <i data-lucide="crown" class="text-[#d4a017] mb-0.5"></i>
+              <i data-lucide="crown" class="text-[#d4a017] mb-0.5 crown-float"></i>
               <div class="relative mb-2">
-                <div class="podium-avatar w-[72px] h-[72px] rounded-full bg-white border-[3px] border-[#d4a017] p-0.5 flex items-center justify-center overflow-hidden text-[13px] shadow-[0_10px_24px_rgba(21,33,89,0.16)]">
+                <div class="podium-avatar w-[72px] h-[72px] lg:w-[96px] lg:h-[96px] rounded-full bg-white border-[3px] border-[#d4a017] p-0.5 flex items-center justify-center overflow-hidden text-[13px] shadow-[0_10px_24px_rgba(21,33,89,0.16)] transition-transform lg:hover:scale-105">
                   <div class="w-full h-full rounded-full bg-gold-tint flex items-center justify-center overflow-hidden">${juara1.foto ? `<img src="${juara1.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${juara1.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara1.gender === "L" ? "👑" : "👸"}</span>` : (juara1.gender === "L" ? "👑" : "👸")}</div>
                 </div>
                 <span class="absolute -bottom-[3px] -right-[3px] w-6 h-6 text-[11px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white bg-[#d4a017]">1</span>
               </div>
-              <p class="text-[11.5px] font-extrabold text-ink-900 leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis max-w-[110px]">${juara1.nama}</p>
-              <p class="text-[12.5px] font-extrabold mt-0.5 text-[#d4a017]">${juara1.skor}</p>
-              <div class="w-full mt-2.5 rounded-t-xl flex items-center justify-center h-[88px] bg-gradient-to-t from-gold-tint to-[#fffdf5] border-t-2 border-[#d4a017]/35">
-                <span class="font-display font-bold text-[38px] text-[#d4a017]/55">1</span>
+              <p class="text-[11.5px] lg:text-[14.5px] font-extrabold text-ink-900 leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis max-w-[110px] lg:max-w-[160px]">${juara1.nama}</p>
+              <p class="hidden lg:block text-[11px] text-ink-400 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis max-w-[160px]">${juara1.prodi || "&nbsp;"}</p>
+              <p class="text-[12.5px] lg:text-[15px] font-extrabold mt-0.5 text-[#d4a017]">${juara1.skor}</p>
+              <div class="w-full mt-2.5 rounded-t-xl flex items-center justify-center h-[88px] lg:h-[118px] bg-gradient-to-t from-gold-tint to-[#fffdf5] border-t-2 border-[#d4a017]/35">
+                <span class="font-display font-bold text-[38px] lg:text-[48px] text-[#d4a017]/55">1</span>
               </div>
             </div>
 
             <div class="flex-1 flex flex-col items-center">
               <div class="relative mb-2">
-                <div class="podium-avatar w-14 h-14 rounded-full bg-white border-2 border-[#a9743a]/40 p-0.5 flex items-center justify-center overflow-hidden text-[13px]">
+                <div class="podium-avatar w-14 h-14 lg:w-[76px] lg:h-[76px] rounded-full bg-white border-2 border-[#a9743a]/40 p-0.5 flex items-center justify-center overflow-hidden text-[13px] transition-transform lg:hover:scale-105">
                   <div class="w-full h-full rounded-full bg-[#a9743a]/[0.08] flex items-center justify-center overflow-hidden">${juara3.foto ? `<img src="${juara3.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${juara3.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${juara3.gender === "L" ? "👦" : "👧"}</span>` : (juara3.gender === "L" ? "👦" : "👧")}</div>
                 </div>
                 <span class="absolute -bottom-[3px] -right-[3px] w-5 h-5 text-[10px] text-white rounded-full flex items-center justify-center font-extrabold border-2 border-white bg-[#a9743a]">3</span>
               </div>
-              <p class="text-[11.5px] font-bold text-ink-900 leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px]">${juara3.nama}</p>
-              <p class="text-[11px] font-extrabold mt-0.5 text-teal-600">${juara3.skor}</p>
-              <div class="w-full mt-2.5 rounded-t-xl flex items-center justify-center h-10 bg-gradient-to-t from-bg to-surface border-t border-border">
-                <span class="font-display font-bold text-xl text-ink-400">3</span>
+              <p class="text-[11.5px] lg:text-[13px] font-bold text-ink-900 leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis max-w-[96px] lg:max-w-[130px]">${juara3.nama}</p>
+              <p class="hidden lg:block text-[10.5px] text-ink-400 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis max-w-[130px]">${juara3.prodi || "&nbsp;"}</p>
+              <p class="text-[11px] lg:text-[13px] font-extrabold mt-0.5 text-teal-600">${juara3.skor}</p>
+              <div class="w-full mt-2.5 rounded-t-xl flex items-center justify-center h-10 lg:h-14 bg-gradient-to-t from-bg to-surface border-t border-border">
+                <span class="font-display font-bold text-xl lg:text-2xl text-ink-400">3</span>
               </div>
             </div>
           `);
+        if (window.lucide) lucide.createIcons();
 
         $listContainer.empty();
 
@@ -433,8 +486,28 @@
         }
       }
 
+      // ---------- Confetti singkat pas leaderboard selesai dimuat ----------
+      function tampilkanConfetti() {
+        const warna = ["#d4a017", "#16a0a1", "#a9c73b", "#152159", "#a9743a"];
+        const $layer = $("#confettiLayer");
+        for (let i = 0; i < 26; i++) {
+          const kiri = 10 + Math.random() * 80; // sebar di sekitar tengah atas
+          const $p = $("<span>")
+            .addClass("confetti-piece")
+            .css({
+              left: kiri + "%",
+              background: warna[i % warna.length],
+              animationDelay: (Math.random() * 0.3) + "s",
+              borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+            });
+          $layer.append($p);
+        }
+        setTimeout(() => $layer.empty(), 2000);
+      }
+
       // Render pertama kali
       renderLeaderboard();
+      tampilkanConfetti();
     });
   </script>
 </body>

@@ -1020,7 +1020,6 @@
         <div class="hero-slideshow" id="heroSlideshow"></div>
 
         <div class="hero-content">
-            <span class="eyebrow"><span class="dot"></span><span class="whitespace-nowrap">Universitas La Tansa Mashiro</span></span>
             <h1 class="hero-title">Tentang PKKMB-KT</h1>
             <p class="lead">
                 Mengenal Portal PKKMB-KT satu pintu digital yang menuntun

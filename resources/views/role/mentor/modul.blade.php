@@ -66,10 +66,6 @@
     <div class="absolute inset-0 z-0 overflow-hidden after:content-[''] after:absolute after:inset-0 after:bg-gradient-to-br after:from-navy-900/90 after:to-teal-600/[0.78]" id="heroSlideshow"></div>
 
     <div class="relative z-[1] max-w-[900px] mx-auto text-center">
-      <div class="inline-flex items-center gap-[7px] bg-lime-500/[0.15] border border-lime-500/[0.35] text-[#c8e46a] text-[11px] font-bold px-3.5 py-[5px] rounded-full mb-4 tracking-[0.06em] uppercase">
-        <span class="w-1.5 h-1.5 rounded-full bg-lime-500" style="animation: pulse 2s infinite;"></span>
-        Panduan Peserta
-      </div>
       <h1 class="font-display text-2xl sm:text-3xl md:text-[38px] font-bold text-white mb-3 leading-[1.2] m-0">Modul<br />PKKMB-KT UNILAM 2026</h1>
       <p class="text-sm text-white/75 leading-[1.7] max-w-[560px] mx-auto">
         Kenali tata tertib, atribut wajib, dan sistem penilaian sebelum
@@ -82,21 +78,25 @@
   <div class="max-w-[900px] mx-auto" style="padding: 32px clamp(16px, 5vw, 48px) calc(74px + 28px);">
     <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
       <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5 before:content-[''] before:w-[5px] before:h-5 before:rounded-full before:flex-shrink-0" style="background-image: none;">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, var(--teal-500), var(--navy-700));"></span>
+        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
         Tentang PKKMB-KT
       </h2>
       <p class="leading-[1.8] text-ink-600 text-sm m-0">
-        Pengenalan Kehidupan Kampus bagi Mahasiswa Baru (PKKMB-KT) merupakan
-        kegiatan awal yang bertujuan untuk membantu mahasiswa baru mengenal
-        lingkungan kampus, budaya akademik, tata tertib, serta membangun
-        karakter yang disiplin, bertanggung jawab, dan mampu beradaptasi
-        dengan kehidupan perkuliahan.
+        @if (isset($modulData['Tentang PKKMB-KT']))
+          {!! $modulData['Tentang PKKMB-KT']->content !!}
+        @else
+          Pengenalan Kehidupan Kampus bagi Mahasiswa Baru (PKKMB-KT) merupakan
+          kegiatan awal yang bertujuan untuk membantu mahasiswa baru mengenal
+          lingkungan kampus, budaya akademik, tata tertib, serta membangun
+          karakter yang disiplin, bertanggung jawab, dan mampu beradaptasi
+          dengan kehidupan perkuliahan.
+        @endif
       </p>
     </div>
 
     <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
       <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, var(--teal-500), var(--navy-700));"></span>
+        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
         Tata Tertib
       </h2>
 
@@ -133,7 +133,7 @@
 
     <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
       <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, var(--teal-500), var(--navy-700));"></span>
+        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
         Atribut yang Harus Dibawa
       </h2>
       <ul class="pl-5 mt-2.5">
@@ -145,7 +145,7 @@
 
     <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
       <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, var(--teal-500), var(--navy-700));"></span>
+        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
         Sistem Penilaian
       </h2>
 
@@ -206,7 +206,7 @@
 
     <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
       <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, var(--teal-500), var(--navy-700));"></span>
+        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
         Reward &amp; Leaderboard
       </h2>
       <p class="leading-[1.8] text-ink-600 text-sm m-0">
@@ -224,13 +224,18 @@
 
     <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
       <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, var(--teal-500), var(--navy-700));"></span>
+        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
         Sanksi
       </h2>
       <p class="leading-[1.8] text-ink-600 text-sm m-0">
-        Mahasiswa yang melakukan pelanggaran terhadap tata tertib PKKMB-KT
-        akan diberikan sanksi sesuai tingkat pelanggaran yang dilakukan.
+        @if (isset($modulData['Sanksi']))
+          {!! $modulData['Sanksi']->content !!}
+        @else
+          Mahasiswa yang melakukan pelanggaran terhadap tata tertib PKKMB-KT
+          akan diberikan sanksi sesuai tingkat pelanggaran yang dilakukan.
+        @endif
       </p>
+      @unless (isset($modulData['Sanksi']))
       <ul class="pl-5 mt-2.5">
         <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Teguran lisan dari mentor.</li>
         <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Pengurangan poin penilaian.</li>
@@ -239,7 +244,25 @@
           berulang.
         </li>
       </ul>
+      @endunless
     </div>
+
+    {{-- Section TAMBAHAN yang panitia buat sendiri (di luar 6 section baku di
+         atas) -- otomatis muncul di sini. --}}
+    @php
+      $sectionBaku = ['Tentang PKKMB-KT', 'Tata Tertib', 'Atribut yang Harus Dibawa', 'Sistem Penilaian', 'Reward & Leaderboard', 'Sanksi'];
+    @endphp
+    @foreach ($modulData->except($sectionBaku) as $itemModul)
+      <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
+        <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
+          <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
+          {{ $itemModul->section }}
+        </h2>
+        <div class="leading-[1.8] text-ink-600 text-sm">
+          {!! $itemModul->content !!}
+        </div>
+      </div>
+    @endforeach
   </div>
 
   <!-- ============ FOOTER ============ -->

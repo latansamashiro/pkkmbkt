@@ -8,7 +8,13 @@ class StudentController extends Controller
 {
     public function modul()
     {
-        return view('role.student.modul');
+        // "Kelola Modul PKKMB" (Panitia) nyimpen konten per-section di tabel
+        // modules -- key-nya "section" (judul), match ke judul section statis
+        // di halaman ini. Kalau panitia belum isi section itu, fallback ke
+        // teks default di bawah (biar halaman gak pernah kosong/rusak).
+        $modulData = \App\Models\ModuleItem::where('status', 'aktif')->get()->keyBy('section');
+
+        return view('role.student.modul', compact('modulData'));
     }
 
     public function leaderboard()
@@ -348,7 +354,7 @@ class StudentController extends Controller
      */
     public function updatePassword(\Illuminate\Http\Request $request)
     {
-        $validated = $request->validateWithBag('passwordUpdate', [
+        $validated = $request->validate([
             'old_password' => ['required', 'current_password'],
             'new_password' => ['required', 'string', 'min:8', 'confirmed', 'different:old_password'],
         ], [
@@ -362,6 +368,10 @@ class StudentController extends Controller
             'password' => \Illuminate\Support\Facades\Hash::make($validated['new_password']),
         ]);
 
-        return back()->with('passwordStatus', 'Kata sandi berhasil diubah.');
+        // Dipanggil lewat AJAX dari halaman profil (biar halaman tidak reload
+        // sama sekali, baik pas berhasil maupun gagal) -> selalu balas JSON.
+        // Kalau validasi di atas gagal, Laravel otomatis balas JSON 422 juga
+        // karena request AJAX ini ngirim header "Accept: application/json".
+        return response()->json(['message' => 'Kata sandi berhasil diubah.']);
     }
 }

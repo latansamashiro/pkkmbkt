@@ -84,4 +84,15 @@ class DashboardController extends Controller
             'ringkasanRole'
         ));
     }
+
+    /**
+     * Leaderboard -- dipakai bareng sama Committee & Advisor (view generik yang
+     * sama, cuma layout-nya beda otomatis lihat prefix rute).
+     */
+    public function leaderboard()
+    {
+        $dataMahasiswa = \App\Support\Leaderboard::hitungRanking();
+
+        return view('role.admin.leaderboard.index', compact('dataMahasiswa'));
+    }
 }

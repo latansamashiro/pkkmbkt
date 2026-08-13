@@ -241,7 +241,9 @@
         color: rgba(255, 255, 255, 0.6);
       }
       .date-input {
-        @apply absolute inset-0 w-full h-full opacity-0 cursor-pointer border-none p-0;
+        @apply absolute w-px h-px opacity-0 pointer-events-none border-none p-0;
+        left: 50%;
+        bottom: 0;
       }
       .btn-today {
         @apply text-[11.5px] font-extrabold text-navy-900 bg-lime-500 border-none rounded-full cursor-pointer flex items-center whitespace-nowrap overflow-hidden;
@@ -561,10 +563,6 @@
 
     <div class="hero-info-inner">
       <div class="hero-info-left">
-        <div class="hero-eyebrow">
-          <span class="dot"></span>
-          Rekam Kehadiran Pribadi
-        </div>
         <h1>Absensi<br />Lihat Kehadiran Saya</h1>
         <p class="hero-info-sub">
           Pantau status kehadiranmu di setiap sesi PKKMB-KT. Data yang
@@ -744,9 +742,9 @@
         stroke-width="1.7"
         stroke-linecap="round"
         stroke-linejoin="round">
-        <path
-          d="M9 17H4l1.4-1.4A2 2 0 0 0 6 14.2V11a6 6 0 1 1 12 0v3.2c0 .5.2 1 .6 1.4L20 17h-5" />
-        <path d="M9 17a3 3 0 0 0 6 0" />
+        <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5" />
+            <path d="M12 8h.01" />
       </svg>
       <span>Info</span>
     </a>
@@ -773,7 +771,19 @@
       // Bentuknya: { "2026-08-02": [{label, waktu, status}, ...], ... }
       const TANDA_PER_TANGGAL = @json($tandaPerTanggal);
 
-      let currentDate = new Date().toISOString().slice(0, 10);
+      // PENTING: pakai komponen tanggal LOKAL (getFullYear/getMonth/getDate),
+      // BUKAN toISOString() -- toISOString() itu berbasis UTC, jadi buat
+      // pengguna di zona waktu +7 (WIB) bisa "geser mundur 1 hari" diam-diam
+      // tiap kali tanggalnya di-konversi bolak-balik, bikin tombol navigasi
+      // jadi salah hitung (kelihatan disabled padahal harusnya belum).
+      function toLocalIso(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
+
+      let currentDate = toLocalIso(new Date());
 
       function formatTanggalIndo(isoDate) {
         const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -843,7 +853,7 @@
       function renderHalaman() {
         $("#datePill").text(formatTanggalIndo(currentDate));
         $("#sessionCardTitle").text(
-          currentDate === new Date().toISOString().slice(0, 10) ?
+          currentDate === toLocalIso(new Date()) ?
           "Detail Kehadiran Hari Ini" :
           `Detail Kehadiran ${formatTanggalIndo(currentDate)}`,
         );
@@ -869,14 +879,17 @@
       const $btnToday = $("#btnToday");
       const $prevDayBtn = $("#prevDay");
       const $nextDayBtn = $("#nextDay");
-      const todayIso = new Date().toISOString().slice(0, 10);
+      const todayIso = toLocalIso(new Date());
 
       $dateInput.attr("max", todayIso).val(currentDate);
 
       function pindahHari(delta) {
+        // currentDate + "T00:00:00" (TANPA embel-embel zona waktu) itu
+        // aman -- browser bacanya sebagai tengah malam WAKTU LOKAL, jadi
+        // getDate()/setDate() di bawah ini juga otomatis waktu lokal.
         const d = new Date(currentDate + "T00:00:00");
         d.setDate(d.getDate() + delta);
-        const iso = d.toISOString().slice(0, 10);
+        const iso = toLocalIso(d);
         if (iso > todayIso) return;
         currentDate = iso;
         $dateInput.val(iso);
@@ -899,13 +912,19 @@
 
       const $dateDisplay = $("#dateDisplay");
       $dateDisplay.on("click", function(e) {
-        if (e.target === $dateInput[0]) return;
+        // Elemen <input type="date"> sengaja dibikin nyaris gak keliatan
+        // (bukan nutupin seluruh pil) -- kalau diandelin ukuran penuh, di
+        // sebagian browser HP area yang beneran bisa disentuh cuma ngikutin
+        // ukuran asli teks "mm/dd/yyyy"-nya, bukan ukuran kotak CSS, jadi
+        // pil-nya kerasa cuma bisa diklik sebagian. Makanya klik di MANA PUN
+        // di pil ini selalu manggil showPicker() langsung lewat JS.
         const inputEl = $dateInput[0];
         if (typeof inputEl.showPicker === "function") {
           try {
             inputEl.showPicker();
           } catch (err) {
             inputEl.focus();
+            inputEl.click();
           }
         } else {
           inputEl.focus();

@@ -31,7 +31,7 @@
     </div>
 
     <!-- STAT CARDS -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-5">
         <div class="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4">
             <span class="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-50 text-indigo-600 shrink-0">
                 <i data-lucide="clipboard-list" class="w-5 h-5"></i>
@@ -60,6 +60,15 @@
             </div>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4">
+            <span class="w-11 h-11 rounded-xl flex items-center justify-center bg-amber-50 text-amber-600 shrink-0">
+                <i data-lucide="backpack" class="w-5 h-5"></i>
+            </span>
+            <div>
+                <p id="statAtkAlmet" class="text-2xl font-extrabold text-slate-800 m-0 leading-none">0</p>
+                <p class="text-xs text-slate-400 m-0 mt-1">ATK &amp; Almet</p>
+            </div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4">
             <span class="w-11 h-11 rounded-xl flex items-center justify-center bg-rose-50 text-rose-500 shrink-0">
                 <i data-lucide="check-circle-2" class="w-5 h-5"></i>
             </span>
@@ -82,6 +91,7 @@
             <option value="">Semua Jenis</option>
             <option value="individu">Individu</option>
             <option value="kelompok">Kelompok</option>
+            <option value="atk_almet">ATK & Almet</option>
         </select>
         <select id="filterStatus"
             class="border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 cursor-pointer focus:outline-none focus:border-teal-600">
@@ -197,13 +207,14 @@
             const JENIS_BADGE = {
                 individu: "bg-teal-50 text-teal-700",
                 kelompok: "bg-lime-50 text-lime-700",
+                atk_almet: "bg-amber-50 text-amber-700",
             };
             const STATUS_BADGE = {
                 aktif: "bg-teal-50 text-teal-700",
                 draft: "bg-amber-50 text-amber-700",
                 ditutup: "bg-slate-100 text-slate-500",
             };
-            const JENIS_LABEL = { individu: "Individu", kelompok: "Kelompok" };
+            const JENIS_LABEL = { individu: "Individu", kelompok: "Kelompok", atk_almet: "ATK & Almet" };
             const STATUS_LABEL = { aktif: "Aktif", draft: "Draft", ditutup: "Ditutup" };
 
             function badge(map, key, label) {
@@ -244,6 +255,7 @@
                 $("#statTotal").text(allItems.length);
                 $("#statIndividu").text(allItems.filter((x) => x.task_type === "individu").length);
                 $("#statKelompok").text(allItems.filter((x) => x.task_type === "kelompok").length);
+                $("#statAtkAlmet").text(allItems.filter((x) => x.task_type === "atk_almet").length);
                 $("#statAktif").text(allItems.filter((x) => x.status === "aktif").length);
             }
 
