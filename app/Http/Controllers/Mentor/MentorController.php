@@ -325,11 +325,6 @@ class MentorController extends Controller
         return view('role.mentor.evaluasi', compact('group', 'kategoriEvaluasi', 'anggotaKelompok'));
     }
 
-    public function evaluasiDetail()
-    {
-        return view('role.mentor.evaluasi-detail');
-    }
-
     public function keaktifan()
     {
         $group = \App\Models\Group::where('mentor_id', auth()->id())->first();

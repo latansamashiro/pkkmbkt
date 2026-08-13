@@ -12,9 +12,7 @@ Terdapat 5 Roles:
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DataMasterController;
 use App\Http\Controllers\Admin\MonitoringController;
-use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\ProfilController;
-use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Routing\RouteGroup;
 use Illuminate\Support\Facades\Route;
@@ -100,11 +98,9 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{group}/anggota/{student}', 'removeMember')->name('admin.kelompok.anggota.destroy');
         });
 
-        Route::get('/role', [RoleController::class, 'index'])->name('admin.role.index');
         Route::get('/monitoring/pkkmb', [MonitoringController::class, 'pkkmb'])->name('admin.monitoring.pkkmb');
         Route::get('/monitoring/laporan', [MonitoringController::class, 'laporan'])->name('admin.monitoring.laporan');
         Route::get('/leaderboard', [DashboardController::class, 'leaderboard'])->name('admin.leaderboard');
-        Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('admin.pengaturan.index');
         Route::get('/profil', [ProfilController::class, 'index'])->name('admin.profil.index');
         Route::post('/profil', [ProfilController::class, 'updateProfile'])->name('admin.profil.update');
         Route::post('/profil/password', [ProfilController::class, 'updatePassword'])->name('admin.profil.password');
@@ -185,7 +181,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/absensi/{template}/save', 'absensiSave')->name('role.mentor.absensi.save');
             Route::post('/absensi/{template}/submit', 'absensiSubmit')->name('role.mentor.absensi.submit');
             Route::get('/evaluasi', 'evaluasi')->name('role.mentor.evaluasi');
-            Route::get('/evaluasi/detail', 'evaluasiDetail')->name('role.mentor.evaluasi.detail');
             Route::get('/keaktifan', 'keaktifan')->name('role.mentor.keaktifan');
             Route::post('/keaktifan', 'keaktifanStore')->name('role.mentor.keaktifan.store');
             Route::get('/keaktifan/{studentId}/riwayat', 'keaktifanRiwayat')->name('role.mentor.keaktifan.riwayat');

@@ -42,10 +42,6 @@
                 <span class="ic"><i data-lucide="briefcase"></i></span>
                 <span class="label">Kelola Panitia</span>
             </a>
-            <a href="{{ route('admin.role.index') }}" class="{{ request()->routeIs('admin.role.*') ? 'active' : '' }}">
-                <span class="ic"><i data-lucide="shield-check"></i></span>
-                <span class="label">Kelola Role & Hak Akses</span>
-            </a>
             <a href="{{ route('admin.data-master.index') }}"
                 class="{{ request()->routeIs('admin.data-master.*') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="database"></i></span>
@@ -97,18 +93,6 @@
                 class="{{ request()->routeIs('admin.leaderboard') ? 'active' : '' }}">
                 <span class="ic"><i data-lucide="trophy"></i></span>
                 <span class="label">Leaderboard</span>
-            </a>
-        </div>
-
-        <button type="button" class="sidebar-group-toggle" data-group="lainnya">
-            <span>Lainnya</span>
-            <i data-lucide="chevron-down" class="chevron"></i>
-        </button>
-        <div class="sidebar-group-content" data-group-content="lainnya">
-            <a href="{{ route('admin.pengaturan.index') }}"
-                class="{{ request()->routeIs('admin.pengaturan.*') ? 'active' : '' }}">
-                <span class="ic"><i data-lucide="settings"></i></span>
-                <span class="label">Pengaturan Sistem</span>
             </a>
         </div>
     </nav>
