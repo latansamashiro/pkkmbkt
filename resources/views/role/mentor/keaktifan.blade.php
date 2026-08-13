@@ -79,6 +79,42 @@
       background: #e1e5f1;
       border-radius: 10px;
     }
+
+    /* ===== Toast notifikasi -- pola standar dipakai di semua halaman Mentor ===== */
+    .save-toast {
+      position: fixed;
+      left: 50%;
+      background: #152159;
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      border-radius: 999px;
+      box-shadow: 0 10px 24px rgba(21, 33, 89, 0.16);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      bottom: calc(74px + 16px);
+      transform: translateX(-50%) translateY(20px);
+      padding: 12px 22px;
+      transition: opacity .25s, transform .25s;
+    }
+    .save-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .save-toast svg {
+      width: 15px;
+      height: 15px;
+      color: #a9c73b;
+    }
+    @media (min-width: 768px) {
+      .save-toast {
+        bottom: 16px;
+      }
+    }
   </style>
 </head>
 
@@ -255,11 +291,11 @@
     </div>
   </main>
 
-  <div class="fixed left-1/2 -translate-x-1/2 bg-navy-900 text-white text-[12.5px] font-bold rounded-full shadow-[0_10px_24px_rgba(21,33,89,0.16)] opacity-0 pointer-events-none transition-all z-[60] flex items-center gap-2" id="saveToast" style="bottom: calc(74px + 16px); padding: 12px 22px; transform: translateX(-50%) translateY(20px);">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="w-[15px] h-[15px] text-lime-500">
+  <div class="save-toast" id="saveToast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
       <path d="M20 6 9 17l-5-5" />
     </svg>
-    <span id="saveToastText">Poin tersimpan</span>
+    <span class="toast-text">Poin tersimpan</span>
   </div>
 
   <footer class="bg-[#0d1735] flex flex-wrap justify-between items-center gap-3.5" style="padding: 24px clamp(16px,5vw,48px) calc(74px + 16px);">
@@ -605,13 +641,9 @@
 
       function tampilkanToast(teks) {
         const $toast = $("#saveToast");
-        $("#saveToastText").text(teks);
-        $toast.removeClass("opacity-0 pointer-events-none").addClass("opacity-100");
-        $toast.css("transform", "translateX(-50%) translateY(0)");
-        setTimeout(() => {
-          $toast.removeClass("opacity-100").addClass("opacity-0 pointer-events-none");
-          $toast.css("transform", "translateX(-50%) translateY(20px)");
-        }, 2200);
+        $toast.find(".toast-text").text(teks);
+        $toast.addClass("show");
+        setTimeout(() => $toast.removeClass("show"), 2200);
       }
 
       // ======================================================================

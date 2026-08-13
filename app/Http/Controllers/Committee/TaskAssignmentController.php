@@ -55,11 +55,17 @@ class TaskAssignmentController extends Controller
             'ids' => ['array'],
             'ids.*' => ['integer'],
         ]);
-        $checkedIds = $validated['ids'] ?? [];
         $userId = $request->user()?->id;
 
         $model = $task->task_type === 'kelompok' ? GroupTask::class : StudentTask::class;
         $fkColumn = $task->task_type === 'kelompok' ? 'group_id' : 'student_id';
+
+        // Saring ID yang beneran ada -- jaga-jaga kalau request-nya dimanipulasi
+        // manual (mis. lewat DevTools) buat kirim ID kelompok/mahasiswa yang gak eksis.
+        $idValid = $task->task_type === 'kelompok'
+            ? Group::pluck('id')->all()
+            : User::where('role_name', 'STUDENT')->pluck('id')->all();
+        $checkedIds = array_values(array_intersect($validated['ids'] ?? [], $idValid));
 
         $existingIds = $model::where('task_id', $task->id)->pluck($fkColumn)->all();
 

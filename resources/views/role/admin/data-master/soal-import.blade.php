@@ -128,9 +128,9 @@ Bobot: 5</pre>
         let sumberAktif = "teks";
         let examId = "";
 
-        function tampilkanToast(msg) {
-            alert(msg); // sederhana dulu, konsisten sama pola konfirmasi lain di halaman ini
-        }
+        // tampilkanToast() gak didefinisiin lagi di sini -- otomatis pakai
+        // punya layouts.admin.main yang di-extends halaman ini, biar gaya
+        // notifikasinya konsisten sama semua halaman Admin lainnya.
 
         // ===== Pilih Paket Evaluasi =====
         $("#examSelect").on("change", function() {

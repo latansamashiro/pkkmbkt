@@ -347,7 +347,10 @@ class MentorController extends Controller
             'student_id' => 'required|integer|exists:users,id',
             'kategori' => 'required|string|max:100',
             'indikator' => 'required|string',
-            'poin' => 'required|integer',
+            // Poin dibatasi ±20 (nilai tertinggi di daftar indikator KATEGORI_KEAKTIFAN/
+            // KATEGORI_PELANGGARAN) -- jaga-jaga kalau ada yang ubah request manual
+            // (mis. lewat DevTools) buat kirim poin sembarang di luar yang ditampilkan.
+            'poin' => 'required|integer|min:-20|max:20',
             'catatan' => 'nullable|string',
         ]);
 

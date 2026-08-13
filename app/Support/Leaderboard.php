@@ -17,6 +17,20 @@ class Leaderboard
 {
     public static function hitungRanking()
     {
+        // Di-cache 30 detik -- halaman Leaderboard ini kemungkinan besar
+        // dibuka BARENGAN oleh banyak mahasiswa sekaligus (semua orang mau
+        // liat ranking-nya), dan perhitungannya lumayan berat (query +
+        // looping semua mahasiswa x semua paket evaluasi). Tanpa cache,
+        // SETIAP request bakal ngitung ulang dari nol -- 30 detik itu cukup
+        // singkat buat tetap kerasa "real-time", tapi udah jauh ngurangin
+        // beban ke database kalau banyak yang buka bersamaan.
+        return \Illuminate\Support\Facades\Cache::remember('leaderboard_ranking', 30, function () {
+            return self::hitungRankingTanpaCache();
+        });
+    }
+
+    protected static function hitungRankingTanpaCache()
+    {
         $totalSesi = \App\Models\AttendanceTemplate::count();
         $poinPerSesi = $totalSesi > 0 ? 600 / $totalSesi : 0;
 
@@ -24,8 +38,12 @@ class Leaderboard
         $totalPaketEvaluasi = $exams->count();
         $poinPerPaketEvaluasi = $totalPaketEvaluasi > 0 ? 400 / $totalPaketEvaluasi : 0;
 
-        // Query sekali buat semua mahasiswa (bukan query berulang per-mahasiswa)
-        $semuaStudentExam = \App\Models\StudentExam::all()->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id);
+        // Query sekali buat semua mahasiswa (bukan query berulang per-mahasiswa).
+        // Cuma ambil kolom yang beneran dipakai -- lebih hemat memori daripada
+        // ::all() polos yang narik semua kolom (termasuk timestamp dll).
+        $semuaStudentExam = \App\Models\StudentExam::select('student_id', 'exam_id', 'exam_detail_id', 'value')
+            ->get()
+            ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id);
         $sesiHadirPerMhs = \App\Models\AttendanceDetail::where('status_presence', 'hadir')
             ->selectRaw('student_id, COUNT(*) as jumlah')
             ->groupBy('student_id')

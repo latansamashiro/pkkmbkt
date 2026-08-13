@@ -758,6 +758,12 @@
           display: none;
         }
       }
+
+      /* ===== Toast notifikasi -- pola standar dipakai di semua halaman Mentor ===== */
+      .save-toast { position: fixed; left: 50%; background: var(--navy-900, #152159); color: #fff; font-size: 12.5px; font-weight: 700; border-radius: 999px; box-shadow: 0 10px 24px rgba(21,33,89,.16); opacity: 0; pointer-events: none; z-index: 60; display: flex; align-items: center; gap: 8px; bottom: calc(var(--bottomnav-h, 74px) + 16px); transform: translateX(-50%) translateY(20px); padding: 12px 22px; transition: opacity .25s, transform .25s; }
+      .save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .save-toast svg { width: 15px; height: 15px; color: #a9c73b; }
+      @media (min-width: 768px) { .save-toast { bottom: 16px; } }
     </style>
   </head>
 
@@ -1206,25 +1212,21 @@
 
     </script>
 
-    <!-- ============ TOAST NOTIFIKASI (sama seperti dashboard admin) ============ -->
-    <div class="toast-wrap" id="toastWrap"
-      style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;">
-      <div id="toastEl"
-        style="opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;transform:translateY(20px);background:var(--navy-900, #152159);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;box-shadow:0 10px 24px rgba(21,33,89,.25);">
-      </div>
+    <!-- ============ TOAST NOTIFIKASI (pola standar dipakai di semua halaman Mentor) ============ -->
+    <div class="save-toast" id="saveToast">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+      <span class="toast-text"></span>
     </div>
 
     <script>
       function tampilkanToast(pesan) {
-        const el = document.getElementById("toastEl");
-        el.textContent = pesan;
-        el.style.opacity = "1";
-        el.style.transform = "translateY(0)";
+        const toast = document.getElementById("saveToast");
+        toast.querySelector(".toast-text").textContent = pesan;
+        toast.classList.add("show");
         clearTimeout(window.__toastTimer);
-        window.__toastTimer = setTimeout(() => {
-          el.style.opacity = "0";
-          el.style.transform = "translateY(20px)";
-        }, 2600);
+        window.__toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
       }
 
       @if (session('profileStatus'))
