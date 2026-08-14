@@ -35,11 +35,15 @@
                     @php
                         $groupedTasks = $tasks->groupBy('task_type');
                     @endphp
-                    @foreach (['individu', 'kelompok', 'atk_almet'] as $tipe)
+                    @php
+                        $labelTipe = ['kelompok' => 'Tugas Kelompok', 'atk' => 'Penerimaan ATK', 'jas_almet' => 'Penerimaan JAS ALMET', 'individu' => 'Tugas Individu'];
+                        $toneTipe = ['kelompok' => 'bg-teal-50 text-teal-600', 'atk' => 'bg-amber-50 text-amber-600', 'jas_almet' => 'bg-purple-50 text-purple-600', 'individu' => 'bg-indigo-50 text-indigo-600'];
+                    @endphp
+                    @foreach (['individu', 'kelompok', 'atk', 'jas_almet'] as $tipe)
                         @if (($groupedTasks[$tipe] ?? collect())->count())
                             <th colspan="{{ $groupedTasks[$tipe]->count() }}"
-                                class="text-center text-[10px] font-extrabold uppercase tracking-wider px-3.5 py-2 whitespace-nowrap {{ $tipe === 'kelompok' ? 'bg-teal-50 text-teal-600' : ($tipe === 'atk_almet' ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600') }}">
-                                {{ $tipe === 'kelompok' ? 'Tugas Kelompok' : ($tipe === 'atk_almet' ? 'ATK & Almet' : 'Tugas Individu') }}
+                                class="text-center text-[10px] font-extrabold uppercase tracking-wider px-3.5 py-2 whitespace-nowrap {{ $toneTipe[$tipe] }}">
+                                {{ $labelTipe[$tipe] }}
                             </th>
                         @endif
                     @endforeach

@@ -83,6 +83,7 @@ class Leaderboard
                 $gender = in_array($genderMentah, ['p', 'perempuan'], true) ? 'P' : 'L';
 
                 return [
+                    'id' => $u->id,
                     'nama' => $u->name,
                     'skor' => (int) $skor,
                     'gender' => $gender,

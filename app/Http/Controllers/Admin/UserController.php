@@ -46,6 +46,11 @@ class UserController extends Controller
         return $role === 'STUDENT';
     }
 
+    protected function hasAdvisorTypeField(string $role): bool
+    {
+        return $role === 'ADVISOR';
+    }
+
     public function index(Request $request)
     {
         $role = $this->lockedRole($request);
@@ -63,6 +68,7 @@ class UserController extends Controller
                 'program_study_name',
                 'gender',
                 'npm',
+                'advisor_type',
             ]);
 
         // dikirim ke FE buat isi dropdown Fakultas -> Prodi (nested by faculty)
@@ -95,6 +101,7 @@ class UserController extends Controller
             'showGroup' => $this->hasGroupField($role),
             'showNpm' => $this->hasNpmField($role),
             'showNim' => $this->hasNpmField($role), // alias — beberapa view (punya Panitia) pakai nama ini
+            'showAdvisorType' => $this->hasAdvisorTypeField($role),
         ]);
     }
 
@@ -132,6 +139,13 @@ class UserController extends Controller
         ];
     }
 
+    protected function rulesAdvisorType(): array
+    {
+        return [
+            'advisor_type' => ['required', Rule::in(['pembimbing', 'koordinator'])],
+        ];
+    }
+
     protected function syncGroupMembership(User $user, ?int $groupId, int $actorId): void
     {
         if ($groupId) {
@@ -154,6 +168,7 @@ class UserController extends Controller
         $academic = $this->hasAcademicFields($role);
         $groupField = $this->hasGroupField($role);
         $npmField = $this->hasNpmField($role);
+        $advisorTypeField = $this->hasAdvisorTypeField($role);
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
@@ -171,6 +186,9 @@ class UserController extends Controller
         if ($npmField) {
             $rules += $this->rulesNpm();
         }
+        if ($advisorTypeField) {
+            $rules += $this->rulesAdvisorType();
+        }
 
         $validated = $request->validate($rules, [
             'email.unique' => 'Email sudah digunakan.',
@@ -187,6 +205,7 @@ class UserController extends Controller
             'program_study_name' => $validated['program_study_name'] ?? null,
             'gender' => $validated['gender'] ?? null,
             'npm' => $validated['npm'] ?? null,
+            'advisor_type' => $validated['advisor_type'] ?? null,
             'created_by_id' => $request->user()->id,
             'updated_by_id' => $request->user()->id,
         ]);
@@ -210,6 +229,7 @@ class UserController extends Controller
                 'gender',
                 'npm',
                 'group_id',
+                'advisor_type',
             ]),
         ], 201);
     }
@@ -220,6 +240,7 @@ class UserController extends Controller
         $academic = $this->hasAcademicFields($role);
         $groupField = $this->hasGroupField($role);
         $npmField = $this->hasNpmField($role);
+        $advisorTypeField = $this->hasAdvisorTypeField($role);
 
         abort_unless($user->role_name === $role, 404);
 
@@ -238,6 +259,9 @@ class UserController extends Controller
         }
         if ($npmField) {
             $rules += $this->rulesNpm($user->id);
+        }
+        if ($advisorTypeField) {
+            $rules += $this->rulesAdvisorType();
         }
 
         $validated = $request->validate($rules, [
@@ -259,6 +283,10 @@ class UserController extends Controller
 
         if ($npmField) {
             $user->npm = $validated['npm'] ?? null;
+        }
+
+        if ($advisorTypeField) {
+            $user->advisor_type = $validated['advisor_type'];
         }
 
         if (!empty($validated['password'])) {
@@ -285,6 +313,7 @@ class UserController extends Controller
                 'gender',
                 'npm',
                 'group_id',
+                'advisor_type',
             ]),
         ]);
     }

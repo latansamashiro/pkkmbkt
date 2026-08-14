@@ -17,7 +17,7 @@ class GroupController extends Controller
      */
     public function index(Request $request)
     {
-        $groups = Group::with(['mentor:id,name', 'advisor:id,name'])
+        $groups = Group::with(['mentor:id,name', 'advisor:id,name', 'koordinator:id,name'])
             ->withCount('members')
             ->orderBy('name')
             ->get();
@@ -27,10 +27,11 @@ class GroupController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'program_study_name']);
 
-        // dipakai buat dropdown Mentor/Advisor di form Tambah/Edit Kelompok
-        // (form-nya submit ke endpoint Data Master yang sudah ada, type=kelompok)
+        // dipakai buat dropdown Mentor/Pembimbing/Koordinator di form Tambah/Edit
+        // Kelompok (form-nya submit ke endpoint Data Master yang sudah ada, type=kelompok)
         $mentors = User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name', 'program_study_name']);
-        $advisors = User::where('role_name', 'ADVISOR')->orderBy('name')->get(['id', 'name']);
+        $advisors = User::where('role_name', 'ADVISOR')->where('advisor_type', 'pembimbing')->orderBy('name')->get(['id', 'name']);
+        $koordinators = User::where('role_name', 'ADVISOR')->where('advisor_type', 'koordinator')->orderBy('name')->get(['id', 'name']);
 
         // dipakai buat dropdown "Filter Program Studi" di tabel kelompok
         $faculties = Faculty::with(['programStudies' => fn($q) => $q->orderBy('name')])
@@ -43,7 +44,7 @@ class GroupController extends Controller
         $data = ['title' => $request->route('title') ?? 'Kelola Kelompok'];
         $view = $request->route('view') ?? 'role.admin.kelompok.index';
 
-        return view($view, compact('data', 'groups', 'students', 'mentors', 'advisors', 'faculties', 'memberMap'));
+        return view($view, compact('data', 'groups', 'students', 'mentors', 'advisors', 'koordinators', 'faculties', 'memberMap'));
     }
 
     /**

@@ -15,6 +15,7 @@ class Group extends Model
         'name',
         'mentor_id',
         'advisor_id',
+        'koordinator_id',
         'max_member',
         'created_by_id',
         'updated_by_id',
@@ -28,6 +29,11 @@ class Group extends Model
     public function advisor()
     {
         return $this->belongsTo(User::class, 'advisor_id');
+    }
+
+    public function koordinator()
+    {
+        return $this->belongsTo(User::class, 'koordinator_id');
     }
 
     public function members()

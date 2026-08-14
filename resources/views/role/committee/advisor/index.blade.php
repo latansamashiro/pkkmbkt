@@ -148,6 +148,11 @@
                                 class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                                 Prodi</th>
                         @endif
+                        @if ($showAdvisorType)
+                            <th
+                                class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
+                                Jenis</th>
+                        @endif
                         <th
                             class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
                             Status</th>
@@ -215,6 +220,18 @@
                         <p id="hintPassword" class="text-xs text-slate-400 mt-1.5">Kosongkan saat edit jika tidak ingin
                             mengubah password.</p>
                     </div>
+
+                    @if ($showAdvisorType)
+                        <div>
+                            <label for="inputAdvisorType" class="block text-xs font-bold text-slate-500 mb-1.5">Jenis</label>
+                            <select id="inputAdvisorType" required
+                                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                                <option value="">Pilih Jenis</option>
+                                <option value="pembimbing">Pembimbing</option>
+                                <option value="koordinator">Koordinator</option>
+                            </select>
+                        </div>
+                    @endif
 
                     @if ($showAcademic)
                         <div class="grid grid-cols-2 gap-4">
@@ -309,6 +326,11 @@
                 <div class="flex items-center justify-between py-2.5"><span
                         class="text-xs font-bold text-slate-400">Email</span><span id="detailEmail"
                         class="text-sm font-semibold text-slate-800">-</span></div>
+                @if ($showAdvisorType)
+                    <div class="flex items-center justify-between py-2.5"><span
+                            class="text-xs font-bold text-slate-400">Jenis</span><span id="detailAdvisorType"
+                            class="text-sm font-semibold text-slate-800">-</span></div>
+                @endif
                 @if ($showAcademic)
                     <div class="flex items-center justify-between py-2.5"><span class="text-xs font-bold text-slate-400">No.
                             HP</span><span id="detailPhone" class="text-sm font-semibold text-slate-800">-</span></div>
@@ -350,6 +372,7 @@
         'gender' => $u->gender,
         'npm' => $u->npm,
         'group_id' => $u->group_id ?? null,
+        'advisor_type' => $u->advisor_type,
     ]);
 @endphp
 
@@ -363,6 +386,7 @@
             const SHOW_ACADEMIC = @json($showAcademic);
             const SHOW_GROUP = @json($showGroup);
             const SHOW_NPM = @json($showNpm);
+            const SHOW_ADVISOR_TYPE = @json($showAdvisorType);
             const GROUPS_MAP = @json($groups instanceof \Illuminate\Support\Collection ? $groups->mapWithKeys(fn($g) => [$g->id => $g->code . ' — ' . $g->name]) : []);
             const FACULTIES = @json($faculties); // [{id, name, program_studies: [{id, name}, ...]}]
             const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
@@ -416,7 +440,7 @@
                 if (currentPage > totalPage) currentPage = totalPage;
                 const start = (currentPage - 1) * PER_PAGE;
                 const pageData = data.slice(start, start + PER_PAGE);
-                const totalCols = SHOW_ACADEMIC ? 7 : 5;
+                const totalCols = SHOW_ACADEMIC ? 7 : (SHOW_ADVISOR_TYPE ? 6 : 5);
 
                 let html;
                 if (pageData.length === 0) {
@@ -430,6 +454,9 @@
                                 ${SHOW_ACADEMIC ? `
                                 <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.phone_no ?? "-"}</td>
                                 <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.program_study_name ?? "-"}</td>
+                                ` : ""}
+                                ${SHOW_ADVISOR_TYPE ? `
+                                <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">${p.advisor_type === "koordinator" ? "Koordinator" : "Pembimbing"}</td>
                                 ` : ""}
                                 <td class="px-3.5 py-3 border-b border-slate-200">
                                     <span class="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full ${badgeClass(p.status)}">
@@ -502,6 +529,10 @@
 
                 if (SHOW_NPM) {
                     $("#inputNpm").val(data ? (data.npm || "") : "");
+                }
+
+                if (SHOW_ADVISOR_TYPE) {
+                    $("#inputAdvisorType").val(data ? (data.advisor_type || "") : "");
                 }
 
                 if (SHOW_GROUP) {
@@ -641,6 +672,10 @@
                     payload.npm = $("#inputNpm").val().trim();
                 }
 
+                if (SHOW_ADVISOR_TYPE) {
+                    payload.advisor_type = $("#inputAdvisorType").val();
+                }
+
                 if (SHOW_GROUP) {
                     payload.group_id = $("#inputKelompok").val() || null;
                 }
@@ -668,6 +703,7 @@
                         gender: result.user.gender,
                         npm: result.user.npm,
                         group_id: result.user.group_id,
+                        advisor_type: result.user.advisor_type,
                     };
                     if (editingId) {
                         const idx = penggunaList.findIndex((p) => p.id === editingId);
@@ -700,6 +736,9 @@
                 detailActiveId = id;
                 $("#detailNama").text(p.nama);
                 $("#detailEmail").text(p.email);
+                if (SHOW_ADVISOR_TYPE) {
+                    $("#detailAdvisorType").text(p.advisor_type === "koordinator" ? "Koordinator" : "Pembimbing");
+                }
                 if (SHOW_NPM) {
                     $("#detailNpm").text(p.npm || "-");
                 }

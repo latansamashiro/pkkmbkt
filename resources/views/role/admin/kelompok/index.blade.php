@@ -128,11 +128,20 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Advisor</label>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Pembimbing</label>
                     <select id="inputAdvisorId" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
                         <option value="">Belum ada</option>
                         @foreach ($advisors as $a)
                             <option value="{{ $a->id }}">{{ $a->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Koordinator</label>
+                    <select id="inputKoordinatorId" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                        <option value="">Belum ada</option>
+                        @foreach ($koordinators as $k)
+                            <option value="{{ $k->id }}">{{ $k->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -232,6 +241,8 @@
         'mentor_id' => $g->mentor_id,
         'advisor' => $g->advisor?->name,
         'advisor_id' => $g->advisor_id,
+        'koordinator' => $g->koordinator?->name,
+        'koordinator_id' => $g->koordinator_id,
         'max_member' => $g->max_member,
         'member_count' => $g->members_count,
     ]);
@@ -282,7 +293,10 @@
                                 <p class="text-sm font-bold text-slate-800 m-0">${g.name}</p>
                                 <p class="text-xs text-slate-400 m-0">${g.code}</p>
                             </td>
-                            <td class="px-4 py-3 text-sm text-slate-600">${g.mentor || '<span class="text-slate-400 italic">Belum ada</span>'}</td>
+                            <td class="px-4 py-3 text-sm text-slate-600">
+                                <p class="m-0">${g.mentor || '<span class="text-slate-400 italic">Belum ada mentor</span>'}</p>
+                                <p class="text-xs text-slate-400 m-0 mt-0.5">Pembimbing: ${g.advisor || '-'} &middot; Koordinator: ${g.koordinator || '-'}</p>
+                            </td>
                             <td class="px-4 py-3 text-sm text-slate-600">${g.member_count} mahasiswa</td>
                             <td class="px-4 py-3" style="min-width:140px">
                                 <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
@@ -331,6 +345,7 @@
                 $("#inputNamaKelompok").val(g ? g.name : "");
                 $("#inputMentorId").val(g && g.mentor_id ? g.mentor_id : "");
                 $("#inputAdvisorId").val(g && g.advisor_id ? g.advisor_id : "");
+                $("#inputKoordinatorId").val(g && g.koordinator_id ? g.koordinator_id : "");
                 $("#inputMaxMember").val(g ? g.max_member : "");
 
                 $modalKelompok.removeClass("hidden").addClass("flex");
@@ -351,6 +366,7 @@
                     name: $("#inputNamaKelompok").val().trim(),
                     mentor_id: $("#inputMentorId").val() || null,
                     advisor_id: $("#inputAdvisorId").val() || null,
+                    koordinator_id: $("#inputKoordinatorId").val() || null,
                     max_member: $("#inputMaxMember").val(),
                 };
 
@@ -371,9 +387,10 @@
                     const d = result.data;
                     const mapped = {
                         id: d.id, code: d.code, name: d.name,
-                        mentor_id: d.mentor_id, advisor_id: d.advisor_id,
+                        mentor_id: d.mentor_id, advisor_id: d.advisor_id, koordinator_id: d.koordinator_id,
                         mentor: $("#inputMentorId option:selected").text() === "Belum ada" ? null : $("#inputMentorId option:selected").text().split(" — ")[0],
                         advisor: $("#inputAdvisorId option:selected").text() === "Belum ada" ? null : $("#inputAdvisorId option:selected").text().split(" — ")[0],
+                        koordinator: $("#inputKoordinatorId option:selected").text() === "Belum ada" ? null : $("#inputKoordinatorId option:selected").text().split(" — ")[0],
                         max_member: d.max_member,
                         member_count: editingGroupId ? (groupList.find(g => g.id === editingGroupId)?.member_count || 0) : 0,
                     };
@@ -424,7 +441,7 @@
                 const g = groupList.find((x) => x.id === groupId);
                 if (!g) return;
                 $("#modalDetailTitle").text(g.name);
-                $("#modalDetailSub").text(`${g.code} • Mentor: ${g.mentor || 'Belum ada'} • ${g.member_count}/${g.max_member} anggota`);
+                $("#modalDetailSub").text(`${g.code} • Mentor: ${g.mentor || 'Belum ada'} • Pembimbing: ${g.advisor || 'Belum ada'} • Koordinator: ${g.koordinator || 'Belum ada'} • ${g.member_count}/${g.max_member} anggota`);
 
                 const anggota = studentList.filter((s) => s.group_id === groupId);
                 const $list = $("#detailAnggotaList").empty();

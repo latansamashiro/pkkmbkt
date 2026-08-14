@@ -25,13 +25,13 @@
             </div>
         </div>
         <button id="btnTambahTugas"
-            class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm px-5 py-3 rounded-xl transition shrink-0">
+            class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition shrink-0">
             <i data-lucide="plus" class="w-4 h-4"></i>Tambah Tugas
         </button>
     </div>
 
     <!-- STAT CARDS -->
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-5">
+    <div class="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-5">
         <div class="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4">
             <span class="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-50 text-indigo-600 shrink-0">
                 <i data-lucide="clipboard-list" class="w-5 h-5"></i>
@@ -64,8 +64,17 @@
                 <i data-lucide="backpack" class="w-5 h-5"></i>
             </span>
             <div>
-                <p id="statAtkAlmet" class="text-2xl font-extrabold text-slate-800 m-0 leading-none">0</p>
-                <p class="text-xs text-slate-400 m-0 mt-1">ATK &amp; Almet</p>
+                <p id="statAtk" class="text-2xl font-extrabold text-slate-800 m-0 leading-none">0</p>
+                <p class="text-xs text-slate-400 m-0 mt-1">Penerimaan ATK</p>
+            </div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4">
+            <span class="w-11 h-11 rounded-xl flex items-center justify-center bg-purple-50 text-purple-600 shrink-0">
+                <i data-lucide="shirt" class="w-5 h-5"></i>
+            </span>
+            <div>
+                <p id="statJasAlmet" class="text-2xl font-extrabold text-slate-800 m-0 leading-none">0</p>
+                <p class="text-xs text-slate-400 m-0 mt-1">Penerimaan JAS ALMET</p>
             </div>
         </div>
         <div class="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4">
@@ -91,7 +100,8 @@
             <option value="">Semua Jenis</option>
             <option value="individu">Individu</option>
             <option value="kelompok">Kelompok</option>
-            <option value="atk_almet">ATK & Almet</option>
+            <option value="atk">Penerimaan ATK</option>
+            <option value="jas_almet">Penerimaan JAS ALMET</option>
         </select>
         <select id="filterStatus"
             class="border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 cursor-pointer focus:outline-none focus:border-teal-600">
@@ -207,14 +217,15 @@
             const JENIS_BADGE = {
                 individu: "bg-teal-50 text-teal-700",
                 kelompok: "bg-lime-50 text-lime-700",
-                atk_almet: "bg-amber-50 text-amber-700",
+                atk: "bg-amber-50 text-amber-700",
+                jas_almet: "bg-purple-50 text-purple-700",
             };
             const STATUS_BADGE = {
                 aktif: "bg-teal-50 text-teal-700",
                 draft: "bg-amber-50 text-amber-700",
                 ditutup: "bg-slate-100 text-slate-500",
             };
-            const JENIS_LABEL = { individu: "Individu", kelompok: "Kelompok", atk_almet: "ATK & Almet" };
+            const JENIS_LABEL = { individu: "Individu", kelompok: "Kelompok", atk: "Penerimaan ATK", jas_almet: "Penerimaan JAS ALMET" };
             const STATUS_LABEL = { aktif: "Aktif", draft: "Draft", ditutup: "Ditutup" };
 
             function badge(map, key, label) {
@@ -255,7 +266,8 @@
                 $("#statTotal").text(allItems.length);
                 $("#statIndividu").text(allItems.filter((x) => x.task_type === "individu").length);
                 $("#statKelompok").text(allItems.filter((x) => x.task_type === "kelompok").length);
-                $("#statAtkAlmet").text(allItems.filter((x) => x.task_type === "atk_almet").length);
+                $("#statAtk").text(allItems.filter((x) => x.task_type === "atk").length);
+                $("#statJasAlmet").text(allItems.filter((x) => x.task_type === "jas_almet").length);
                 $("#statAktif").text(allItems.filter((x) => x.status === "aktif").length);
             }
 

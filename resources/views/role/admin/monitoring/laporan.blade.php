@@ -16,10 +16,6 @@
         <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Monitoring</p>
         <h2 class="text-2xl font-extrabold text-slate-800 m-0">Monitoring Laporan</h2>
     </div>
-    <a href="#" id="btnExport" class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
-        <i data-lucide="download" class="w-4 h-4"></i>
-        Export PDF
-    </a>
 </div>
 
 <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
@@ -55,14 +51,10 @@
                 @forelse ($laporan as $idx => $l)
                     @php
                         $lihatUrl = null;
-                        $downloadUrl = null;
 
                         if (($l['group_id'] ?? null)) {
                             if ($l['jenis'] === 'Absensi') {
                                 $lihatUrl = route($monBase.'.absensi.detail', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]);
-                                if ($l['submitted'] ?? false) {
-                                    $downloadUrl = route($monBase.'.absensi.export-pdf', ['groupId' => $l['group_id'], 'tanggal' => $l['tanggal']]);
-                                }
                             } elseif ($l['jenis'] === 'Evaluasi') {
                                 $lihatUrl = route($monBase.'.evaluasi.detail', $l['group_id']);
                             } elseif ($l['jenis'] === 'Keaktifan') {
@@ -90,12 +82,6 @@
                                     <a href="{{ $lihatUrl }}" class="text-teal-600 hover:text-teal-700 text-xs font-bold">Lihat</a>
                                 @else
                                     <span class="text-slate-300 text-xs font-bold cursor-not-allowed" title="Kelompok tidak diketahui">Lihat</span>
-                                @endif
-
-                                @if ($downloadUrl)
-                                    <a href="{{ $downloadUrl }}" target="_blank" class="text-teal-600 hover:text-teal-700 text-xs font-bold">Download</a>
-                                @elseif ($l['jenis'] === 'Absensi')
-                                    <span class="text-slate-300 text-xs font-bold cursor-not-allowed" title="Baru bisa didownload setelah absensi ini disubmit mentor">Download</span>
                                 @endif
                             </div>
                         </td>

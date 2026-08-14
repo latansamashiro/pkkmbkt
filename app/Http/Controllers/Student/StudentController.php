@@ -20,8 +20,9 @@ class StudentController extends Controller
     public function leaderboard()
     {
         $dataMahasiswa = \App\Support\Leaderboard::hitungRanking();
+        $currentStudentId = auth()->id();
 
-        return view('role.student.leaderboard', compact('dataMahasiswa'));
+        return view('role.student.leaderboard', compact('dataMahasiswa', 'currentStudentId'));
     }
 
     public function dashboard()

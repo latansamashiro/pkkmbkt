@@ -222,6 +222,8 @@
           <span id="text-btn-load">Lihat Semua Peringkat</span>
           <i data-lucide="chevron-down"></i>
         </button>
+
+        <div id="pinKamuWrap" class="mt-3"></div>
       </div>
     </div>
   </div>
@@ -301,6 +303,7 @@
       // 1. DATA MASTER KESELURUHAN -- dari database (SEMUA mahasiswa, bukan cuma 1 kelompok),
       // diurutkan server-side berdasarkan total poin tertinggi.
       const dataMahasiswa = @json($dataMahasiswa);
+      const CURRENT_STUDENT_ID = @json($currentStudentId);
 
       let kategoriAktif = "ALL";
       let statusLimit = true;
@@ -315,6 +318,8 @@
         if (kategoriAktif !== "ALL") {
           dataFilter = dataFilter.filter((mhs) => mhs.gender === kategoriAktif);
         }
+
+        renderPinKamu(dataFilter);
 
         const juara1 = dataFilter[0] || {
           nama: "-",
@@ -422,6 +427,43 @@
         }
 
         if (window.lucide) lucide.createIcons();
+      }
+
+      // ---------- Kartu "pin" nama sendiri -- biar mahasiswa yang login
+      // langsung tau peringkatnya berapa, gak perlu scroll cari-cari nama
+      // sendiri di daftar panjang. Selalu keliatan (di luar area scroll),
+      // dan ngikutin filter tab yang lagi aktif (Semua/Best Male/Best Female).
+      function renderPinKamu(dataFilter) {
+        const $wrap = $("#pinKamuWrap");
+        if (!CURRENT_STUDENT_ID) {
+          $wrap.empty();
+          return;
+        }
+
+        const indeks = dataFilter.findIndex((m) => m.id === CURRENT_STUDENT_ID);
+        if (indeks === -1) {
+          // gak kepilih di kategori ini (mis. lagi liat "Best Female" tapi dia laki-laki)
+          $wrap.empty();
+          return;
+        }
+
+        const aku = dataFilter[indeks];
+        const peringkat = indeks + 1;
+        const inisial = aku.nama.split(" ").filter(Boolean).slice(0, 2).map((s) => s[0]).join("").toUpperCase();
+        const avatarHtml = aku.foto
+          ? `<img src="${aku.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${aku.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${inisial}</span>`
+          : inisial;
+
+        $wrap.html(`
+          <div class="flex items-center justify-between px-3.5 py-3 bg-teal-tint border-[1.5px] border-teal-500 rounded-[13px]">
+            <div class="flex items-center gap-2.5">
+              <span class="w-[18px] text-center font-display text-[11px] font-bold text-teal-600">${peringkat}</span>
+              <div class="w-[30px] h-[30px] rounded-full bg-navy-tint text-navy-900 text-[10.5px] font-extrabold flex items-center justify-center overflow-hidden">${avatarHtml}</div>
+              <span class="text-[12.5px] font-bold text-ink-900">${aku.nama} <span class="text-teal-600 font-extrabold">(Kamu)</span></span>
+            </div>
+            <span class="text-[12.5px] font-extrabold text-teal-600">${aku.skor}</span>
+          </div>
+        `);
       }
 
       function ubahKategori(kategori) {

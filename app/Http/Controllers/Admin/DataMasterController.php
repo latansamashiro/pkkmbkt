@@ -105,7 +105,8 @@ class DataMasterController extends Controller
                     ['key' => 'name', 'label' => 'Nama Kelompok', 'type' => 'text', 'required' => true],
                     ['key' => 'program_study_filter', 'label' => 'Program Studi', 'type' => 'select', 'required' => false, 'options_key' => 'program_studies', 'virtual' => true],
                     ['key' => 'mentor_id', 'label' => 'Mentor', 'type' => 'select', 'required' => false, 'options_key' => 'mentors', 'filter_by' => 'program_study_filter'],
-                    ['key' => 'advisor_id', 'label' => 'Advisor', 'type' => 'select', 'required' => false, 'options_key' => 'advisors'],
+                    ['key' => 'advisor_id', 'label' => 'Pembimbing', 'type' => 'select', 'required' => false, 'options_key' => 'advisors_pembimbing'],
+                    ['key' => 'koordinator_id', 'label' => 'Koordinator', 'type' => 'select', 'required' => false, 'options_key' => 'advisors_koordinator'],
                     ['key' => 'max_member', 'label' => 'Maks. Anggota', 'type' => 'number', 'required' => true],
                 ],
             ],
@@ -308,7 +309,8 @@ class DataMasterController extends Controller
                 ['key' => 'task_type', 'label' => 'Jenis Tugas', 'type' => 'select', 'required' => true, 'options' => [
                     'individu' => 'INDIVIDU',
                     'kelompok' => 'KELOMPOK',
-                    'atk_almet' => 'ATK & ALMET',
+                    'atk' => 'PENERIMAAN ATK',
+                    'jas_almet' => 'PENERIMAAN JAS ALMET',
                 ]],
                 ['key' => 'deadline', 'label' => 'Deadline', 'type' => 'date', 'required' => true],
                 ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => [
@@ -335,6 +337,10 @@ class DataMasterController extends Controller
             'mentors' => User::where('role_name', 'MENTOR')->orderBy('name')->get(['id', 'name'])
                 ->mapWithKeys(fn($u) => [$u->id => $u->name]),
             'advisors' => User::where('role_name', 'ADVISOR')->orderBy('name')->get(['id', 'name'])
+                ->mapWithKeys(fn($u) => [$u->id => $u->name]),
+            'advisors_pembimbing' => User::where('role_name', 'ADVISOR')->where('advisor_type', 'pembimbing')->orderBy('name')->get(['id', 'name'])
+                ->mapWithKeys(fn($u) => [$u->id => $u->name]),
+            'advisors_koordinator' => User::where('role_name', 'ADVISOR')->where('advisor_type', 'koordinator')->orderBy('name')->get(['id', 'name'])
                 ->mapWithKeys(fn($u) => [$u->id => $u->name]),
             'program_studies' => ProgramStudy::orderBy('name')->get(['name'])
                 ->mapWithKeys(fn($p) => [$p->name => $p->name]),

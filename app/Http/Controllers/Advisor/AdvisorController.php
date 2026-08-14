@@ -35,7 +35,15 @@ class AdvisorController extends Controller
 {
     protected function myGroups()
     {
-        return Group::where('advisor_id', Auth::id());
+        // Advisor yang login bisa jadi Pembimbing (advisor_id) ATAU
+        // Koordinator (koordinator_id) di suatu kelompok -- keduanya dianggap
+        // "kelompok binaan" dia. Dibungkus where(function...) supaya kalau
+        // pemanggilnya nge-chain kondisi lain (mis. ->when($cari, ...)), itu
+        // ke-AND-kan ke SELURUH grup ini, bukan cuma ke salah satu sisi OR-nya.
+        return Group::where(function ($q) {
+            $q->where('advisor_id', Auth::id())
+                ->orWhere('koordinator_id', Auth::id());
+        });
     }
 
     public function dashboard()
@@ -486,6 +494,8 @@ class AdvisorController extends Controller
                 $jenisLabel = match ($t->task_type) {
                     'kelompok' => 'Kelompok',
                     'atk_almet' => 'ATK & Almet',
+                    'atk' => 'Penerimaan ATK',
+                    'jas_almet' => 'Penerimaan JAS ALMET',
                     default => 'Individu',
                 };
                 $header[] = $t->title . ' (' . $jenisLabel . ')';
@@ -521,7 +531,7 @@ class AdvisorController extends Controller
         $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
 
         $tasks = Task::where('status', '!=', 'draft')
-            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk_almet')")
+            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet')")
             ->orderBy('deadline')
             ->get();
 

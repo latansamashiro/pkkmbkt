@@ -604,6 +604,8 @@ public function tugasExportExcel($groupId)
             $jenisLabel = match ($t->task_type) {
                 'kelompok' => 'Kelompok',
                 'atk_almet' => 'ATK & Almet',
+                'atk' => 'Penerimaan ATK',
+                'jas_almet' => 'Penerimaan JAS ALMET',
                 default => 'Individu',
             };
             $header[] = $t->title . ' (' . $jenisLabel . ')';
@@ -638,7 +640,7 @@ protected function siapkanDataTugasDetail($groupId): array
 
     // Individu duluan, lalu kelompok, lalu ATK & Almet -- biar kolomnya gampang dikelompokkan di tampilan.
     $tasks = Task::where('status', '!=', 'draft')
-        ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk_almet')")
+        ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet')")
         ->orderBy('deadline')
         ->get();
 
