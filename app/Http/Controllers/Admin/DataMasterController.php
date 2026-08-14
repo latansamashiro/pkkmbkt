@@ -310,7 +310,7 @@ class DataMasterController extends Controller
                     'individu' => 'INDIVIDU',
                     'kelompok' => 'KELOMPOK',
                     'atk' => 'PENERIMAAN ATK',
-                    'jas_almet' => 'PENERIMAAN JAS ALMET',
+                    'jas_almamater' => 'PENERIMAAN JAS ALMAMATER',
                 ]],
                 ['key' => 'deadline', 'label' => 'Deadline', 'type' => 'date', 'required' => true],
                 ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => [

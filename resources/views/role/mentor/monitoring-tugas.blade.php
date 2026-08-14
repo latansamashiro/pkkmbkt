@@ -233,8 +233,8 @@
             span++;
             i++;
           }
-          const LABEL_TIPE = { kelompok: "Tugas Kelompok", atk: "Penerimaan ATK", jas_almet: "Penerimaan JAS ALMET" };
-          const TONE_TIPE = { kelompok: "text-teal-600 bg-teal-tint", atk: "text-amber-600 bg-amber-50", jas_almet: "text-purple-600 bg-purple-50" };
+         const LABEL_TIPE = { kelompok: "Tugas Kelompok", atk: "Penerimaan ATK", jas_almamater: "Penerimaan JAS ALMAMATER" };
+          const TONE_TIPE = { kelompok: "text-teal-600 bg-teal-tint", atk: "text-amber-600 bg-amber-50", jas_almamater: "text-purple-600 bg-purple-50" };
           const label = LABEL_TIPE[tipe] ?? "Tugas Individu";
           const tone = TONE_TIPE[tipe] ?? "text-navy-700 bg-navy-tint";
           groupHeaderHtml += `<th colspan="${span}" class="text-center text-[10px] font-extrabold uppercase tracking-[0.05em] ${tone} border-b border-border sticky top-0 z-[2] whitespace-nowrap" style="padding:7px 14px;">${label}</th>`;
