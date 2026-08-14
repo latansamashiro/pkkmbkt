@@ -168,16 +168,16 @@
           <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Poin pelanggaran kelompok binaan</span>
         </a>
 
-        <a href="#" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 opacity-50 cursor-not-allowed" aria-disabled="true">
-          <span class="w-[46px] h-[46px] rounded-[14px] bg-[#f2f6e0] text-[#7c9426] flex items-center justify-center">
-            <svg class="w-[23px] h-[23px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3l1.8 3.6L18 7.2l-3 2.9.7 4.1L12 12.3l-3.7 1.9.7-4.1-3-2.9 4.2-.6z" />
-              <path d="M5 21v-5M12 21v-7M19 21v-4" />
-            </svg>
-          </span>
-          <span class="text-[12.5px] font-bold text-[#1b2238] leading-tight">Monitoring Leaderboard</span>
-          <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Segera hadir</span>
-        </a>
+       <a href="{{ route('role.advisor.leaderboard') }}" class="flex flex-col sm:items-start items-center text-center sm:text-left gap-2.5 bg-white border border-[#e1e5f1] rounded-2xl p-4 sm:p-5 hover:border-[#7c9426] hover:shadow-md transition {{ request()->routeIs('role.advisor.leaderboard') ? 'border-[#7c9426] ring-1 ring-[#7c9426]' : '' }}">
+      <span class="w-[46px] h-[46px] rounded-[14px] bg-[#f2f6e0] text-[#7c9426] flex items-center justify-center">
+        <svg class="w-[23px] h-[23px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l1.8 3.6L18 7.2l-3 2.9.7 4.1L12 12.3l-3.7 1.9.7-4.1-3-2.9 4.2-.6z" />
+          <path d="M5 21v-5M12 21v-7M19 21v-4" />
+        </svg>
+      </span>
+      <span class="text-[12.5px] font-bold text-[#1b2238] leading-tight">Monitoring Leaderboard</span>
+      <span class="hidden sm:block text-[11.5px] text-[#8d92a6] leading-snug">Lihat peringkat</span>
+    </a>
 
       </div>
     </section>

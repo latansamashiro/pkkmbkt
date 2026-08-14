@@ -310,7 +310,7 @@ class DataMasterController extends Controller
                     'individu' => 'INDIVIDU',
                     'kelompok' => 'KELOMPOK',
                     'atk' => 'PENERIMAAN ATK',
-                    'jas_almamater' => 'PENERIMAAN JAS ALMAMATER',
+                    'jas_almet' => 'PENERIMAAN JAS ALMET',
                 ]],
                 ['key' => 'deadline', 'label' => 'Deadline', 'type' => 'date', 'required' => true],
                 ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => [
@@ -789,6 +789,56 @@ class DataMasterController extends Controller
             'jumlah' => count($hasil['soal']),
         ]);
     }
+
+    /**
+     * Import 1 bagian Modul PKKMB dari file .docx -- tersimpan sebagai
+     * Draft (panitia review dulu sebelum di-publish ke mahasiswa/mentor).
+     */
+    public function modulImport(Request $request)
+    {
+        $request->validate([
+            'judul' => 'nullable|string|max:150',
+            'file' => 'required|file|mimes:docx',
+        ]);
+
+        $teks = trim($this->ekstrakTeksDocx($request->file('file')->getRealPath()));
+
+        if ($teks === '') {
+            return response()->json([
+                'message' => 'File ini kosong atau teksnya tidak bisa dibaca. Pastikan file .docx berisi teks (bukan cuma gambar/scan).',
+            ], 422);
+        }
+
+        // Judul: dari input manual kalau diisi, kalau enggak ambil baris
+        // pertama file (asal wajar panjangnya), fallback ke nama filenya.
+        $judul = trim((string) $request->input('judul'));
+        if ($judul === '') {
+            $barisPertama = trim(explode("\n", $teks)[0] ?? '');
+            $judul = ($barisPertama !== '' && mb_strlen($barisPertama) <= 100)
+                ? $barisPertama
+                : pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME);
+        }
+
+        // Ubah teks polos (baris per baris) jadi paragraf HTML <p>, biar bisa
+        // dibuka & diedit lagi lewat editor rich-text yang sama kayak bagian
+        // yang ditulis manual.
+        $paragraf = array_values(array_filter(array_map('trim', explode("\n", $teks)), fn ($p) => $p !== ''));
+        $html = implode('', array_map(fn ($p) => '<p>' . e($p) . '</p>', $paragraf));
+
+        $item = ModuleItem::create([
+            'section' => $judul,
+            'content' => $html,
+            'status' => 'draft', // sengaja draft dulu -- panitia review sebelum publish ke mahasiswa
+            'created_by_id' => $request->user()?->id,
+            'updated_by_id' => $request->user()?->id,
+        ]);
+
+        return response()->json([
+            'message' => "Berhasil diimpor sebagai bagian baru \"{$judul}\" (status: Draft, belum tampil ke mahasiswa sebelum di-publish).",
+            'item' => $item,
+        ]);
+    }
+
 
     /**
      * Ekstrak teks polos dari file .docx TANPA butuh library tambahan

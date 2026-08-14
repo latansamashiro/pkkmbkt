@@ -12,10 +12,16 @@
             <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Kelola Data</p>
             <h2 class="text-2xl font-extrabold text-slate-800 m-0">{{ $data['title'] }}</h2>
         </div>
-        <button id="btnTambahBagian"
-            class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
-            <i data-lucide="plus" class="w-4 h-4"></i>Tambah Bagian
-        </button>
+        <div class="flex items-center gap-3">
+            <button id="btnImportModul"
+                class="inline-flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                <i data-lucide="file-up" class="w-4 h-4"></i>Import dari Word
+            </button>
+            <button id="btnTambahBagian"
+                class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>Tambah Bagian
+            </button>
+        </div>
     </div>
 
     <p id="modulLoading" class="text-center text-sm text-slate-400 py-6">Memuat data...</p>
@@ -106,6 +112,39 @@
         .prose-editor ol { list-style: decimal; padding-left: 22px; margin: 0 0 10px; }
         .prose-editor a { color: #0d9488; text-decoration: underline; }
     </style>
+
+    <!-- ===== MODAL IMPORT DARI WORD ===== -->
+    <div id="modalImportModul" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex items-start justify-between gap-4 mb-5">
+                <div>
+                    <h3 class="text-lg font-extrabold text-slate-800 m-0">Import Bagian dari Word</h3>
+                    <p class="text-xs text-slate-400 m-0 mt-1">Upload file Word (.docx) berisi teks -- isinya otomatis jadi bagian baru (status Draft, review dulu sebelum di-publish).</p>
+                </div>
+                <button id="btnCloseImportModul" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">Judul Bagian (opsional)</label>
+            <input type="text" id="inputJudulImport" placeholder="Kosongkan biar otomatis dari isi file"
+                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 mb-4 focus:outline-none focus:border-teal-600" />
+
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">File Word (.docx)</label>
+            <input type="file" id="inputFileImportModul" accept=".docx"
+                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600" />
+            <p class="text-xs text-slate-400 mt-2">Cuma teksnya yang dibaca (formatting Bold/warna/dsb di dalam Word diabaikan) -- bisa dirapikan lagi lewat editor setelah diimpor.</p>
+
+            <div id="importModulErrorBox" class="hidden mt-4 bg-rose-50 border border-rose-100 rounded-xl p-3">
+                <p class="text-xs font-bold text-rose-600 m-0" id="importModulErrorText"></p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 mt-6">
+                <button type="button" id="btnBatalImportModul" class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm px-4 py-2.5 rounded-xl transition">Batal</button>
+                <button type="button" id="btnSubmitImportModul" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition disabled:opacity-60">Import Sekarang</button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -350,6 +389,58 @@
             });
             $("#btnClosePratinjau").on("click", () => $("#modalPratinjau").addClass("hidden").removeClass("flex"));
             $("#modalPratinjau").on("click", function (e) { if (e.target === this) $(this).addClass("hidden").removeClass("flex"); });
+
+            // ===== Import Bagian dari Word (.docx) =====
+            const $modalImportModul = $("#modalImportModul");
+
+            $("#btnImportModul").on("click", function () {
+                $("#inputJudulImport").val("");
+                $("#inputFileImportModul").val("");
+                $("#importModulErrorBox").addClass("hidden");
+                $modalImportModul.removeClass("hidden").addClass("flex");
+            });
+            $("#btnCloseImportModul, #btnBatalImportModul").on("click", () => $modalImportModul.addClass("hidden").removeClass("flex"));
+            $modalImportModul.on("click", function (e) { if (e.target === this) $(this).addClass("hidden").removeClass("flex"); });
+
+            $("#btnSubmitImportModul").on("click", function () {
+                const file = $("#inputFileImportModul")[0].files[0];
+                $("#importModulErrorBox").addClass("hidden");
+
+                if (!file) {
+                    $("#importModulErrorText").text("Pilih file .docx dulu.");
+                    $("#importModulErrorBox").removeClass("hidden");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("judul", $("#inputJudulImport").val().trim());
+                formData.append("file", file);
+
+                const $btn = $(this);
+                $btn.prop("disabled", true).text("Mengimpor...");
+
+                $.ajax({
+                    url: `${URL_BASE}/import`,
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: { "X-CSRF-TOKEN": CSRF_TOKEN },
+                })
+                    .done(function (res) {
+                        $modalImportModul.addClass("hidden").removeClass("flex");
+                        tampilkanToast(res.message || "Berhasil diimpor.");
+                        muatModul();
+                    })
+                    .fail(function (xhr) {
+                        const res = xhr.responseJSON || {};
+                        $("#importModulErrorText").text(res.message || "Gagal mengimpor file. Coba lagi.");
+                        $("#importModulErrorBox").removeClass("hidden");
+                    })
+                    .always(function () {
+                        $btn.prop("disabled", false).text("Import Sekarang");
+                    });
+            });
 
             muatModul();
         });

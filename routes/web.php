@@ -281,6 +281,10 @@ Route::middleware(['auth'])->group(function () {
             // didaftarkan duluan, bakal "nyamber" /evaluasi/soal-import (dianggap
             // {type} = "soal-import") sebelum sempat ke rute spesifik ini.
             Route::post('/evaluasi/soal-import', 'soalImport')->name('committee.evaluasi.soal-import');
+            // Import Modul PKKMB — sama alasannya kayak soal-import di atas,
+            // wajib didaftarkan SEBELUM loop $sections biar gak "kesamber" rute
+            // generik POST /modul-pkkmb/{type}.
+            Route::post('/modul-pkkmb/import', 'modulImport')->name('committee.modul-pkkmb.import');
 
             $sections = [
                 'data-master' => ['path' => 'jadwal',      'types' => ['jadwal'],                          'title' => 'Kelola Jadwal',      'view' => 'role.committee.jadwal.index'],

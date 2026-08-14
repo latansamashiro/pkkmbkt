@@ -8,11 +8,10 @@ class StudentController extends Controller
 {
     public function modul()
     {
-        // "Kelola Modul PKKMB" (Panitia) nyimpen konten per-section di tabel
-        // modules -- key-nya "section" (judul), match ke judul section statis
-        // di halaman ini. Kalau panitia belum isi section itu, fallback ke
-        // teks default di bawah (biar halaman gak pernah kosong/rusak).
-        $modulData = \App\Models\ModuleItem::where('status', 'aktif')->get()->keyBy('section');
+        // "Kelola Modul PKKMB" (Panitia) satu-satunya sumber konten halaman
+        // ini -- gak ada lagi teks bawaan/hardcode, murni tampilkan section
+        // yang statusnya "aktif" (published), diurutkan sesuai dibuatnya.
+        $modulData = \App\Models\ModuleItem::where('status', 'aktif')->orderBy('id')->get();
 
         return view('role.student.modul', compact('modulData'));
     }

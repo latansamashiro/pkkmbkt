@@ -76,183 +76,9 @@
 
   <!-- ============ MAIN ============ -->
   <div class="max-w-[900px] mx-auto" style="padding: 32px clamp(16px, 5vw, 48px) calc(74px + 28px);">
-    <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
-      <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5 before:content-[''] before:w-[5px] before:h-5 before:rounded-full before:flex-shrink-0" style="background-image: none;">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
-        Tentang PKKMB-KT
-      </h2>
-      <p class="leading-[1.8] text-ink-600 text-sm m-0">
-        @if (isset($modulData['Tentang PKKMB-KT']))
-          {!! $modulData['Tentang PKKMB-KT']->content !!}
-        @else
-          Pengenalan Kehidupan Kampus bagi Mahasiswa Baru (PKKMB-KT) merupakan
-          kegiatan awal yang bertujuan untuk membantu mahasiswa baru mengenal
-          lingkungan kampus, budaya akademik, tata tertib, serta membangun
-          karakter yang disiplin, bertanggung jawab, dan mampu beradaptasi
-          dengan kehidupan perkuliahan.
-        @endif
-      </p>
-    </div>
-
-    <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
-      <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
-        Tata Tertib
-      </h2>
-
-      <h3 class="text-teal-600 text-[14.5px] font-bold" style="margin: 18px 0 10px;">Kehadiran</h3>
-      <ul class="pl-5 mt-2.5">
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Hadir 15 menit sebelum kegiatan dimulai.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Wajib mengikuti seluruh rangkaian kegiatan PKKMB-KT.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">
-          Tidak diperkenankan meninggalkan kegiatan tanpa izin mentor atau
-          panitia.
-        </li>
-      </ul>
-
-      <h3 class="text-teal-600 text-[14.5px] font-bold" style="margin: 18px 0 10px;">Berpakaian</h3>
-      <ul class="pl-5 mt-2.5">
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Menggunakan pakaian sesuai ketentuan panitia.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Berpenampilan rapi dan sopan.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Menggunakan atribut yang telah ditentukan.</li>
-      </ul>
-
-      <h3 class="text-teal-600 text-[14.5px] font-bold" style="margin: 18px 0 10px;">Sikap</h3>
-      <ul class="pl-5 mt-2.5">
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Menghormati panitia, mentor, pemateri, dan sesama mahasiswa.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Menjaga ketertiban selama kegiatan berlangsung.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Tidak mengganggu jalannya kegiatan.</li>
-      </ul>
-
-      <h3 class="text-teal-600 text-[14.5px] font-bold" style="margin: 18px 0 10px;">Kebersihan</h3>
-      <ul class="pl-5 mt-2.5">
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Menjaga kebersihan lingkungan kegiatan.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Membuang sampah pada tempatnya.</li>
-      </ul>
-    </div>
-
-    <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
-      <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
-        Atribut yang Harus Dibawa
-      </h2>
-      <ul class="pl-5 mt-2.5">
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">ID Card PKKMB.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Alat tulis.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Buku Panduan PKKMB.</li>
-      </ul>
-    </div>
-
-    <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
-      <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
-        Sistem Penilaian
-      </h2>
-
-      <h3 class="text-teal-600 text-[14.5px] font-bold" style="margin: 18px 0 10px;">⭐ Aspek Keaktifan</h3>
-      <table class="w-full border-collapse rounded-[13px] overflow-hidden border border-border mt-3.5">
-        <tr>
-          <th class="bg-navy-900 text-white text-left text-[12.5px] font-bold" style="padding: 13px 14px;">Aspek</th>
-          <th class="bg-navy-900 text-white text-left text-[12.5px] font-bold" width="120" style="padding: 13px 14px;">Poin</th>
-        </tr>
-        <tr class="even:[&>td]:bg-bg">
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Aktif bertanya dan menjawab</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#059669] font-extrabold bg-[#ecfdf5] rounded-full text-xs inline-block" style="padding:3px 10px;">+10</span></td>
-        </tr>
-        <tr class="even:[&>td]:bg-bg">
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Membantu teman</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#059669] font-extrabold bg-[#ecfdf5] rounded-full text-xs inline-block" style="padding:3px 10px;">+5</span></td>
-        </tr>
-        <tr class="even:[&>td]:bg-bg">
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Menjadi sukarelawan saat kegiatan</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#059669] font-extrabold bg-[#ecfdf5] rounded-full text-xs inline-block" style="padding:3px 10px;">+7</span></td>
-        </tr>
-        <tr class="even:[&>td]:bg-bg">
-          <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;">Menjaga kebersihan</td>
-          <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;"><span class="text-[#059669] font-extrabold bg-[#ecfdf5] rounded-full text-xs inline-block" style="padding:3px 10px;">+3</span></td>
-        </tr>
-      </table>
-
-      <h3 class="text-teal-600 text-[14.5px] font-bold" style="margin: 18px 0 10px;">⚠️ Aspek Pelanggaran</h3>
-      <table class="w-full border-collapse rounded-[13px] overflow-hidden border border-border mt-3.5">
-        <tr>
-          <th class="bg-navy-900 text-white text-left text-[12.5px] font-bold" style="padding: 13px 14px;">Pelanggaran</th>
-          <th class="bg-navy-900 text-white text-left text-[12.5px] font-bold" width="120" style="padding: 13px 14px;">Poin</th>
-        </tr>
-        <tr class="even:[&>td]:bg-bg">
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Tidak mengikuti kegiatan tanpa izin</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#dc2626] font-extrabold bg-[#fef2f2] rounded-full text-xs inline-block" style="padding:3px 10px;">-15</span></td>
-        </tr>
-        <tr class="even:[&>td]:bg-bg">
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;">Tidak rapi / atribut tidak lengkap</td>
-          <td class="text-[13.5px] text-ink-900 border-b border-border" style="padding: 13px 14px;"><span class="text-[#dc2626] font-extrabold bg-[#fef2f2] rounded-full text-xs inline-block" style="padding:3px 10px;">-5</span></td>
-        </tr>
-        <tr class="even:[&>td]:bg-bg">
-          <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;">Mengganggu jalannya kegiatan</td>
-          <td class="text-[13.5px] text-ink-900" style="padding: 13px 14px;"><span class="text-[#dc2626] font-extrabold bg-[#fef2f2] rounded-full text-xs inline-block" style="padding:3px 10px;">-10</span></td>
-        </tr>
-      </table>
-
-      <div class="bg-teal-tint border-l-4 border-teal-500 rounded-[13px] mt-[18px] leading-[1.8] text-ink-600 text-[13.5px]" style="padding: 16px 18px;">
-        <b class="text-navy-900">Informasi:</b><br /><br />
-        Seluruh poin keaktifan dan pelanggaran akan diinput oleh mentor
-        melalui sistem PKKMB-KT. Nilai akan diakumulasikan secara otomatis dan
-        digunakan sebagai dasar perhitungan
-        <b class="text-navy-900">Leaderboard Mahasiswa</b>. Mahasiswa dengan poin tertinggi akan
-        menempati peringkat teratas sebagai bentuk apresiasi atas keaktifan
-        dan kedisiplinannya selama kegiatan berlangsung.
-      </div>
-    </div>
-
-    <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
-      <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
-        Reward &amp; Leaderboard
-      </h2>
-      <p class="leading-[1.8] text-ink-600 text-sm m-0">
-        Mahasiswa yang memperoleh akumulasi poin tertinggi selama kegiatan
-        PKKMB-KT akan mendapatkan apresiasi dari panitia sebagai bentuk
-        penghargaan atas keaktifan, kedisiplinan, dan kontribusinya selama
-        kegiatan berlangsung.
-      </p>
-      <ul class="pl-5 mt-2.5">
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Predikat Mahasiswa Teraktif PKKMB-KT.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Piagam atau penghargaan (sesuai kebijakan panitia).</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Peringkat terbaik pada Leaderboard Mahasiswa.</li>
-      </ul>
-    </div>
-
-    <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
-      <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
-        <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
-        Sanksi
-      </h2>
-      <p class="leading-[1.8] text-ink-600 text-sm m-0">
-        @if (isset($modulData['Sanksi']))
-          {!! $modulData['Sanksi']->content !!}
-        @else
-          Mahasiswa yang melakukan pelanggaran terhadap tata tertib PKKMB-KT
-          akan diberikan sanksi sesuai tingkat pelanggaran yang dilakukan.
-        @endif
-      </p>
-      @unless (isset($modulData['Sanksi']))
-      <ul class="pl-5 mt-2.5">
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Teguran lisan dari mentor.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">Pengurangan poin penilaian.</li>
-        <li class="mb-2.5 leading-[1.7] text-[13.5px] text-ink-600 marker:text-teal-500">
-          Pembinaan oleh panitia apabila pelanggaran dilakukan secara
-          berulang.
-        </li>
-      </ul>
-      @endunless
-    </div>
-
-    {{-- Section TAMBAHAN yang panitia buat sendiri (di luar 6 section baku di
-         atas) -- otomatis muncul di sini. --}}
-    @php
-      $sectionBaku = ['Tentang PKKMB-KT', 'Tata Tertib', 'Atribut yang Harus Dibawa', 'Sistem Penilaian', 'Reward & Leaderboard', 'Sanksi'];
-    @endphp
-    @foreach ($modulData->except($sectionBaku) as $itemModul)
+    {{-- Semua konten di sini murni dari database (dikelola Panitia lewat
+         "Kelola Modul PKKMB") -- gak ada lagi teks bawaan/hardcode. --}}
+    @forelse ($modulData as $itemModul)
       <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] mb-5" style="padding: 26px clamp(20px, 4vw, 30px);">
         <h2 class="font-display text-navy-900 text-[19px] font-bold mb-4 mt-0 flex items-center gap-2.5">
           <span class="w-[5px] h-5 rounded-full flex-shrink-0" style="background: linear-gradient(to bottom, #16a0a1, #1e3a8f);"></span>
@@ -262,7 +88,11 @@
           {!! $itemModul->content !!}
         </div>
       </div>
-    @endforeach
+    @empty
+      <div class="bg-surface rounded-[18px] border border-border shadow-[0_2px_14px_rgba(21,33,89,0.07),0_1px_2px_rgba(21,33,89,0.05)] text-center" style="padding: 40px 26px;">
+        <p class="text-ink-400 text-sm m-0">Belum ada konten modul yang dipublish. Silakan cek lagi nanti.</p>
+      </div>
+    @endforelse
   </div>
 
   <!-- ============ FOOTER ============ -->
