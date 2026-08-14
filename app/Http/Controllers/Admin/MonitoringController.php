@@ -487,29 +487,32 @@ public function evaluasiDetail(Request $request, $groupId)
 
     $studentIds = Member::where('group_id', $groupId)->pluck('student_id');
 
-    $studentExams = StudentExam::whereIn('student_id', $studentIds)
+    // Skor tiap paket = RATA-RATA semua percobaan yang sudah diselesaikan
+    // mahasiswa (bukan lagi jawaban mentah percobaan terakhir doang).
+    $skorAttemptSemua = \App\Models\ExamAttemptScore::whereIn('student_id', $studentIds)
         ->whereIn('exam_id', $categories->pluck('id'))
         ->get()
-        ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id);
+        ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id)
+        ->map(fn ($grup) => $grup->pluck('skor'));
 
     $rows = Member::where('group_id', $groupId)
         ->with('student')
         ->get()
-        ->map(function ($m) use ($categories, $studentExams) {
+        ->map(function ($m) use ($categories, $skorAttemptSemua) {
             $nilai = [];
             $skorList = [];
             $adaYangBelumLulus = false;
             $sudahMengisi = false;
 
             foreach ($categories as $exam) {
-                $rowsUntukExam = $studentExams->get($m->student_id . '-' . $exam->id);
-                if (!\App\Support\ExamScoring::sudahDikerjakan($rowsUntukExam)) {
+                $skorAttemptExamIni = $skorAttemptSemua->get($m->student_id . '-' . $exam->id);
+                if (!\App\Support\ExamScoring::sudahDikerjakan($skorAttemptExamIni)) {
                     $nilai[$exam->id] = null;
                     continue;
                 }
 
                 $sudahMengisi = true;
-                $skor = \App\Support\ExamScoring::hitungSkor($exam, $rowsUntukExam);
+                $skor = \App\Support\ExamScoring::rataRata($skorAttemptExamIni);
                 $nilai[$exam->id] = $skor;
                 $skorList[] = $skor;
                 if ($skor < $exam->passing_grade) {
@@ -603,8 +606,9 @@ public function tugasExportExcel($groupId)
         foreach ($tasks as $t) {
             $jenisLabel = match ($t->task_type) {
                 'kelompok' => 'Kelompok',
+                'atk_almet' => 'ATK & Almet',
                 'atk' => 'Penerimaan ATK',
-                'jas_almamater' => 'Penerimaan JAS ALMAMATER',
+                'jas_almet' => 'Penerimaan JAS ALMET',
                 default => 'Individu',
             };
             $header[] = $t->title . ' (' . $jenisLabel . ')';
@@ -638,8 +642,8 @@ protected function siapkanDataTugasDetail($groupId): array
     $group = Group::with('mentor')->findOrFail($groupId);
 
     // Individu duluan, lalu kelompok, lalu ATK & Almet -- biar kolomnya gampang dikelompokkan di tampilan.
-        $tasks = Task::where('status', '!=', 'draft')
-        ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almamater')")
+    $tasks = Task::where('status', '!=', 'draft')
+        ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet', 'atk_almet')")
         ->orderBy('deadline')
         ->get();
 

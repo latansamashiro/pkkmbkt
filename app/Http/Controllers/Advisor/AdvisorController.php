@@ -294,29 +294,32 @@ class AdvisorController extends Controller
 
         $studentIds = Member::where('group_id', $groupId)->pluck('student_id');
 
-        $studentExams = \App\Models\StudentExam::whereIn('student_id', $studentIds)
+        // Skor tiap paket = RATA-RATA semua percobaan yang sudah diselesaikan
+        // mahasiswa (bukan lagi jawaban mentah percobaan terakhir doang).
+        $skorAttemptSemua = \App\Models\ExamAttemptScore::whereIn('student_id', $studentIds)
             ->whereIn('exam_id', $categories->pluck('id'))
             ->get()
-            ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id);
+            ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id)
+            ->map(fn ($grup) => $grup->pluck('skor'));
 
         $rows = Member::where('group_id', $groupId)
             ->with('student')
             ->get()
-            ->map(function ($m) use ($categories, $studentExams) {
+            ->map(function ($m) use ($categories, $skorAttemptSemua) {
                 $nilai = [];
                 $skorList = [];
                 $adaYangBelumLulus = false;
                 $sudahMengisi = false;
 
                 foreach ($categories as $exam) {
-                    $rowsUntukExam = $studentExams->get($m->student_id . '-' . $exam->id);
-                    if (!\App\Support\ExamScoring::sudahDikerjakan($rowsUntukExam)) {
+                    $skorAttemptExamIni = $skorAttemptSemua->get($m->student_id . '-' . $exam->id);
+                    if (!\App\Support\ExamScoring::sudahDikerjakan($skorAttemptExamIni)) {
                         $nilai[$exam->id] = null;
                         continue;
                     }
 
                     $sudahMengisi = true;
-                    $skor = \App\Support\ExamScoring::hitungSkor($exam, $rowsUntukExam);
+                    $skor = \App\Support\ExamScoring::rataRata($skorAttemptExamIni);
                     $nilai[$exam->id] = $skor;
                     $skorList[] = $skor;
                     if ($skor < $exam->passing_grade) {
@@ -531,7 +534,7 @@ class AdvisorController extends Controller
         $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
 
         $tasks = Task::where('status', '!=', 'draft')
-            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet')")
+            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet', 'atk_almet')")
             ->orderBy('deadline')
             ->get();
 

@@ -1172,10 +1172,9 @@
         const lulus = skor >= kuisAktif.passingGrade;
         const percobaanHabis = (kuisAktif.attemptsUsed || 0) >= MAX_PERCOBAAN;
 
-        const st = statusKuis[kuisAktif.id];
-        if (st.skorTerbaik === null || skor > st.skorTerbaik) {
-          st.skorTerbaik = skor;
-        }
+        // Catatan: skor final yang beneran kepakai (buat status Lulus/Belum
+        // & Leaderboard) itu RATA-RATA semua percobaan, dihitung di server
+        // pas submit (lihat selesaiKuis()) -- bukan skor 1x percobaan ini aja.
 
         $("#runnerProgressFill").css("width", "100%");
 
@@ -1267,8 +1266,14 @@
           data: JSON.stringify({ jawaban: jawabanUser }),
         }).done(function (result) {
           statusKuis[kuisAktif.id].sudahKirim = true;
-          statusKuis[kuisAktif.id].skorTerbaik = result.skor;
-          alert(`Hasil kuis "${kuisAktif.judul}" berhasil dikirim! Skor tersimpan: ${result.skor}.`);
+          // skorRataRata dari server = rata-rata SEMUA percobaan yang udah
+          // diselesaikan (bukan cuma percobaan barusan) -- ini yang beneran
+          // kepakai buat status Lulus/Belum & yang dikirim ke Leaderboard.
+          statusKuis[kuisAktif.id].skorTerbaik = result.skorRataRata;
+          const pesanRata = result.skorRataRata !== result.skor
+            ? ` Rata-rata dari semua percobaanmu: ${result.skorRataRata}.`
+            : "";
+          alert(`Hasil kuis "${kuisAktif.judul}" berhasil dikirim! Skor percobaan ini: ${result.skor}.${pesanRata}`);
           keluarKuis();
         }).fail(function () {
           alert("Gagal mengirim hasil kuis. Coba lagi.");

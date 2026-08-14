@@ -142,10 +142,13 @@ class StudentController extends Controller
     {
         $exams = \App\Models\Exam::with('details')->orderBy('title')->get();
 
-        $studentExams = \App\Models\StudentExam::where('student_id', auth()->id())
+        // Skor RATA-RATA semua percobaan yang sudah diselesaikan (bukan lagi
+        // ngitung ulang dari jawaban mentah percobaan terakhir).
+        $skorAttemptSaya = \App\Models\ExamAttemptScore::where('student_id', auth()->id())
             ->whereIn('exam_id', $exams->pluck('id'))
             ->get()
-            ->groupBy('exam_id');
+            ->groupBy('exam_id')
+            ->map(fn ($grup) => $grup->pluck('skor'));
 
         // Berapa kali mahasiswa ini udah "Mulai/Ulangi Kuis" per paket evaluasi
         // -- dipakai buat batasin maksimal 3x percobaan (lihat evaluasiMulaiAttempt()).
@@ -183,10 +186,10 @@ class StudentController extends Controller
         // status pengerjaan siswa yang SUDAH tersimpan sebelumnya (kalau ada)
         $statusAwal = [];
         foreach ($exams as $exam) {
-            $rows = $studentExams->get($exam->id);
-            if (\App\Support\ExamScoring::sudahDikerjakan($rows)) {
+            $skorList = $skorAttemptSaya->get($exam->id);
+            if (\App\Support\ExamScoring::sudahDikerjakan($skorList)) {
                 $statusAwal[(string) $exam->id] = [
-                    'skorTerbaik' => \App\Support\ExamScoring::hitungSkor($exam, $rows),
+                    'skorTerbaik' => \App\Support\ExamScoring::rataRata($skorList),
                     'sudahKirim' => true,
                 ];
             }
@@ -264,9 +267,31 @@ class StudentController extends Controller
 
         $skor = $details->count() ? (int) round($benar / $details->count() * 100) : 0;
 
+        // Simpan skor PERCOBAAN INI SAJA (bukan ketimpa) -- attempt_number
+        // diambil dari counter exam_attempts yang sudah ke-increment duluan
+        // pas mahasiswa klik "Mulai" (evaluasiMulaiAttempt). updateOrCreate
+        // biar aman kalau submit-nya kepencet 2x / retry jaringan buat
+        // attempt yang sama, gak dobel baris.
+        $attemptSaatIni = \App\Models\ExamAttempt::where('exam_id', $exam->id)
+            ->where('student_id', auth()->id())
+            ->value('attempts') ?? 1;
+
+        \App\Models\ExamAttemptScore::updateOrCreate(
+            ['exam_id' => $exam->id, 'student_id' => auth()->id(), 'attempt_number' => $attemptSaatIni],
+            ['skor' => $skor]
+        );
+
+        // Skor RATA-RATA dari semua percobaan yang sudah diselesaikan -- ini
+        // yang beneran dikirim ke Leaderboard & Monitoring/Laporan, BUKAN
+        // skor percobaan ini doang.
+        $skorRataRata = \App\Support\ExamScoring::rataRata(
+            \App\Models\ExamAttemptScore::where('exam_id', $exam->id)->where('student_id', auth()->id())->pluck('skor')
+        );
+
         return response()->json([
             'message' => 'Hasil kuis berhasil dikirim.',
             'skor' => $skor,
+            'skorRataRata' => $skorRataRata,
         ]);
     }
 

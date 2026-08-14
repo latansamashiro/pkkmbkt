@@ -3,61 +3,62 @@
 namespace App\Support;
 
 /**
- * Perhitungan skor evaluasi (kuis) 1 mahasiswa buat 1 paket Exam.
+ * Perhitungan skor evaluasi (kuis) mahasiswa.
  *
- * Sebelumnya logic "cocokin jawaban mahasiswa (StudentExam) sama kunci
- * jawaban (ExamDetail), hitung berapa yang benar, ubah jadi skor 0-100"
- * ini ke-copy-paste di 4 tempat beda (StudentController, Admin\MonitoringController,
- * MentorController, App\Support\Leaderboard) -- sekarang dipusatkan di sini
- * biar kalau ada perbaikan/perubahan aturan, cukup diubah 1 kali di 1 tempat.
+ * Sejak fitur "rata-rata semua percobaan" ditambahkan, skor yang dipakai di
+ * Leaderboard/Monitoring/Laporan BUKAN skor 1 percobaan aja -- itu RATA-RATA
+ * dari SEMUA percobaan (attempt) yang sudah diselesaikan mahasiswa untuk
+ * paket evaluasi itu (maksimal 3x percobaan, tapi kalau baru sempat 1x atau
+ * 2x, rata-ratanya dihitung dari yang sudah dikerjakan itu aja -- bukan
+ * dipaksa dibagi 3).
+ *
+ * Sumber datanya tabel `exam_attempt_scores` (1 baris = 1 percobaan yang
+ * SUDAH selesai & submit, skornya gak pernah ketimpa) -- BUKAN `student_exams`
+ * (itu jawaban mentah per-soal punya percobaan TERAKHIR, ke-overwrite tiap
+ * submit, bukan sumber yang tepat buat rata-rata beberapa percobaan).
  */
 class ExamScoring
 {
     /**
-     * Jumlah jawaban benar mahasiswa buat 1 paket evaluasi.
+     * Skor rata-rata dari kumpulan skor tiap percobaan.
      *
-     * @param  \App\Models\Exam  $exam  Harus sudah eager-load relasi 'details'.
-     * @param  \Illuminate\Support\Collection|null  $rows  Baris StudentExam milik mahasiswa itu, khusus untuk $exam ini.
+     * @param  \Illuminate\Support\Collection|array|null  $skorList  Daftar skor (int) tiap percobaan yang sudah diselesaikan.
+     * @return int|null  Null kalau belum ada percobaan sama sekali.
      */
-    public static function hitungBenar($exam, $rows): int
+    public static function rataRata($skorList): ?int
     {
-        if (!$rows || $rows->isEmpty()) {
-            return 0;
+        if (!$skorList) {
+            return null;
+        }
+        $skorList = collect($skorList);
+        if ($skorList->isEmpty()) {
+            return null;
         }
 
-        $benar = 0;
-        foreach ($rows as $r) {
-            $detail = $exam->details->firstWhere('id', $r->exam_detail_id);
-            if ($detail && $r->value && strtolower((string) $r->value) === strtolower((string) $detail->key)) {
-                $benar++;
-            }
-        }
-
-        return $benar;
+        return (int) round($skorList->avg());
     }
 
     /**
-     * Skor (0-100) mahasiswa buat 1 paket evaluasi. 0 kalau belum dikerjakan
-     * sama sekali atau paket itu belum ada soalnya.
+     * Sudah pernah menyelesaikan minimal 1 percobaan apa belum.
      */
-    public static function hitungSkor($exam, $rows): int
+    public static function sudahDikerjakan($skorList): bool
     {
-        $total = $exam->details->count();
-        if ($total === 0) {
-            return 0;
-        }
-
-        $benar = self::hitungBenar($exam, $rows);
-
-        return (int) round($benar / $total * 100);
+        return $skorList !== null && collect($skorList)->isNotEmpty();
     }
 
     /**
-     * Sudah dikerjakan mahasiswa itu apa belum (ada minimal 1 baris StudentExam
-     * buat paket ini).
+     * Ambil SEMUA skor attempt (buat SEMUA mahasiswa & paket evaluasi
+     * sekaligus) dalam 1 query -- dipakai di halaman yang butuh data banyak
+     * mahasiswa sekaligus (Leaderboard, Monitoring) biar gak query berulang
+     * per-mahasiswa (N+1).
+     *
+     * @return \Illuminate\Support\Collection  keyBy "studentId-examId" -> Collection skor (int[])
      */
-    public static function sudahDikerjakan($rows): bool
+    public static function semuaSkorAttempt(): \Illuminate\Support\Collection
     {
-        return $rows !== null && $rows->isNotEmpty();
+        return \App\Models\ExamAttemptScore::select('student_id', 'exam_id', 'skor')
+            ->get()
+            ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id)
+            ->map(fn ($grup) => $grup->pluck('skor'));
     }
 }

@@ -9,9 +9,10 @@ namespace App\Support;
  * Skema poin (total maksimal 1000 kalau absensi & evaluasi 100% lengkap):
  * - Keaktifan/Pelanggaran : net dari activities.activity_value (gak dibatasi, bisa nambah/ngurang bebas)
  * - Absensi   (bobot 600) : (jumlah sesi hadir / total sesi) x 600 -- "1 sesi" = 1 baris AttendanceTemplate
- * - Evaluasi  (bobot 400) : jumlah per-paket dari (skor paket / 100) x (400 / jumlah paket)
- *   -> proporsional sesuai skor, dan otomatis nyesuaiin diri kalau jumlah
- *      paket evaluasi berubah (400 dibagi rata, bukan per-paket fixed).
+ * - Evaluasi  (bobot 400) : jumlah per-paket dari (skor RATA-RATA semua percobaan / 100) x (400 / jumlah paket)
+ *   -> skor per-paket itu sendiri rata-rata dari semua percobaan yang sudah
+ *      diselesaikan mahasiswa (maks 3x, lihat App\Support\ExamScoring), dan
+ *      proporsional/nyesuaiin diri kalau jumlah paket evaluasi berubah.
  */
 class Leaderboard
 {
@@ -39,11 +40,10 @@ class Leaderboard
         $poinPerPaketEvaluasi = $totalPaketEvaluasi > 0 ? 400 / $totalPaketEvaluasi : 0;
 
         // Query sekali buat semua mahasiswa (bukan query berulang per-mahasiswa).
-        // Cuma ambil kolom yang beneran dipakai -- lebih hemat memori daripada
-        // ::all() polos yang narik semua kolom (termasuk timestamp dll).
-        $semuaStudentExam = \App\Models\StudentExam::select('student_id', 'exam_id', 'exam_detail_id', 'value')
-            ->get()
-            ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id);
+        // Sumber skor evaluasi sekarang dari exam_attempt_scores (RATA-RATA
+        // semua percobaan), bukan lagi ngitung ulang dari jawaban mentah
+        // student_exams (yang cuma nyimpen percobaan TERAKHIR).
+        $semuaSkorAttempt = \App\Support\ExamScoring::semuaSkorAttempt();
         $sesiHadirPerMhs = \App\Models\AttendanceDetail::where('status_presence', 'hadir')
             ->selectRaw('student_id, COUNT(*) as jumlah')
             ->groupBy('student_id')
@@ -54,7 +54,7 @@ class Leaderboard
 
         return \App\Models\User::where('role_name', 'STUDENT')
             ->get(['id', 'name', 'gender', 'profile_picture', 'npm', 'program_study_name'])
-            ->map(function ($u) use ($poinPerSesi, $poinPerPaketEvaluasi, $exams, $semuaStudentExam, $sesiHadirPerMhs, $poinAktivitasPerMhs) {
+            ->map(function ($u) use ($poinPerSesi, $poinPerPaketEvaluasi, $exams, $semuaSkorAttempt, $sesiHadirPerMhs, $poinAktivitasPerMhs) {
                 $poinAktivitas = (int) ($poinAktivitasPerMhs[$u->id] ?? 0);
 
                 $sesiHadir = (int) ($sesiHadirPerMhs[$u->id] ?? 0);
@@ -62,16 +62,12 @@ class Leaderboard
 
                 $poinEvaluasi = 0;
                 foreach ($exams as $exam) {
-                    $totalSoal = $exam->details->count();
-                    if ($totalSoal === 0) {
-                        continue;
+                    $skorList = $semuaSkorAttempt->get($u->id . '-' . $exam->id);
+                    if (!\App\Support\ExamScoring::sudahDikerjakan($skorList)) {
+                        continue; // paket ini belum pernah dikerjakan mahasiswa ini -> 0 poin dari paket ini
                     }
-                    $rows = $semuaStudentExam->get($u->id . '-' . $exam->id);
-                    if (!\App\Support\ExamScoring::sudahDikerjakan($rows)) {
-                        continue; // paket ini belum dikerjakan mahasiswa ini -> 0 poin dari paket ini
-                    }
-                    $benar = \App\Support\ExamScoring::hitungBenar($exam, $rows);
-                    $poinEvaluasi += $poinPerPaketEvaluasi * ($benar / $totalSoal);
+                    $skorRataRata = \App\Support\ExamScoring::rataRata($skorList);
+                    $poinEvaluasi += $poinPerPaketEvaluasi * ($skorRataRata / 100);
                 }
 
                 $skor = $poinAktivitas + round($poinAbsensi) + round($poinEvaluasi);

@@ -278,7 +278,7 @@ class MentorController extends Controller
         if ($group) {
             $studentIds = \App\Models\Member::where('group_id', $group->id)->pluck('student_id');
 
-            $studentExams = \App\Models\StudentExam::whereIn('student_id', $studentIds)
+            $skorAttemptSemua = \App\Models\ExamAttemptScore::whereIn('student_id', $studentIds)
                 ->whereIn('exam_id', $exams->pluck('id'))
                 ->get()
                 ->groupBy(fn($r) => $r->student_id . '-' . $r->exam_id);
@@ -286,16 +286,16 @@ class MentorController extends Controller
             $anggotaKelompok = \App\Models\Member::where('group_id', $group->id)
                 ->with('student')
                 ->get()
-                ->map(function ($m) use ($exams, $studentExams) {
-                    $hasil = $exams->mapWithKeys(function ($exam) use ($m, $studentExams) {
-                        $rows = $studentExams->get($m->student_id . '-' . $exam->id);
-                        $selesai = \App\Support\ExamScoring::sudahDikerjakan($rows);
+                ->map(function ($m) use ($exams, $skorAttemptSemua) {
+                    $hasil = $exams->mapWithKeys(function ($exam) use ($m, $skorAttemptSemua) {
+                        $skorAttemptExamIni = $skorAttemptSemua->get($m->student_id . '-' . $exam->id);
+                        $selesai = \App\Support\ExamScoring::sudahDikerjakan($skorAttemptExamIni);
                         $skor = null;
                         $waktu = null;
 
                         if ($selesai) {
-                            $skor = \App\Support\ExamScoring::hitungSkor($exam, $rows);
-                            $waktu = $rows->max('updated_at')?->translatedFormat('d M Y, H:i');
+                            $skor = \App\Support\ExamScoring::rataRata($skorAttemptExamIni->pluck('skor'));
+                            $waktu = $skorAttemptExamIni->max('updated_at')?->translatedFormat('d M Y, H:i');
                         }
 
                         return [(string) $exam->id => [
