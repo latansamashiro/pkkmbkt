@@ -702,7 +702,7 @@
           <a href="{{ route('role.student.profil') }}" class="avatar-btn" aria-label="Masuk ke akun">
             @if (auth()->user()->profile_picture)
             <img
-              src="{{ asset('storage/'.auth()->user()->profile_picture) }}"
+              src="{{ asset('storage/'.auth()->user()->profile_picture).'?v='.auth()->user()->updated_at->timestamp }}"
               alt="Foto profil"
               style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
             @else

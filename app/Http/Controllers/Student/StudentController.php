@@ -351,11 +351,20 @@ class StudentController extends Controller
         $user = $request->user();
 
         if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('profile-photos', 'public');
+
+            // store() balikin `false` (bukan exception) kalau gagal nulis
+            // file -- jangan lanjut simpan path yang gagal itu ke database,
+            // dan kasih tau user daripada diem aja kayak berhasil.
+            if ($path === false) {
+                return back()->withErrors(['avatar' => 'Gagal menyimpan foto. Coba lagi.'], 'profileUpdate')->withInput();
+            }
+
             // Hapus foto lama kalau ada, lalu simpan yang baru
             if ($user->profile_picture) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
             }
-            $validated['profile_picture'] = $request->file('avatar')->store('profile-photos', 'public');
+            $validated['profile_picture'] = $path;
         }
 
         $user->update([

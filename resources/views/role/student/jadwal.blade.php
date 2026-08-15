@@ -739,30 +739,7 @@
       </div>
     </div>
   </main>
-
-  <!-- ============ CTA ============ -->
-  <section class="cta-section">
-    <h2>Siap Memulai Perjalanan Akademikmu?</h2>
-    <p>
-      Pastikan seluruh berkas dan atribut sudah lengkap. Hubungi mentor
-      pendamping kelompokmu jika ada yang perlu ditanyakan.
-    </p>
-    <div class="cta-buttons">
-      <a href="{{ route('landing.informasi') }}" class="btn-primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14M13 5l7 7-7 7" />
-        </svg>
-        Lihat Informasi Lengkap
-      </a>
-      <a href="{{ route('landing.kontak') }}" class="btn-outline">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-        </svg>
-        Hubungi Panitia
-      </a>
-    </div>
-  </section>
-
+ 
   <!-- ============ FOOTER ============ -->
   <footer class="footer">
     <p>© 2026 PKKMB-KT UNILAM. Semua hak dilindungi.</p>
@@ -803,7 +780,7 @@
           d="M12 3l1.8 3.6L18 7.2l-3 2.9.7 4.1L12 12.3l-3.7 1.9.7-4.1-3-2.9 4.2-.6z" />
         <path d="M5 21v-5M12 21v-7M19 21v-4" />
       </svg>
-      <span>Papan</span>
+      <span>Leaderboard</span>
     </a>
     <a href="{{ route('dashboard') }}" class="home" aria-label="Beranda">
       <svg

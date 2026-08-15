@@ -583,10 +583,33 @@ class AdvisorController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . Auth::id()],
             'phone_no' => ['nullable', 'string', 'max:20'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         $user = Auth::user();
-        $user->update($validated);
+
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('profile-photos', 'public');
+
+            // store() balikin `false` (bukan exception) kalau gagal nulis
+            // file -- jangan lanjut simpan path yang gagal itu ke database,
+            // dan kasih tau user daripada diem aja kayak berhasil.
+            if ($path === false) {
+                return back()->withErrors(['avatar' => 'Gagal menyimpan foto. Coba lagi.'])->withInput();
+            }
+
+            if ($user->profile_picture) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
+            }
+            $validated['profile_picture'] = $path;
+        }
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone_no' => $validated['phone_no'] ?? null,
+            'profile_picture' => $validated['profile_picture'] ?? $user->profile_picture,
+        ]);
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }

@@ -249,7 +249,7 @@
                         return `
                             <div class="relative pl-6">
                                 <span class="absolute left-0 top-6 w-2.5 h-2.5 rounded-full ${dotCls}"></span>
-                                <div class="flex items-start justify-between gap-3 border ${rowCls} rounded-2xl p-4">
+                                <div class="flex items-start justify-between gap-3 flex-wrap border ${rowCls} rounded-2xl p-4">
                                     <div class="flex items-start gap-4 min-w-0">
                                         <div class="shrink-0 w-14">
                                             <p class="text-sm font-extrabold text-slate-800 m-0">${jamMulai}</p>
@@ -269,7 +269,7 @@
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-1 shrink-0">
+                                    <div class="flex items-center gap-1 shrink-0 ml-auto">
                                         <button data-aksi="edit" data-id="${it.id}" aria-label="Edit" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="pencil" class="w-4 h-4"></i></button>
                                         <button data-aksi="penting" data-id="${it.id}" aria-label="Tandai Penting" class="w-8 h-8 flex items-center justify-center rounded-lg ${isPenting ? "text-amber-500" : "text-slate-400"} hover:bg-slate-100"><i data-lucide="star" class="w-4 h-4"></i></button>
                                         <button data-aksi="publish" data-id="${it.id}" aria-label="Publish/Draft" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"><i data-lucide="${eyeIcon}" class="w-4 h-4"></i></button>

@@ -11,9 +11,8 @@ $title = $data['title'] ?? 'DASHBOARD PANITIA';
             <span class="ic"><i data-lucide="search"></i></span>
             <input type="text" placeholder="Cari mahasiswa, kelompok, jadwal..." />
         </div>
-        <button class="icon-btn" aria-label="Notifikasi">
-            <span class="ic"><i data-lucide="bell"></i></span>
-            <span class="dot-badge"></span>
-        </button>
+        <a href="{{ route('committee.profil.index') }}" class="icon-btn" aria-label="Profil Saya">
+            <span class="ic"><i data-lucide="user-round"></i></span>
+        </a>
     </div>
 </header>

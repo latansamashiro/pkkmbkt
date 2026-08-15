@@ -43,6 +43,30 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
+        // Login boleh pakai EMAIL LENGKAP (mis. mentor@gmail.com) ATAU cuma
+        // NIM/NPM aja (mis. 525241009) -- kalau yang diketik gak mengandung
+        // "@", dianggap NIM/NPM. Dicoba 2 cara: (1) cocokkan ke kolom email
+        // hasil "npm@unilam.ac.id", (2) cocokkan LANGSUNG ke kolom npm --
+        // jaga-jaga kalau email akun yang sebenarnya di database gak persis
+        // ngikutin pola "npm@unilam.ac.id".
+        Fortify::authenticateUsing(function (Request $request) {
+            $login = trim((string) $request->input(Fortify::username()));
+
+            if (str_contains($login, '@')) {
+                $user = \App\Models\User::where('email', $login)->first();
+            } else {
+                $user = \App\Models\User::where('email', $login . '@unilam.ac.id')
+                    ->orWhere('npm', $login)
+                    ->first();
+            }
+
+            if ($user && \Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
+                return $user;
+            }
+
+            return null;
+        });
+
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
 

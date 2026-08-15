@@ -76,13 +76,13 @@
                 <form action="{{ route('login') }}" method="POST" class="login-form">
                     @csrf
 
-                    <!-- Field Email -->
+                    <!-- Field Email / NIM-NPM -->
                     <div>
-                        <label for="email" class="login-field-label">Alamat Email</label>
+                        <label for="email" class="login-field-label">Email atau NIM/NPM</label>
                         <div class="login-input-wrap">
                             <i data-lucide="mail" class="ic"></i>
-                            <input type="email" id="email" name="email" value="{{ old('email') }}"
-                                placeholder="Masukkan email terdaftar" autocomplete="email" required autofocus
+                            <input type="text" id="email" name="email" value="{{ old('email') }}"
+                                placeholder="Email atau NIM/NPM (contoh: 525241009)" autocomplete="username" required autofocus
                                 class="login-input" />
                         </div>
                     </div>

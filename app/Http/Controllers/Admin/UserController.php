@@ -43,7 +43,7 @@ class UserController extends Controller
 
     protected function hasNpmField(string $role): bool
     {
-        return $role === 'STUDENT';
+        return in_array($role, ['STUDENT', 'MENTOR'], true);
     }
 
     protected function hasAdvisorTypeField(string $role): bool
@@ -332,8 +332,8 @@ class UserController extends Controller
     }
 
     /**
-     * Download template CSV — kolomnya menyesuaikan role (STUDENT dapat
-     * kolom NPM & Kode Kelompok, role lain tidak).
+     * Download template CSV — kolomnya menyesuaikan role (STUDENT & MENTOR
+     * dapat kolom NPM, STUDENT juga dapat Kode Kelompok, role lain tidak).
      */
     public function importTemplate(Request $request)
     {
