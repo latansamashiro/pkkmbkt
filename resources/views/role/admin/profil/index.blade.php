@@ -29,7 +29,7 @@
             @csrf
             <div class="flex items-center gap-4 mb-6">
                 <img id="avatarPreview"
-                    src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2718%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M20 88c0-22 13-35 30-35s30 13 30 35%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E' }}"
+                    src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture).'?v='.$user->updated_at->timestamp : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23e2e8f0%27/%3E%3Ccircle cx=%2750%27 cy=%2738%27 r=%2718%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M20 88c0-22 13-35 30-35s30 13 30 35%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E' }}"
                     class="w-16 h-16 rounded-full object-cover shrink-0 border border-slate-200" alt="Foto profil" />
                 <div>
                     <strong class="block text-slate-800 font-bold">{{ $user->name }}</strong>

@@ -11,8 +11,13 @@ $title = $data['title'] ?? 'DASHBOARD PEMBIMBING & KOORDINATOR';
             <span class="ic"><i data-lucide="search"></i></span>
             <input type="text" placeholder="Cari kelompok binaan, jadwal..." />
         </div>
-        <a href="{{ route('role.advisor.profil') }}" class="icon-btn" aria-label="Profil Saya">
-            <span class="ic"><i data-lucide="user-round"></i></span>
+        <a href="{{ route('role.advisor.profil') }}" class="icon-btn" aria-label="Profil Saya" style="overflow: hidden; padding: 0;">
+            @if (auth()->user()->profile_picture)
+                <img src="{{ asset('storage/'.auth()->user()->profile_picture).'?v='.auth()->user()->updated_at->timestamp }}"
+                    alt="Foto profil" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
+            @else
+                <span class="ic"><i data-lucide="user-round"></i></span>
+            @endif
         </a>
     </div>
 </header>
