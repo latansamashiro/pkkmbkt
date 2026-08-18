@@ -429,10 +429,10 @@ class MentorController extends Controller
     {
         $group = \App\Models\Group::where('mentor_id', auth()->id())->first();
 
-        // Urutkan tugas individu duluan, kelompok, baru ATK & Almet -- supaya
-        // kolomnya di tabel gampang dikelompokkan per jenis (bukan campur acak).
+        // Urutkan tugas individu duluan, kelompok, ATK, baru Jas Almamater --
+        // supaya kolomnya di tabel gampang dikelompokkan per jenis (bukan campur acak).
         $tasks = \App\Models\Task::where('status', '!=', 'draft')
-            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet', 'atk_almet')")
+            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet')")
             ->orderBy('deadline')
             ->get();
         $daftarTugas = $tasks->map(fn($t) => ['id' => (string) $t->id, 'nama' => $t->title, 'tipe' => $t->task_type]);

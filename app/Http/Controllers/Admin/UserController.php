@@ -51,6 +51,22 @@ class UserController extends Controller
         return $role === 'ADVISOR';
     }
 
+    /**
+     * Password acak buat akun hasil import yang kolom Password-nya dikosongkan
+     * di CSV. Sengaja pakai charset huruf+angka polos (bukan Str::random()
+     * bawaan yang bisa nyampur karakter kurang gampang dibaca/diketik ulang)
+     * -- persis 8 karakter, gampang dibacakan/diketik ulang ke mahasiswa/mentor/advisor.
+     */
+    protected function buatPasswordAcak(int $panjang = 8): string
+    {
+        $charset = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'; // tanpa 0/O/1/l/i biar gak ketuker
+        $hasil = '';
+        for ($i = 0; $i < $panjang; $i++) {
+            $hasil .= $charset[random_int(0, strlen($charset) - 1)];
+        }
+        return $hasil;
+    }
+
     public function index(Request $request)
     {
         $role = $this->lockedRole($request);
@@ -345,6 +361,9 @@ class UserController extends Controller
         }
         $header[] = 'No HP';
         $header[] = 'Jenis Kelamin (laki-laki/perempuan)';
+        if ($this->hasAdvisorTypeField($role)) {
+            $header[] = 'Jenis (pembimbing/koordinator)';
+        }
         if ($this->hasAcademicFields($role)) {
             $header[] = 'Fakultas';
             $header[] = 'Program Studi';
@@ -359,6 +378,9 @@ class UserController extends Controller
         }
         $contoh[] = '081234567890';
         $contoh[] = 'laki-laki';
+        if ($this->hasAdvisorTypeField($role)) {
+            $contoh[] = 'pembimbing';
+        }
         if ($this->hasAcademicFields($role)) {
             $contoh[] = 'FAKULTAS TEKNOLOGI INFORMASI';
             $contoh[] = 'TEKNIK INFORMATIKA';
@@ -394,6 +416,7 @@ class UserController extends Controller
         $academic = $this->hasAcademicFields($role);
         $groupField = $this->hasGroupField($role);
         $npmField = $this->hasNpmField($role);
+        $advisorTypeField = $this->hasAdvisorTypeField($role);
 
         $request->validate([
             'file' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
@@ -411,7 +434,18 @@ class UserController extends Controller
             rewind($handle);
         }
 
-        $header = fgetcsv($handle);
+        // Deteksi pemisah kolom otomatis (koma atau titik-koma) -- Excel di
+        // Indonesia/negara ber-locale koma-desimal itu DEFAULT-nya nyimpen
+        // CSV pakai titik-koma (;), bukan koma (,). Kalau dipaksa baca pakai
+        // koma padahal filenya titik-koma, satu baris penuh kebaca jadi 1
+        // kolom doang -- bikin semua kolom (Nama/Email/Password/dst) keisi
+        // data yang sama persis (baris utuh yang gak kebagi-bagi).
+        $posisiAwal = ftell($handle);
+        $baris1 = fgets($handle);
+        fseek($handle, $posisiAwal);
+        $pemisah = (substr_count((string) $baris1, ';') > substr_count((string) $baris1, ',')) ? ';' : ',';
+
+        $header = fgetcsv($handle, 0, $pemisah);
         if (!$header) {
             return response()->json(['message' => 'File kosong atau formatnya tidak terbaca.'], 422);
         }
@@ -430,7 +464,7 @@ class UserController extends Controller
         $gagal = [];
         $baris = 1;
 
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, 0, $pemisah)) !== false) {
             $baris++;
             if (count(array_filter($row, fn($v) => trim((string) $v) !== '')) === 0) {
                 continue; // baris kosong, lewati diam-diam
@@ -446,6 +480,10 @@ class UserController extends Controller
             $fakultas = $academic ? $kolom($row, 'fakultas') : null;
             $prodi = $academic ? $kolom($row, 'program studi') : null;
             $kodeKelompok = $groupField ? $kolom($row, 'kelompok') : null;
+            $advisorTypeRaw = $advisorTypeField ? strtolower((string) $kolom($row, 'jenis')) : null;
+            $advisorType = $advisorTypeField
+                ? (str_contains($advisorTypeRaw, 'koordinator') ? 'koordinator' : 'pembimbing')
+                : null;
 
             if (!$nama || !$email) {
                 $gagal[] = "Baris {$baris}: Nama dan Email wajib diisi.";
@@ -473,7 +511,7 @@ class UserController extends Controller
                 }
             }
 
-            $passwordAsli = $password ?: \Illuminate\Support\Str::random(8);
+            $passwordAsli = $password ?: $this->buatPasswordAcak();
 
             $user = User::create([
                 'name' => $nama,
@@ -487,6 +525,7 @@ class UserController extends Controller
                 'gender' => $gender,
                 'npm' => $npm ?: null,
                 'pending_group_code' => $kodeBelumAda,
+                'advisor_type' => $advisorType,
                 'created_by_id' => $request->user()->id,
                 'updated_by_id' => $request->user()->id,
             ]);
@@ -502,6 +541,7 @@ class UserController extends Controller
                 'password' => $passwordAsli,
                 'kelompok' => $group->name ?? null,
                 'prodi' => $prodi ?: null,
+                'advisor_type' => $advisorType,
             ];
         }
         fclose($handle);

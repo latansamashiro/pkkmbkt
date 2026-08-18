@@ -298,6 +298,39 @@
     <span class="toast-text">Poin tersimpan</span>
   </div>
 
+  <!-- ============ MODAL KONFIRMASI SIMPAN POIN ============ -->
+  <div id="modalKonfirmasiPoin" class="fixed inset-0 bg-[#0a0f28]/50 hidden items-center justify-center z-[100] p-4">
+    <div class="bg-surface rounded-[22px] w-full max-w-sm p-6 relative shadow-[0_20px_50px_rgba(10,15,40,0.35)]">
+      <button type="button" id="btnTutupKonfirmasi" aria-label="Tutup" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-ink-400 hover:bg-bg hover:text-ink-900 transition-colors">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+      </button>
+
+      <div id="konfirmasiIconWrap" class="w-14 h-14 rounded-full flex items-center justify-center mb-4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <path d="M12 17h.01" />
+        </svg>
+      </div>
+
+      <h3 class="font-display text-[19px] font-bold text-navy-900 m-0 mb-1.5">Konfirmasi Poin</h3>
+      <p class="text-[13.5px] text-ink-600 leading-[1.6] m-0 mb-4">Pastikan sudah memilih indikator penilaian dengan benar sebelum disimpan.</p>
+
+      <div id="konfirmasiRingkasan" class="rounded-xl bg-bg border border-border px-3.5 py-3 mb-5">
+        <div class="flex items-center justify-between mb-1">
+          <span id="konfirmasiKategori" class="text-[13.5px] font-bold text-navy-900">-</span>
+          <span id="konfirmasiPoinVal" class="font-display text-[15px] font-extrabold">-</span>
+        </div>
+        <p id="konfirmasiIndikator" class="text-[12px] text-ink-600 m-0 leading-[1.5]">-</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button type="button" id="btnBatalKonfirmasi" class="flex-1 border border-border text-ink-600 hover:bg-bg font-bold text-[13.5px] rounded-xl transition-colors" style="padding: 12px 16px;">Pilih Lagi</button>
+        <button type="button" id="btnYaKonfirmasi" class="flex-1 text-white font-bold text-[13.5px] rounded-xl transition-transform hover:-translate-y-0.5" style="padding: 12px 16px;">Ya, Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="bg-[#0d1735] flex flex-wrap justify-between items-center gap-3.5" style="padding: 24px clamp(16px,5vw,48px) calc(74px + 16px);">
     <p class="text-[13px] text-[#4a6a9f] m-0">© 2026 PKKMB-KT UNILAM. Semua hak dilindungi.</p>
     <div class="flex gap-5">
@@ -632,11 +665,48 @@
           });
       }
 
+      // ---------- Modal konfirmasi sebelum beneran nyimpen poin ----------
+      const $modalKonfirmasi = $("#modalKonfirmasiPoin");
+      let konfirmasiPending = null; // { tipe, itemTerpilih, $catatan, $btnAsli }
+
+      function bukaKonfirmasi(tipe, itemTerpilih, $catatan, $btnAsli) {
+        konfirmasiPending = { tipe, itemTerpilih, $catatan, $btnAsli };
+
+        const isKeaktifan = tipe === "keaktifan";
+        $("#konfirmasiKategori").text(itemTerpilih.kategori);
+        $("#konfirmasiIndikator").text(itemTerpilih.indikator);
+        $("#konfirmasiPoinVal")
+          .text(`${isKeaktifan ? "+" : "-"}${itemTerpilih.poin}`)
+          .css("color", isKeaktifan ? "#0f8a8c" : "#d9695a");
+        $("#konfirmasiIconWrap")
+          .css({ background: isKeaktifan ? "#e2f3f2" : "#fdeeec", color: isKeaktifan ? "#0f8a8c" : "#d9695a" });
+        $("#btnYaKonfirmasi").css("background", isKeaktifan ? "#0f8a8c" : "#d9695a");
+
+        $modalKonfirmasi.removeClass("hidden").addClass("flex");
+      }
+
+      function tutupKonfirmasi() {
+        $modalKonfirmasi.addClass("hidden").removeClass("flex");
+        konfirmasiPending = null;
+      }
+
+      $("#btnTutupKonfirmasi, #btnBatalKonfirmasi").on("click", tutupKonfirmasi);
+      $modalKonfirmasi.on("click", function(e) {
+        if (e.target === this) tutupKonfirmasi(); // klik di luar kartu (backdrop) -> batal, balik milih lagi
+      });
+
+      $("#btnYaKonfirmasi").on("click", function() {
+        if (!konfirmasiPending) return;
+        const { tipe, itemTerpilih, $catatan, $btnAsli } = konfirmasiPending;
+        tutupKonfirmasi();
+        simpanPoin(tipe, itemTerpilih, $catatan, $btnAsli);
+      });
+
       $("#btnSimpanKeaktifan").on("click", function() {
-        simpanPoin("keaktifan", keaktifanTerpilih, $("#catatanKeaktifan"), $(this));
+        bukaKonfirmasi("keaktifan", keaktifanTerpilih, $("#catatanKeaktifan"), $(this));
       });
       $("#btnSimpanPelanggaran").on("click", function() {
-        simpanPoin("pelanggaran", pelanggaranTerpilih, $("#catatanPelanggaran"), $(this));
+        bukaKonfirmasi("pelanggaran", pelanggaranTerpilih, $("#catatanPelanggaran"), $(this));
       });
 
       function tampilkanToast(teks) {

@@ -73,7 +73,7 @@
                 <i data-lucide="shirt" class="w-5 h-5"></i>
             </span>
             <div>
-                <p id="statJasAlmamater" class="text-2xl font-extrabold text-slate-800 m-0 leading-none">0</p>
+                <p id="statJasAlmet" class="text-2xl font-extrabold text-slate-800 m-0 leading-none">0</p>
                 <p class="text-xs text-slate-400 m-0 mt-1">Penerimaan JAS ALMAMATER</p>
             </div>
         </div>
@@ -101,7 +101,7 @@
             <option value="individu">Individu</option>
             <option value="kelompok">Kelompok</option>
             <option value="atk">Penerimaan ATK</option>
-            <option value="jas_almamater">Penerimaan JAS ALMAMATER</option>
+            <option value="jas_almet">Penerimaan JAS ALMAMATER</option>
         </select>
         <select id="filterStatus"
             class="border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 cursor-pointer focus:outline-none focus:border-teal-600">
@@ -218,14 +218,14 @@
                 individu: "bg-teal-50 text-teal-700",
                 kelompok: "bg-lime-50 text-lime-700",
                 atk: "bg-amber-50 text-amber-700",
-                jas_almamater: "bg-purple-50 text-purple-700",
+                jas_almet: "bg-purple-50 text-purple-700",
             };
             const STATUS_BADGE = {
                 aktif: "bg-teal-50 text-teal-700",
                 draft: "bg-amber-50 text-amber-700",
                 ditutup: "bg-slate-100 text-slate-500",
             };
-            const JENIS_LABEL = { individu: "Individu", kelompok: "Kelompok", atk: "Penerimaan ATK", jas_almamater: "Penerimaan JAS ALMAMATER" };
+            const JENIS_LABEL = { individu: "Individu", kelompok: "Kelompok", atk: "Penerimaan ATK", jas_almet: "Penerimaan JAS ALMAMATER" };
             const STATUS_LABEL = { aktif: "Aktif", draft: "Draft", ditutup: "Ditutup" };
 
             function badge(map, key, label) {
@@ -267,7 +267,7 @@
                 $("#statIndividu").text(allItems.filter((x) => x.task_type === "individu").length);
                 $("#statKelompok").text(allItems.filter((x) => x.task_type === "kelompok").length);
                 $("#statAtk").text(allItems.filter((x) => x.task_type === "atk").length);
-                $("#statJasAlmamater").text(allItems.filter((x) => x.task_type === "jas_almamater").length);
+                $("#statJasAlmet").text(allItems.filter((x) => x.task_type === "jas_almet").length);
                 $("#statAktif").text(allItems.filter((x) => x.status === "aktif").length);
             }
 

@@ -572,8 +572,7 @@ public function tugas(Request $request)
                 'status'     => $status,
             ];
         })
-        ->filter(fn ($g) => $g['tanggal'] !== null) // sembunyiin kelompok yg belum ada status tugas sama sekali
-        ->values();
+        ->values(); // semua kelompok tetap tampil, termasuk yang belum ada aktivitas tugas sama sekali
 
     return view($request->route('view') ?? 'role.admin.monitoring.tugas', [
         'data'    => ['title' => $request->route('title') ?? 'Monitoring Pengumpulan Tugas'],
@@ -606,9 +605,8 @@ public function tugasExportExcel($groupId)
         foreach ($tasks as $t) {
             $jenisLabel = match ($t->task_type) {
                 'kelompok' => 'Kelompok',
-                'atk_almet' => 'ATK & Almet',
                 'atk' => 'Penerimaan ATK',
-                'jas_almet' => 'Penerimaan JAS ALMET',
+                'jas_almet' => 'Penerimaan JAS ALMAMATER',
                 default => 'Individu',
             };
             $header[] = $t->title . ' (' . $jenisLabel . ')';
@@ -641,9 +639,9 @@ protected function siapkanDataTugasDetail($groupId): array
 {
     $group = Group::with('mentor')->findOrFail($groupId);
 
-    // Individu duluan, lalu kelompok, lalu ATK & Almet -- biar kolomnya gampang dikelompokkan di tampilan.
+    // Individu, Kelompok, ATK, lalu Jas Almamater -- biar kolomnya gampang dikelompokkan di tampilan.
     $tasks = Task::where('status', '!=', 'draft')
-        ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet', 'atk_almet')")
+        ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet')")
         ->orderBy('deadline')
         ->get();
 

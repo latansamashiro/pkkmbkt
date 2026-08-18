@@ -467,8 +467,7 @@ class AdvisorController extends Controller
                     'status'     => $status,
                 ];
             })
-            ->filter(fn ($g) => $g['tanggal'] !== null)
-            ->values();
+            ->values(); // semua kelompok binaan tetap tampil, termasuk yang belum ada aktivitas tugas sama sekali
 
         $filters = compact('cari');
 
@@ -496,9 +495,8 @@ class AdvisorController extends Controller
             foreach ($tasks as $t) {
                 $jenisLabel = match ($t->task_type) {
                     'kelompok' => 'Kelompok',
-                    'atk_almet' => 'ATK & Almet',
                     'atk' => 'Penerimaan ATK',
-                    'jas_almet' => 'Penerimaan JAS ALMET',
+                    'jas_almet' => 'Penerimaan JAS ALMAMATER',
                     default => 'Individu',
                 };
                 $header[] = $t->title . ' (' . $jenisLabel . ')';
@@ -534,7 +532,7 @@ class AdvisorController extends Controller
         $group = $this->myGroups()->with('mentor')->findOrFail($groupId);
 
         $tasks = Task::where('status', '!=', 'draft')
-            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet', 'atk_almet')")
+            ->orderByRaw("FIELD(task_type, 'individu', 'kelompok', 'atk', 'jas_almet')")
             ->orderBy('deadline')
             ->get();
 

@@ -66,6 +66,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/advisor', 'store')->name('admin.advisor.store')->defaults('roleKey', 'ADVISOR');
             Route::put('/advisor/{user}', 'update')->name('admin.advisor.update')->defaults('roleKey', 'ADVISOR');
             Route::delete('/advisor/{user}', 'destroy')->name('admin.advisor.destroy')->defaults('roleKey', 'ADVISOR');
+            Route::get('/advisor-import/template', 'importTemplate')->name('admin.advisor.import-template')->defaults('roleKey', 'ADVISOR');
+            Route::post('/advisor-import', 'import')->name('admin.advisor.import')->defaults('roleKey', 'ADVISOR');
 
             // Kelola Panitia -> committee
             Route::get('/panitia', 'index')->name('admin.panitia.index')->defaults('roleKey', 'COMMITTEE');
@@ -256,6 +258,8 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::post('/', 'store')->name('committee.advisor.store'), $defaults);
             $withDefaults(Route::put('/{user}', 'update')->name('committee.advisor.update'), $defaults);
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.advisor.destroy'), $defaults);
+            $withDefaults(Route::get('/import/template', 'importTemplate')->name('committee.advisor.import-template'), $defaults);
+            $withDefaults(Route::post('/import', 'import')->name('committee.advisor.import'), $defaults);
         });
 
         // ===== Kelola Anggota per Kelompok (masih pakai GroupController, tapi

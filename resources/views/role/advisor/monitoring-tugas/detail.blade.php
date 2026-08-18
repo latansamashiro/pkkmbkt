@@ -34,16 +34,22 @@
                     <th class="bg-slate-100" colspan="3"></th>
                     @php
                         $groupedTasks = $tasks->groupBy('task_type');
-                    @endphp
-                    @php
-                        $labelTipe = ['kelompok' => 'Tugas Kelompok', 'atk' => 'Penerimaan ATK', 'jas_almet' => 'Penerimaan JAS ALMET', 'individu' => 'Tugas Individu'];
+                        $labelTipe = ['kelompok' => 'Tugas Kelompok', 'atk' => 'Penerimaan ATK', 'jas_almet' => 'Penerimaan JAS ALMAMATER', 'individu' => 'Tugas Individu'];
                         $toneTipe = ['kelompok' => 'bg-teal-50 text-teal-600', 'atk' => 'bg-amber-50 text-amber-600', 'jas_almet' => 'bg-purple-50 text-purple-600', 'individu' => 'bg-indigo-50 text-indigo-600'];
+                        // Urutan baku duluan, TAPI kalau ada jenis tugas lain yang gak
+                        // dikenal (task_type yang gak ada di daftar di atas), tetap
+                        // dimasukkan di akhir -- supaya total kolom di baris header
+                        // ATAS ini SELALU sama persis dengan jumlah kolom tugas asli
+                        // di baris bawahnya. Kalau ada yang kelewat, header atas & bawah
+                        // jadi gak sejajar (itu sebabnya tabelnya kelihatan berantakan).
+                        $urutanTipe = collect(['individu', 'kelompok', 'atk', 'jas_almet'])
+                            ->merge($groupedTasks->keys()->diff(['individu', 'kelompok', 'atk', 'jas_almet']));
                     @endphp
-                    @foreach (['individu', 'kelompok', 'atk', 'jas_almet'] as $tipe)
+                    @foreach ($urutanTipe as $tipe)
                         @if (($groupedTasks[$tipe] ?? collect())->count())
                             <th colspan="{{ $groupedTasks[$tipe]->count() }}"
-                                class="text-center text-[10px] font-extrabold uppercase tracking-wider px-3.5 py-2 whitespace-nowrap {{ $toneTipe[$tipe] }}">
-                                {{ $labelTipe[$tipe] }}
+                                class="text-center text-[10px] font-extrabold uppercase tracking-wider px-3.5 py-2 whitespace-nowrap {{ $toneTipe[$tipe] ?? 'bg-slate-100 text-slate-500' }}">
+                                {{ $labelTipe[$tipe] ?? ucfirst($tipe) }}
                             </th>
                         @endif
                     @endforeach
