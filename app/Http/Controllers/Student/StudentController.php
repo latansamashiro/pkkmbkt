@@ -31,7 +31,71 @@ class StudentController extends Controller
             ->orderBy('schedule_begin_time')
             ->get();
 
-        return view('role.student.dashboard', compact('jadwalHariIni'));
+        $progres = $this->hitungProgresMahasiswa(auth()->id());
+
+        return view('role.student.dashboard', compact('jadwalHariIni', 'progres'));
+    }
+
+    /**
+     * Progres PKKMB-KT mahasiswa = rata-rata dari 3 komponen (kalau datanya
+     * ada): % kehadiran (dari sesi yang sudah lewat), % paket evaluasi yang
+     * sudah dikerjakan minimal 1x, dan % tugas yang sudah diselesaikan (dari
+     * tugas individu + tugas kelompok yang ditugaskan ke dia). Komponen yang
+     * penyebutnya masih 0 (belum ada data sama sekali) dilewati, bukan
+     * dianggap 0%, biar gak menyesatkan sebelum kegiatan benar-benar mulai.
+     */
+    protected function hitungProgresMahasiswa(int $studentId): int
+    {
+        $groupId = \App\Models\Member::where('student_id', $studentId)->value('group_id');
+
+        // 1) Absensi -- dari sesi (AttendanceTemplate) yang tanggalnya sudah
+        // lewat/hari ini, dibandingkan sesi yang statusnya "hadir" pada
+        // Attendance kelompoknya yang SUDAH disubmit mentor.
+        $persenAbsensi = null;
+        if ($groupId) {
+            $templateIdsLewat = \App\Models\AttendanceTemplate::where('attendance_date', '<=', today())->pluck('id');
+            $totalSesi = $templateIdsLewat->count();
+            if ($totalSesi > 0) {
+                $attendanceIdsSubmitted = \App\Models\Attendance::where('group_id', $groupId)
+                    ->whereIn('attendance_template_id', $templateIdsLewat)
+                    ->where('status', 'submitted')
+                    ->pluck('id');
+                $hadir = \App\Models\AttendanceDetail::where('student_id', $studentId)
+                    ->whereIn('attendance_id', $attendanceIdsSubmitted)
+                    ->where('status_presence', 'hadir')
+                    ->count();
+                $persenAbsensi = $hadir / $totalSesi * 100;
+            }
+        }
+
+        // 2) Evaluasi -- paket yang sudah dikerjakan minimal 1x (ada baris di
+        // exam_attempt_scores), dibanding total paket evaluasi yang ada.
+        $persenEvaluasi = null;
+        $totalEvaluasi = \App\Models\Exam::count();
+        if ($totalEvaluasi > 0) {
+            $evaluasiDikerjakan = \App\Models\ExamAttemptScore::where('student_id', $studentId)
+                ->distinct('exam_id')->count('exam_id');
+            $persenEvaluasi = $evaluasiDikerjakan / $totalEvaluasi * 100;
+        }
+
+        // 3) Tugas -- gabungan tugas individu (StudentTask) & tugas kelompok
+        // (GroupTask, lewat kelompoknya) yang ditugaskan ke dia, dibanding
+        // yang sudah ditandai "selesai" oleh mentor.
+        $persenTugas = null;
+        $individuTaskIds = \App\Models\StudentTask::where('student_id', $studentId)->pluck('task_id');
+        $groupTaskIds = $groupId ? \App\Models\GroupTask::where('group_id', $groupId)->pluck('task_id') : collect();
+        $totalTugasIds = $individuTaskIds->merge($groupTaskIds)->unique();
+        if ($totalTugasIds->count() > 0) {
+            $tugasSelesai = \App\Models\StudentTask::where('student_id', $studentId)
+                ->where('status', 'selesai')
+                ->whereIn('task_id', $totalTugasIds)
+                ->count();
+            $persenTugas = $tugasSelesai / $totalTugasIds->count() * 100;
+        }
+
+        $komponen = array_filter([$persenAbsensi, $persenEvaluasi, $persenTugas], fn($v) => $v !== null);
+
+        return count($komponen) > 0 ? (int) round(array_sum($komponen) / count($komponen)) : 0;
     }
 
     public function info()

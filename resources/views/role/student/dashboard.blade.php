@@ -262,7 +262,6 @@
       }
       .progress-fill {
         @apply h-full rounded-full;
-        width: 42%;
         background: linear-gradient(90deg, var(--navy-700), var(--teal-500));
       }
 
@@ -785,10 +784,10 @@
             <div class="progress-block">
               <div class="progress-row">
                 <span class="progress-label">Progres PKKMB-KT</span>
-                <span class="progress-pct">42%</span>
+                <span class="progress-pct">{{ $progres }}%</span>
               </div>
               <div class="progress-track">
-                <div class="progress-fill"></div>
+                <div class="progress-fill" style="width: {{ $progres }}%"></div>
               </div>
             </div>
           </section>

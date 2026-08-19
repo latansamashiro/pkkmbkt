@@ -39,7 +39,38 @@ class MentorController extends Controller
             ->orderBy('schedule_begin_time')
             ->get();
 
-        return view('role.mentor.dashboard', compact('jadwalHariIni'));
+        $progres = $this->hitungProgresMentor(auth()->id());
+
+        return view('role.mentor.dashboard', compact('jadwalHariIni', 'progres'));
+    }
+
+    /**
+     * Progres Mentor = kelengkapan submit presensi kelompok binaannya --
+     * berapa persen dari sesi (AttendanceTemplate) yang tanggalnya sudah
+     * lewat/hari ini, yang absensinya SUDAH disubmit (bukan cuma draft).
+     * Beda dari Mahasiswa: Mentor bukan peserta, jadi progres yang relevan
+     * buat dia adalah tugas rutin dia sendiri (submit presensi), bukan
+     * evaluasi/tugas yang justru dia sendiri yang menilai/memantau.
+     */
+    protected function hitungProgresMentor(int $mentorId): int
+    {
+        $group = \App\Models\Group::where('mentor_id', $mentorId)->first();
+        if (!$group) {
+            return 0;
+        }
+
+        $templateIdsLewat = \App\Models\AttendanceTemplate::where('attendance_date', '<=', today())->pluck('id');
+        $totalSesi = $templateIdsLewat->count();
+        if ($totalSesi === 0) {
+            return 0;
+        }
+
+        $sesiSubmitted = \App\Models\Attendance::where('group_id', $group->id)
+            ->whereIn('attendance_template_id', $templateIdsLewat)
+            ->where('status', 'submitted')
+            ->count();
+
+        return (int) round($sesiSubmitted / $totalSesi * 100);
     }
 
     public function info()

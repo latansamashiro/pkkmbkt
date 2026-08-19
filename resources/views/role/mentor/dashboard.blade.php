@@ -32,10 +32,10 @@
     <div class="progress-block">
       <div class="progress-row">
         <span class="progress-label">Progres PKKMB-KT</span>
-        <span class="progress-pct">{{ $progres ?? 42 }}%</span>
+        <span class="progress-pct">{{ $progres }}%</span>
       </div>
       <div class="progress-track">
-        <div class="progress-fill" style="width: {{ $progres ?? 42 }}%"></div>
+        <div class="progress-fill" style="width: {{ $progres }}%"></div>
       </div>
     </div>
   </section>
