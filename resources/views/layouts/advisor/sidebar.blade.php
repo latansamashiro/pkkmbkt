@@ -1,7 +1,7 @@
 <aside class="sidebar">
     <a href="{{ route('dashboard') }}" class="sidebar-brand">
         <img src="{{ asset('assets/unilam.png') }}" alt="Logo UNILAM" class="brand-badge" />
-        <div class="brand-text"><strong>PKKMB-KT</strong><span>Panel Pembimbing</span></div>
+        <div class="brand-text"><strong>PKKMB-KT</strong><span>Panel Pembimbing & Koordinator</span></div>
     </a>
     <nav class="sidebar-nav" aria-label="Navigasi pembimbing">
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
