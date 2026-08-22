@@ -111,7 +111,7 @@
 
             function avatarHtml(mhs, fallback) {
                 if (mhs.foto) {
-                    return `<img src="${mhs.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${mhs.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${fallback}</span>`;
+                    return `<img loading="lazy" src="${mhs.foto}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" class="w-full h-full object-cover" alt="${mhs.nama}"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">${fallback}</span>`;
                 }
                 return fallback;
             }

@@ -765,7 +765,7 @@
           images
           .map(
             (src) =>
-            `<img class="gallery-img w-full h-full object-cover flex-shrink-0" src="${src}" alt="Foto lokasi" />`,
+            `<img loading="lazy" class="gallery-img w-full h-full object-cover flex-shrink-0" src="${src}" alt="Foto lokasi" />`,
           )
           .join(""),
         );
