@@ -834,7 +834,7 @@
           <div class="hero-stat-lbl">Total E-Book</div>
         </div>
         <div class="hero-stat">
-          <div class="hero-stat-val" id="statGlobalProgress">75%</div>
+          <div class="hero-stat-val" id="statGlobalProgress">0%</div>
           <div class="hero-stat-lbl">Progres</div>
         </div>
       </div>
@@ -865,41 +865,45 @@
     <div class="main-grid">
       <div>
         <!-- Video Section -->
-        <div class="section-head">
-          <div
-            class="section-head-bar"
-            style="
-                background: linear-gradient(
-                  to bottom,
-                  var(--teal-500),
-                  var(--navy-700)
-                );
-              "></div>
-          <h2>Video Materi PKKMB-KT</h2>
-          <span class="count" id="videoCount">0</span>
-        </div>
-        <div class="video-grid" id="videoGridContainer"></div>
-        <div class="empty-state" id="videoEmptyState">
-          <p>Tidak ada video yang cocok dengan pencarian ini.</p>
+        <div id="videoSectionWrap">
+          <div class="section-head">
+            <div
+              class="section-head-bar"
+              style="
+                  background: linear-gradient(
+                    to bottom,
+                    var(--teal-500),
+                    var(--navy-700)
+                  );
+                "></div>
+            <h2>Video Materi PKKMB-KT</h2>
+            <span class="count" id="videoCount">0</span>
+          </div>
+          <div class="video-grid" id="videoGridContainer"></div>
+          <div class="empty-state" id="videoEmptyState">
+            <p>Tidak ada video yang cocok dengan pencarian ini.</p>
+          </div>
         </div>
 
         <!-- Ebook Section -->
-        <div class="section-head" style="margin-top: 8px">
-          <div
-            class="section-head-bar"
-            style="
-                background: linear-gradient(
-                  to bottom,
-                  var(--teal-600),
-                  #6d28d9
-                );
-              "></div>
-          <h2>E-Book &amp; Panduan PKKMB</h2>
-          <span class="count" id="ebookCount">0</span>
-        </div>
-        <div class="ebook-grid" id="ebookGridContainer"></div>
-        <div class="empty-state" id="ebookEmptyState">
-          <p>Tidak ada dokumen yang cocok dengan pencarian ini.</p>
+        <div id="ebookSectionWrap">
+          <div class="section-head" style="margin-top: 8px">
+            <div
+              class="section-head-bar"
+              style="
+                  background: linear-gradient(
+                    to bottom,
+                    var(--teal-600),
+                    #6d28d9
+                  );
+                "></div>
+            <h2>E-Book &amp; Panduan PKKMB</h2>
+            <span class="count" id="ebookCount">0</span>
+          </div>
+          <div class="ebook-grid" id="ebookGridContainer"></div>
+          <div class="empty-state" id="ebookEmptyState">
+            <p>Tidak ada dokumen yang cocok dengan pencarian ini.</p>
+          </div>
         </div>
       </div>
 
@@ -1032,42 +1036,23 @@
 
   <script>
     $(function() {
-      const SKEMA_KATEGORI = [{
-          id: "semua",
-          label: "Semua"
-        },
-        {
-          id: "video",
-          label: "Video Materi"
-        },
-        {
-          id: "ebook",
-          label: "E-Book"
-        },
-        {
-          id: "akademik",
-          label: "Akademik"
-        },
-        {
-          id: "keuangan",
-          label: "Keuangan"
-        },
-        {
-          id: "lkms",
-          label: "LKMS"
-        },
-        {
-          id: "tatib",
-          label: "Tata Tertib"
-        },
-        {
-          id: "organisasi",
-          label: "Organisasi"
-        },
-        {
-          id: "profil",
-          label: "Profil Kampus"
-        },
+      // Kategori sekarang SINKRON dengan opsi "Jenis Topik" yang beneran ada
+      // di form Panitia/Admin (DataMasterController::types()['topik']) --
+      // sebelumnya di sini ada "Keuangan" & "Organisasi" yang gak pernah ada
+      // di form Panitia, sementara "Perpustakaan", "Kemahasiswaan", "Sejarah
+      // Unilam", "Narasumber Eksternal" malah kelewat. Value id-nya harus
+      // PERSIS sama kayak value yang disimpan ke DB (termasuk typo
+      // "eskternal" yang sengaja dipertahankan karena itu literal value-nya).
+      const SKEMA_KATEGORI = [
+        { id: "semua", label: "Semua" },
+        { id: "video", label: "Video Materi" },
+        { id: "ebook", label: "E-Book" },
+        { id: "keunilaman", label: "Sejarah Unilam" },
+        { id: "akademik", label: "Akademik" },
+        { id: "lkms", label: "LKMS" },
+        { id: "perpustakaan", label: "Perpustakaan" },
+        { id: "kemahasiswaan", label: "Kemahasiswaan" },
+        { id: "narasumber eskternal", label: "Narasumber Eksternal" },
       ];
 
       const videoMateri = @json($videoMateri);
@@ -1082,8 +1067,10 @@
       const $ebookCount = $("#ebookCount");
       const $videoGridContainer = $("#videoGridContainer");
       const $videoEmptyState = $("#videoEmptyState");
+      const $videoSectionWrap = $("#videoSectionWrap");
       const $ebookGridContainer = $("#ebookGridContainer");
       const $ebookEmptyState = $("#ebookEmptyState");
+      const $ebookSectionWrap = $("#ebookSectionWrap");
       const $materiDetailsModal = $("#materiDetailsModal");
 
       function renderChips() {
@@ -1122,6 +1109,17 @@
         $countBadgeLabel.text(`${filtered.length} materi ditemukan`);
         $videoCount.text(videos.length);
         $ebookCount.text(ebooks.length);
+
+        // FIX: dulu klik "E-Book" cuma ngosongin grid video-nya doang, tapi
+        // judul section "Video Materi PKKMB-KT" + kotak empty-state-nya
+        // tetap nongol (section-nya sendiri gak pernah disembunyiin total).
+        // Sekarang: kalau filter aktif secara eksplisit salah satu TIPE
+        // (video/ebook), section yang gak relevan disembunyikan SELURUHNYA
+        // (judul + grid + empty-state ikut hilang). Filter "semua" atau
+        // filter kategori topik (akademik/lkms/dst) tetap nampilin dua-duanya,
+        // karena kategori topik bisa aja ngena ke video MAUPUN ebook.
+        $videoSectionWrap.toggle(filterAktif !== "ebook");
+        $ebookSectionWrap.toggle(filterAktif !== "video");
       }
 
       function getGradientStyle(g) {
@@ -1513,6 +1511,15 @@
       function initStats() {
         $("#statTotalVideo").text(videoMateri.length);
         $("#statTotalEbook").text(ebookMateri.length);
+        // Progres global dihitung jujur dari rata-rata progress video yang
+        // beneran ada -- BUKAN angka hardcode "75%" seperti sebelumnya
+        // (yang gak nyambung ke data apa pun). Karena belum ada sistem
+        // tracking progres tonton per-mahasiswa, ini akan tampil 0% untuk
+        // sekarang -- itu jujur, bukan bug.
+        const rata = videoMateri.length
+          ? Math.round(videoMateri.reduce((a, v) => a + (v.progress || 0), 0) / videoMateri.length)
+          : 0;
+        $("#statGlobalProgress").text(rata + "%");
       }
 
       $searchInput.on("input", handleSearchAndFilter);
