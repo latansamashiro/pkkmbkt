@@ -60,11 +60,17 @@ class FortifyServiceProvider extends ServiceProvider
                     ->first();
             }
 
-            if ($user && \Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
-                return $user;
+                 if (!$user || !\Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
+                return null;
             }
 
-            return null;
+            // Akun yang sudah dinonaktifkan panitia/admin tidak boleh bisa
+            // login sama sekali, walau email/password yang dimasukkan benar.
+            if ($user->status !== 'aktif') {
+                return null;
+            }
+
+            return $user;
         });
 
         RateLimiter::for('login', function (Request $request) {

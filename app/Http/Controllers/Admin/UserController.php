@@ -210,21 +210,26 @@ class UserController extends Controller
             'email.unique' => 'Email sudah digunakan.',
             'npm.unique' => 'NPM sudah dipakai mahasiswa lain.',
         ]);
-        $user = User::create([
+
+        // Hanya field yang memang fillable (data form) yang lewat sini.
+        // role_name/status/created_by_id/updated_by_id SENGAJA di-set manual
+        // di bawah lewat property assignment -- lihat catatan di model User.
+        $user = new User([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role_name' => $role,
-            'status' => $validated['status'],
             'phone_no' => $validated['phone_no'] ?? null,
             'faculty_name' => $validated['faculty_name'] ?? null,
             'program_study_name' => $validated['program_study_name'] ?? null,
             'gender' => $validated['gender'] ?? null,
             'npm' => $validated['npm'] ?? null,
             'advisor_type' => $validated['advisor_type'] ?? null,
-            'created_by_id' => $request->user()->id,
-            'updated_by_id' => $request->user()->id,
         ]);
+        $user->role_name = $role;
+        $user->status = $validated['status'];
+        $user->created_by_id = $request->user()->id;
+        $user->updated_by_id = $request->user()->id;
+        $user->save();
 
         if ($groupField) {
             $this->syncGroupMembership($user, $validated['group_id'] ?? null, $request->user()->id);
@@ -285,6 +290,9 @@ class UserController extends Controller
             'npm.unique' => 'NPM sudah dipakai mahasiswa lain.',
         ]);
 
+        // Method ini sudah dari awal pakai property assignment (bukan array
+        // create/update sekaligus), jadi TIDAK ada perubahan sama sekali di
+        // sini akibat penyesuaian $fillable pada model User.
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->status = $validated['status'];
@@ -513,12 +521,13 @@ class UserController extends Controller
 
             $passwordAsli = $password ?: $this->buatPasswordAcak();
 
-            $user = User::create([
+            // Sama seperti store(): field yang bukan data form (role_name,
+            // status, created_by_id, updated_by_id) di-set manual, bukan
+            // lewat array yang dilempar ke constructor/create().
+            $user = new User([
                 'name' => $nama,
                 'email' => $email,
                 'password' => Hash::make($passwordAsli),
-                'role_name' => $role,
-                'status' => 'aktif',
                 'phone_no' => $phone ?: null,
                 'faculty_name' => $fakultas ?: null,
                 'program_study_name' => $prodi ?: null,
@@ -526,9 +535,12 @@ class UserController extends Controller
                 'npm' => $npm ?: null,
                 'pending_group_code' => $kodeBelumAda,
                 'advisor_type' => $advisorType,
-                'created_by_id' => $request->user()->id,
-                'updated_by_id' => $request->user()->id,
             ]);
+            $user->role_name = $role;
+            $user->status = 'aktif';
+            $user->created_by_id = $request->user()->id;
+            $user->updated_by_id = $request->user()->id;
+            $user->save();
 
             if ($group) {
                 $this->syncGroupMembership($user, $group->id, $request->user()->id);
