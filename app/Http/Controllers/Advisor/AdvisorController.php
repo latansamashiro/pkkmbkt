@@ -185,7 +185,7 @@ class AdvisorController extends Controller
                     $row[] = $labelStatus[$status] ?? '-';
                 }
                 $row[] = $m['persen'] . '%';
-                fputcsv($out, $row);
+                fputcsv($out, $this->netralkanBarisCsv($row));
             }
             fclose($out);
         };
@@ -510,7 +510,7 @@ class AdvisorController extends Controller
                     $row[] = ($r['tugas'][(string) $t->id] ?? false) ? 'Selesai' : 'Belum';
                 }
                 $row[] = "{$r['selesai']}/{$r['total']}";
-                fputcsv($out, $row);
+                fputcsv($out, $this->netralkanBarisCsv($row));
             }
             fclose($out);
         };
@@ -632,5 +632,19 @@ class AdvisorController extends Controller
         $dataMahasiswa = \App\Support\Leaderboard::hitungRanking();
 
         return view('role.admin.leaderboard.index', compact('dataMahasiswa'));
+    }
+
+    /**
+     * Cegah CSV/Formula Injection: kalau suatu nilai (mis. nama mahasiswa, yang
+     * diisi bebas oleh user) diawali =, +, -, @, atau tab/CR, Excel/Sheets akan
+     * menganggapnya sebagai FORMULA saat file dibuka, bukan teks biasa.
+     * Prefix dengan tanda kutip satu (') menetralkannya jadi teks apa adanya.
+     */
+    protected function netralkanBarisCsv(array $row): array
+    {
+        return array_map(function ($v) {
+            $s = (string) $v;
+            return preg_match('/^[=+\-@\t\r]/', $s) ? "'" . $s : $s;
+        }, $row);
     }
 }

@@ -617,6 +617,14 @@
                     list.forEach((x) => map.set(x.email, x));
                     try { localStorage.setItem(IMPORT_STORAGE_KEY, JSON.stringify(Array.from(map.values()))); } catch (e) {}
                 }
+                // Cegah CSV/Formula Injection: kalau nilai diawali =, +, -, @, atau
+                // tab/CR, Excel/Sheets akan menganggapnya sebagai FORMULA saat file
+                // dibuka, bukan teks biasa. Nama mentor diisi bebas oleh user,
+                // jadi harus dinetralkan sebelum masuk CSV.
+                function netralkanFormula(v) {
+                    const s = String(v);
+                    return /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+                }
                 function unduhCSV(list, namaFile) {
                 if (!list || !list.length) return;
                 const header = ["Nama", "Email", "Password"];
@@ -630,7 +638,7 @@
                     baris.push(row);
                 });
                 const csv = "\uFEFF" + "sep=,\r\n" + baris
-                    .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+                    .map((r) => r.map((v) => `"${netralkanFormula(v).replace(/"/g, '""')}"`).join(","))
                     .join("\r\n");
 
                 const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
