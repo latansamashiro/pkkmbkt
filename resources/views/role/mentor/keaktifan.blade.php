@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -122,7 +122,7 @@
   <header class="sticky top-0 z-50 flex items-center justify-between gap-4 bg-navy-900 border-b border-white/10" style="padding: 14px clamp(16px,5vw,48px);">
     <div class="flex items-center gap-2.5 no-underline cursor-default" aria-label="PKKMB-KT UNILAM">
       <div class="w-[38px] h-[38px] rounded-full bg-white flex items-center justify-center overflow-hidden flex-shrink-0">
-        <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" class="w-full h-full object-contain" />
+        <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM" class="w-full h-full object-contain" />
       </div>
       <div>
         <strong class="block font-display text-[14.5px] text-white">PKKMB-KT</strong>
@@ -719,7 +719,7 @@
       // ======================================================================
       // ►► SLIDESHOW LATAR HERO — sama seperti halaman lain.
       // ======================================================================
-      const heroSlideImages = ["/Gambar/gedungutama.jpeg", "/Gambar/rektor.jpeg", "/Gambar/gedung.jpeg"];
+      const heroSlideImages = ["/gambar/gedungutama.webp", "/gambar/rektor.webp", "/gambar/gedung.webp"];
       const HERO_SLIDE_INTERVAL_MS = 6000;
       const $heroSlideshow = $("#heroSlideshow");
       if ($heroSlideshow.length && heroSlideImages.length) {

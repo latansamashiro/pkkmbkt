@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -1186,9 +1186,9 @@
       });
 
       const heroSlideImages = [
-        "/Gambar/gedungutama.jpeg",
-        "/Gambar/rektor.jpeg",
-        "/Gambar/gedung.jpeg",
+        "/gambar/gedungutama.webp",
+        "/gambar/rektor.webp",
+        "/gambar/gedung.webp",
       ];
       const HERO_SLIDE_INTERVAL_MS = 6000;
       const heroSlideshow = document.getElementById("heroSlideshow");

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -223,7 +223,7 @@
             rgba(21, 33, 89, 0.94) 0%,
             rgba(15, 138, 140, 0.85) 100%
           ),
-          url("{{ asset('gambar/unilam.jpeg') }}");
+          url("{{ asset('gambar/unilam.webp') }}");
         background-size: cover;
         background-position: center;
       }
@@ -610,7 +610,7 @@
   <header class="navbar">
     <a href="{{ route('dashboard') }}" class="navbar-brand" aria-label="PKKMB-KT UNILAM Beranda">
       <div class="navbar-logo">
-        <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
+        <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM" />
       </div>
       <div class="navbar-brand-text">
         <strong>PKKMB-KT</strong>

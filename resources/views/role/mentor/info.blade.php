@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -170,9 +170,9 @@
       // ►► SLIDESHOW LATAR HERO
       // ======================================================================
       const heroSlideImages = [
-        "{{ asset('gambar/gedungutama.jpeg') }}",
-        "{{ asset('gambar/rektor.jpeg') }}",
-        "{{ asset('gambar/gedung.jpeg') }}",
+        "{{ asset('gambar/gedungutama.webp') }}",
+        "{{ asset('gambar/rektor.webp') }}",
+        "{{ asset('gambar/gedung.webp') }}",
       ];
       const HERO_SLIDE_INTERVAL_MS = 6000;
       const $heroSlideshow = $("#heroSlideshow");

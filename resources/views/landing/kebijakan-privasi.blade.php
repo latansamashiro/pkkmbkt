@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -446,7 +446,7 @@
         aria-label="PKKMB-KT UNILAM Beranda"
       >
         <div class="navbar-logo">
-          <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
+          <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM" />
         </div>
         <div class="navbar-brand-text">
           <strong>PKKMB-KT</strong>

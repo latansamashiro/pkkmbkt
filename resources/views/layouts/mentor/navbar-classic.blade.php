@@ -1,10 +1,10 @@
-{{-- resources/views/layouts/mentor/navbar-classic.blade.php
+﻿{{-- resources/views/layouts/mentor/navbar-classic.blade.php
      Dipakai di halaman yang masih pakai CSS custom (.navbar, .navbar-links) — Jadwal, Profil.
      Cara pakai: @include('layouts.mentor.navbar-classic', ['navActive' => 'jadwal']) --}}
 <header class="navbar">
   <a href="#" class="navbar-brand" aria-label="PKKMB-KT UNILAM Beranda">
     <div class="navbar-logo">
-      <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
+      <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM" />
     </div>
     <div class="navbar-brand-text">
       <strong>PKKMB-KT</strong>

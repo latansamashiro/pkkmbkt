@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
   <head>
     <link
@@ -613,7 +613,7 @@
     <header class="navbar">
       <a href="{{ route('landing.home') }}" class="navbar-brand" aria-label="PKKMB-KT UNILAM Beranda">
         <div class="navbar-logo">
-          <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
+          <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM" />
         </div>
         <div class="navbar-brand-text">
           <strong>PKKMB-KT</strong>

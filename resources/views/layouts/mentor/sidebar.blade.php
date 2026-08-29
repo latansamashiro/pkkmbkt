@@ -1,7 +1,7 @@
-{{-- resources/views/layouts/mentor/sidebar.blade.php --}}
+﻿{{-- resources/views/layouts/mentor/sidebar.blade.php --}}
 <aside class="sidebar">
   <span class="sidebar-brand">
-    <img src="{{ asset('gambar/unilam-logo-full.png') }}" alt="Logo UNILAM" />
+    <img src="{{ asset('gambar/unilam-logo-full.webp') }}" alt="Logo UNILAM" />
   </span>
 
   <nav class="sidebar-nav" aria-label="Navigasi utama">

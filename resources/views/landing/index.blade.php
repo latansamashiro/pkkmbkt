@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -619,7 +619,7 @@
             />
           </svg>
           <div class="logo-frame">
-            <img src="{{ asset('gambar/unilam-logo-full.png') }}" alt="Universitas La Tansa Mashiro" />
+            <img src="{{ asset('gambar/unilam-logo-full.webp') }}" alt="Universitas La Tansa Mashiro" />
           </div>
         </div>
 

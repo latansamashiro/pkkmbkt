@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -300,7 +300,7 @@
             rgba(21, 33, 89, 0.94) 0%,
             rgba(15, 138, 140, 0.85) 100%
           ),
-          url("/Gambar/unilam.jpeg");
+          url("/gambar/unilam.webp");
         background-size: cover;
         background-position: center;
       }

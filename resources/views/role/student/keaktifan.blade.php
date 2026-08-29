@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -65,7 +65,7 @@
       <div
         class="w-[38px] h-[38px] rounded-full bg-white flex items-center justify-center font-display text-[9px] font-bold text-navy-900 text-center leading-tight flex-shrink-0 overflow-hidden">
         <img
-          src="{{ asset('gambar/unilam.png') }}"
+          src="{{ asset('gambar/unilam.webp') }}"
           alt="Logo UNILAM"
           class="w-full h-full object-contain" />
       </div>
@@ -375,9 +375,9 @@
       // ►► SLIDESHOW LATAR HERO
       // ======================================================================
       const heroSlideImages = [
-        "{{ asset('gambar/gedungutama.jpeg') }}",
-        "{{ asset('gambar/rektor.jpeg') }}",
-        "{{ asset('gambar/gedung.jpeg') }}",
+        "{{ asset('gambar/gedungutama.webp') }}",
+        "{{ asset('gambar/rektor.webp') }}",
+        "{{ asset('gambar/gedung.webp') }}",
       ];
       const HERO_SLIDE_INTERVAL_MS = 6000;
       const $heroSlideshow = $("#heroSlideshow");

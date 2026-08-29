@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -113,7 +113,7 @@
       // ======================================================================
       // ►► SLIDESHOW LATAR HERO
       // ======================================================================
-      const heroSlideImages = ["/Gambar/gedungutama.jpeg", "/Gambar/rektor.jpeg", "/Gambar/gedung.jpeg"];
+      const heroSlideImages = ["/gambar/gedungutama.webp", "/gambar/rektor.webp", "/gambar/gedung.webp"];
       const HERO_SLIDE_INTERVAL_MS = 6000;
       const $heroSlideshow = $("#heroSlideshow");
       if ($heroSlideshow.length && heroSlideImages.length) {

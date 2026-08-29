@@ -1,7 +1,7 @@
-{{-- resources/views/layouts/mentor/header.blade.php --}}
+﻿{{-- resources/views/layouts/mentor/header.blade.php --}}
 <header class="topbar !static">
   <a href="{{ route('dashboard') }}" class="topbar-brand">
-    <img src="{{ asset('gambar/unilam.png') }}" alt="Universitas La Tansa Mashiro" />
+    <img src="{{ asset('gambar/unilam.webp') }}" alt="Universitas La Tansa Mashiro" />
   </a>
 
   <h1 class="topbar-title">@yield('page-title', 'Dashboard Mentor')</h1>

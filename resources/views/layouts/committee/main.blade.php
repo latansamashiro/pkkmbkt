@@ -30,23 +30,23 @@
     </div>
 
     <nav class="bottom-nav">
-        <a href="{{ route('dashboard') }}" class="active">
-            <span class="ic"><i data-lucide="layout-dashboard"></i></span>
-            <span>Home</span>
-        </a>
         <a href="{{ route('committee.master.index') }}">
             <span class="ic"><i data-lucide="users"></i></span>
             <span>Kelompok</span>
         </a>
-        <a href="{{ route('committee.data-master.index') }}" class="home">
+        <a href="{{ route('committee.data-master.index') }}">
             <span class="ic"><i data-lucide="calendar"></i></span>
             <span>Jadwal</span>
+        </a>
+         <a href="{{ route('dashboard') }}" class="home">
+            <span class="ic"><i data-lucide="layout-dashboard"></i></span>
+            <span>Home</span>
         </a>
         <a href="{{ route('committee.absensi.index') }}">
             <span class="ic"><i data-lucide="calendar-check"></i></span>
             <span>Absensi</span>
         </a>
-        <a href="#">
+         <a href="{{ route('committee.profil.index') }}">
             <span class="ic"><i data-lucide="user-circle"></i></span>
             <span>Profil</span>
         </a>

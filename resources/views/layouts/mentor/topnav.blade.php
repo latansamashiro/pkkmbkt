@@ -1,4 +1,4 @@
-{{-- resources/views/layouts/mentor/topnav.blade.php
+﻿{{-- resources/views/layouts/mentor/topnav.blade.php
      Dipakai di halaman yang masih pakai desain "hero foto" (Info, Leaderboard, Modul).
      Cara pakai: @include('layouts.mentor.topnav', ['navActive' => 'info']) --}}
 <header
@@ -10,7 +10,7 @@
     <div
       class="w-[38px] h-[38px] rounded-full bg-white flex items-center justify-center font-display text-[9px] font-bold text-navy-900 text-center leading-tight flex-shrink-0 overflow-hidden">
       <img
-        src="{{ asset('gambar/unilam.png') }}"
+        src="{{ asset('gambar/unilam.webp') }}"
         alt="Logo UNILAM"
         class="w-full h-full object-contain" />
     </div>

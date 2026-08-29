@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -540,7 +540,7 @@
   <header class="navbar">
     <a href="{{ route('dashboard') }}" class="navbar-brand" aria-label="PKKMB-KT UNILAM Beranda">
       <div class="navbar-logo">
-        <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM" />
+        <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM" />
       </div>
       <div class="navbar-brand-text">
         <strong>PKKMB-KT</strong>
@@ -948,9 +948,9 @@
       // ►► SLIDESHOW LATAR HERO
       // ======================================================================
       const heroSlideImages = [
-        "{{ asset('gambar/gedungutama.jpeg') }}",
-        "{{ asset('gambar/rektor.jpeg') }}",
-        "{{ asset('gambar/gedung.jpeg') }}",
+        "{{ asset('gambar/gedungutama.webp') }}",
+        "{{ asset('gambar/rektor.webp') }}",
+        "{{ asset('gambar/gedung.webp') }}",
       ];
       const HERO_SLIDE_INTERVAL_MS = 6000;
       const $heroSlideshow = $("#heroSlideshow");

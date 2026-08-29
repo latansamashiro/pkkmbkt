@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -588,7 +588,7 @@
       <span
         class="sidebar-brand">
         <img
-          src="{{ asset('gambar/unilam-logo-full.png') }}"
+          src="{{ asset('gambar/unilam-logo-full.webp') }}"
           alt="Logo UNILAM" />
       </span>
 
@@ -693,7 +693,7 @@
       <header class="topbar" style="position: static !important;">
         <a href="{{ route('dashboard') }}" class="topbar-brand">
           <img
-            src="{{ asset('gambar/unilam.png') }}"
+            src="{{ asset('gambar/unilam.webp') }}"
             alt="Universitas La Tansa Mashiro" />
         </a>
         <h1 class="topbar-title">Dashboard Mahasiswa</h1>

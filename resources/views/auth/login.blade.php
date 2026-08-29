@@ -91,7 +91,7 @@
                     <div>
                         <div class="login-label-row">
                             <label for="password" class="login-field-label" style="margin-bottom:0">Password</label>
-                            <a href="#" class="login-forgot">Lupa Password?</a>
+                            <a href="https://wa.me/6282299537888" class="login-forgot">Lupa Password?</a>
                         </div>
                         <div class="login-input-wrap">
                             <i data-lucide="lock" class="ic"></i>

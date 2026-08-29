@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 
 <head>
@@ -101,7 +101,7 @@
       <div
         class="w-[38px] h-[38px] rounded-full bg-white flex items-center justify-center font-display text-[9px] font-bold text-navy-900 text-center leading-tight flex-shrink-0 overflow-hidden">
         <img
-          src="{{ asset('gambar/unilam.png') }}"
+          src="{{ asset('gambar/unilam.webp') }}"
           alt="Logo UNILAM"
           class="w-full h-full object-contain" />
       </div>
@@ -185,7 +185,7 @@
           id="mapImageWrap">
           <img
             class="map-image absolute inset-0 w-full h-full object-contain object-center block"
-            src="{{ asset('gambar/denah.jpeg') }}"
+            src="{{ asset('gambar/denah.webp') }}"
             alt="Denah Kampus UNILAM" />
         </div>
         <div
@@ -397,7 +397,7 @@
         icon: "fa-door-open",
         mapUrl: "https://maps.app.goo.gl/MBPQcipRZC3NZxuv8",
         desc: "Pintu masuk utama menuju area kampus UNILAM.",
-        fotos: ["{{ asset('gambar/Peta/Gerbang.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/Gerbang.webp') }}"]
       },
       {
         id: "gedung-utama",
@@ -411,7 +411,7 @@
         icon: "fa-building",
         mapsUrl: "https://maps.app.goo.gl/ycUFd26rhdKD292i6",
         desc: "Berisi ruang kuliah FTI, FKES, FEB, FKIP, Perpustakaan, BAAK, BAUM, Kemahasiswaan & Alumni, hingga ruang kerja sama dan Warek.",
-        fotos: ["{{ asset('gambar/Peta/GedungUtama.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/GedungUtama.webp') }}"]
       },
       {
         id: "gedung-rektor",
@@ -425,7 +425,7 @@
         icon: "fa-user-tie",
         mapsUrl: "https://maps.app.goo.gl/V7gXRZceAq7e9tct7",
         desc: "Ruang dosen dan ruang kerja pimpinan rektorat.",
-        fotos: ["{{ asset('gambar/Peta/GedungRektor.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/GedungRektor.webp') }}"]
       },
       {
         id: "gedung-d",
@@ -439,7 +439,7 @@
         icon: "fa-building",
         mapsUrl: "https://maps.app.goo.gl/V7gXRZceAq7e9tct7",
         desc: "Ruang kelas D101–D203 beserta ruang dosen.",
-        fotos: ["{{ asset('gambar/Peta/GedungD.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/GedungD.webp') }}"]
       },
       {
         id: "gedung-c",
@@ -453,7 +453,7 @@
         icon: "fa-building",
         mapsUrl: "https://maps.app.goo.gl/P8XqX28CNXHby38f9",
         desc: "Ruang kelas C101–C205 beserta ruang dosen.",
-        fotos: ["{{ asset('gambar/Peta/GedungC.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/GedungC.webp') }}"]
       },
       {
         id: "gedung-e",
@@ -467,7 +467,7 @@
         icon: "fa-building",
         mapsUrl: "https://maps.app.goo.gl/V7gXRZceAq7e9tct7",
         desc: "Ruang kelas E101–E105.",
-        fotos: ["{{ asset('gambar/Peta/GedungE.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/GedungE.webp') }}"]
       },
       {
         id: "gedung-b",
@@ -481,7 +481,7 @@
         icon: "fa-building",
         mapsUrl: "https://maps.app.goo.gl/JiN2YzUsy4GUxymk9",
         desc: "Lab Jaringan, Lab Office, Ruang Operator, Lab Bidan, dan ruang kelas B101–B103.",
-        fotos: ["{{ asset('gambar/Peta/GedungB.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/GedungB.webp') }}"]
       },
       {
         id: "gedung-a",
@@ -495,7 +495,7 @@
         icon: "fa-building",
         mapsUrl: "https://maps.app.goo.gl/dZ4f7UFTHPiXRTDs7",
         desc: "Ruang kelas A101–A206 beserta ruang dosen.",
-        fotos: ["{{ asset('gambar/Peta/GedungA.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/GedungA.webp') }}"]
       },
       {
         id: "hall",
@@ -509,7 +509,7 @@
         icon: "fa-people-roof",
         mapsUrl: "https://maps.app.goo.gl/nNcymRQvDA8oK98X9",
         desc: "Aula serbaguna untuk acara dan kegiatan besar kampus.",
-        fotos: ["{{ asset('gambar/Peta/Hall.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/Hall.webp') }}"]
       },
       {
         id: "wisma-hall",
@@ -523,7 +523,7 @@
         icon: "fa-hotel",
         mapsUrl: "https://maps.app.goo.gl/EoyvSJKDSNYGehZM8",
         desc: "Wisma / penginapan tamu di area Hall.",
-        fotos: ["{{ asset('gambar/Peta/Wisma Hall.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/Wisma Hall.webp') }}"]
       },
       {
         id: "asrama",
@@ -537,7 +537,7 @@
         icon: "fa-bed",
         mapsUrl: "https://maps.app.goo.gl/vj21sy7fqoQvcr8m8",
         desc: "Tempat tinggal mahasiswa yang tinggal di lingkungan kampus.",
-        fotos: ["{{ asset('gambar/Peta/Asrama.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/Asrama.webp') }}"]
       },
       {
         id: "masjid",
@@ -551,7 +551,7 @@
         icon: "fa-mosque",
         mapsUrl: "https://maps.app.goo.gl/y54KYaheSWAk9WeM8",
         desc: "Masjid kampus untuk kegiatan ibadah civitas akademika.",
-        fotos: ["{{ asset('gambar/Peta/Masjid.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/Masjid.webp') }}"]
       },
       {
         id: "pmb-lkms",
@@ -565,7 +565,7 @@
         icon: "fa-building-columns",
         mapsUrl: "https://maps.app.goo.gl/Cs95mdjqwHF5tgYp6",
         desc: "Kantor Penerimaan Mahasiswa Baru dan LKMS.",
-        fotos: ["{{ asset('gambar/Peta/LKMS.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/LKMS.webp') }}"]
       },
       {
         id: "food-court",
@@ -579,7 +579,7 @@
         icon: "fa-utensils",
         mapsUrl: "https://maps.app.goo.gl/PWhyG9F517Rcwppx5",
         desc: "Area kantin dan tempat makan mahasiswa.",
-        fotos: ["{{ asset('gambar/Peta/FoodCourt.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/FoodCourt.webp') }}"]
       },
       {
         id: "lapangan-voli",
@@ -593,7 +593,7 @@
         icon: "fa-volleyball",
         mapsUrl: "https://maps.app.goo.gl/eAaspu2C7dKtssqy7",
         desc: "Lapangan olahraga bola voli kampus.",
-        fotos: ["{{ asset('gambar/Peta/LapanganBolaVoli.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/LapanganBolaVoli.webp') }}"]
       },
       {
         id: "lapangan-putsal",
@@ -607,7 +607,7 @@
         icon: "fa-futbol",
         mapsUrl: "https://maps.app.goo.gl/eAaspu2C7dKtssqy7",
         desc: "Lapangan olahraga futsal kampus.",
-        fotos: ["{{ asset('gambar/Peta/LapanganBola.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/LapanganBola.webp') }}"]
       },
       {
         id: "parkir-mobil",
@@ -621,7 +621,7 @@
         icon: "fa-square-parking",
         mapsUrl: "https://maps.app.goo.gl/ZhKLZPcFxYDbWMpV6",
         desc: "Area parkir kendaraan roda empat.",
-        fotos: ["{{ asset('gambar/Peta/ParkirMobil.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/ParkirMobil.webp') }}"]
       },
       {
         id: "parkir-motormahasiswa",
@@ -635,7 +635,7 @@
         icon: "fa-motorcycle",
         mapsUrl: "https://maps.app.goo.gl/ZhKLZPcFxYDbWMpV6",
         desc: "Area parkir kendaraan roda empat.",
-        fotos: ["{{ asset('gambar/Peta/ParkirMotor.jpeg') }}"]
+        fotos: ["{{ asset('gambar/Peta/ParkirMotor.webp') }}"]
       },
     ];
 
@@ -882,9 +882,9 @@
       // ►► HERO SLIDESHOW
       // ======================================================================
       const heroSlideImages = [
-        "{{ asset('gambar/gedungutama.jpeg') }}",
-        "{{ asset('gambar/rektor.jpeg') }}",
-        "{{ asset('gambar/gedung.jpeg') }}",
+        "{{ asset('gambar/gedungutama.webp') }}",
+        "{{ asset('gambar/rektor.webp') }}",
+        "{{ asset('gambar/gedung.webp') }}",
       ];
       const HERO_SLIDE_INTERVAL_MS = 6000;
       const $heroSlideshow = $("#heroSlideshow");

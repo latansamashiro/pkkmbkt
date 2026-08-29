@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
   <head>
     <link
@@ -974,7 +974,7 @@
 <header class="navbar mb-5">
     <a href="{{ route('landing.home') }}" class="navbar-brand" aria-label="PKKMB-KT UNILAM Beranda">
         <div class="navbar-logo">
-            <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM">
+            <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM">
         </div>
         <div class="navbar-brand-text">
             <strong>PKKMB-KT</strong>
@@ -1176,7 +1176,7 @@
 
             <div class="dev-card dev-1" data-dev>
                 <span class="top-accent"></span>
-                <img src="{{ asset('gambar/deni.jpeg') }}" alt="Foto Deni Candra Setiawan">
+                <img src="{{ asset('gambar/deni.webp') }}" alt="Foto Deni Candra Setiawan">
                 <div class="dev-shade"></div>
                 <span class="dev-label-mini">Deni Candra Setiawan</span>
                 <div class="dev-info-full">
@@ -1193,7 +1193,7 @@
 
             <div class="dev-card dev-2" data-dev>
                 <span class="top-accent"></span>
-                <img src="{{ asset('gambar/salman.jpeg') }}" alt="Foto Salman Alfarisi">
+                <img src="{{ asset('gambar/salman.webp') }}" alt="Foto Salman Alfarisi">
                 <div class="dev-shade"></div>
                 <span class="dev-label-mini">Salman Alfarisi</span>
                 <div class="dev-info-full">
@@ -1210,7 +1210,7 @@
 
             <div class="dev-card dev-3" data-dev>
                 <span class="top-accent"></span>
-                <img src="{{ asset('gambar/azir.jpeg') }}" alt="Foto Moch. Azir Fadila">
+                <img src="{{ asset('gambar/azir.webp') }}" alt="Foto Moch. Azir Fadila">
                 <div class="dev-shade"></div>
                 <span class="dev-label-mini">Moch. Azir Fadila</span>
                 <div class="dev-info-full">
@@ -1227,7 +1227,7 @@
 
             <div class="dev-card dev-4" data-dev>
                 <span class="top-accent"></span>
-                <img src="{{ asset('gambar/nazrul.jpeg') }}" alt="Foto Nazrul Ibrahim Husen">
+                <img src="{{ asset('gambar/nazrul.webp') }}" alt="Foto Nazrul Ibrahim Husen">
                 <div class="dev-shade"></div>
                 <span class="dev-label-mini">Nazrul Ibrahim Husen</span>
                 <div class="dev-info-full">
@@ -1250,7 +1250,7 @@
     <footer>
         <div class="app-info-head">
             <div class="app-info-logo">
-                <img src="{{ asset('gambar/unilam.png') }}" alt="Logo UNILAM">
+                <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM">
             </div>
             <div>
                 <h4 class="fw-bold mb-0">Informasi Aplikasi</h4>
@@ -1350,9 +1350,9 @@
     }
 
     const heroSlideImages = [
-        "/gambar/gedungutama.jpeg",
-        "/gambar/rektor.jpeg",
-        "/gambar/gedung.jpeg",
+        "/gambar/gedungutama.webp",
+        "/gambar/rektor.webp",
+        "/gambar/gedung.webp",
     ];
     const HERO_SLIDE_INTERVAL_MS = 6000;
 
