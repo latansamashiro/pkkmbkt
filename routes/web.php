@@ -203,6 +203,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/jadwal', 'jadwal')->name('role.student.jadwal');
             Route::get('/keaktifan', 'keaktifan')->name('role.student.keaktifan');
             Route::get('/materi', 'materi')->name('role.student.materi');
+            Route::post('/materi/{topic}/progress', 'materiProgress')->name('role.student.materi.progress');
             Route::get('/denah-kampus', 'denahKampus')->name('role.student.denah-kampus');
             Route::get('/evaluasi', 'evaluasi')->name('role.student.evaluasi');
             Route::post('/evaluasi/{exam}/submit', 'evaluasiSubmit')->name('role.student.evaluasi.submit');

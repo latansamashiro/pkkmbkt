@@ -167,14 +167,20 @@ class StudentController extends Controller
     {
         $topics = \App\Models\Topic::where('status', 'published')->orderByDesc('created_at')->get();
 
+        // Progres tonton video yang beneran tersimpan buat mahasiswa ini
+        // (diisi dari YouTube IFrame Player API, lihat materiProgress()).
+        $progressMap = \App\Models\TopicProgress::where('student_id', auth()->id())
+            ->pluck('percent', 'topic_id');
+
         $gradients = [
             'from-teal-600 to-blue-800', 'from-purple-600 to-indigo-800', 'from-amber-500 to-orange-700',
             'from-cyan-600 to-blue-800', 'from-purple-600 to-pink-700', 'from-indigo-600 to-purple-800',
         ];
 
-        $mapItem = function ($t, $idx) use ($gradients) {
+        $mapItem = function ($t, $idx) use ($gradients, $progressMap) {
             return [
                 'id' => ($t->category === 'video' ? 'vid-' : 'doc-') . $t->id,
+                'topicId' => $t->id,
                 'tipe' => $t->category,
                 'judul' => $t->title,
                 'deskripsi' => '-',
@@ -186,7 +192,7 @@ class StudentController extends Controller
                 'updatedAt' => $t->updated_at?->translatedFormat('d F Y'),
                 'thumbnailImg' => '',
                 'gradientFallback' => $gradients[$idx % count($gradients)],
-                'progress' => 0,
+                'progress' => $t->category === 'video' ? (int) ($progressMap[$t->id] ?? 0) : 0,
                 'tags' => array_values(array_filter([$t->category, $t->topic_type])),
             ];
         };
@@ -195,6 +201,25 @@ class StudentController extends Controller
         $ebookMateri = $topics->where('category', 'ebook')->values()->map(fn($t, $i) => $mapItem($t, $i));
 
         return view('role.student.materi', compact('videoMateri', 'ebookMateri'));
+    }
+
+    /**
+     * Dipanggil dari YouTube IFrame Player API di halaman Materi buat nyimpen
+     * progres tonton (persen 0-100). Cuma boleh naik -- kalau mahasiswa
+     * nonton ulang dari awal, progres tersimpan gak turun.
+     */
+    public function materiProgress(\Illuminate\Http\Request $request, \App\Models\Topic $topic)
+    {
+        $percent = max(0, min(100, (int) $request->input('percent', 0)));
+
+        $row = \App\Models\TopicProgress::firstOrNew([
+            'student_id' => auth()->id(),
+            'topic_id' => $topic->id,
+        ]);
+        $row->percent = max($row->percent ?? 0, $percent);
+        $row->save();
+
+        return response()->json(['percent' => $row->percent]);
     }
 
     public function denahKampus()

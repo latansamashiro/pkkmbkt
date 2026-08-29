@@ -458,6 +458,16 @@
             let currentPage = 1;
             let editingId = null;
 
+            // Normalisasi teks prodi sebelum dibandingkan -- data lama hasil Import
+            // Excel/CSV kadang nyimpen teks apa adanya dari file (mis. "S1 AKUNTANSI"),
+            // beda format sama master Program Studi yang dipakai buat isi dropdown
+            // filter (mis. "S-1 AKUNTANSI"). Tanpa ini, filter prodi gagal nemuin
+            // data yang sebenarnya ada (perbandingan string exact-match gagal
+            // gara-gara beda tanda hubung/spasi/huruf besar-kecil doang).
+            function normalisasiProdi(teks) {
+                return (teks || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+            }
+
             function filteredData() {
                 const status = $("#filterStatus").val();
                 const q = $("#searchPengguna").val().trim().toLowerCase();
@@ -465,7 +475,7 @@
 
                 return penggunaList.filter((p) =>
                     (!status || p.status === status) &&
-                    (!prodi || p.program_study_name === prodi) &&
+                    (!prodi || normalisasiProdi(p.program_study_name) === normalisasiProdi(prodi)) &&
                     (!q || p.nama.toLowerCase().includes(q) || p.email.toLowerCase().includes(q))
                 );
             }

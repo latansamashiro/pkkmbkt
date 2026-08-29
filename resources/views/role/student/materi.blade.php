@@ -1059,6 +1059,7 @@
       const ebookMateri = @json($ebookMateri);
       const GABUNGAN = [...videoMateri, ...ebookMateri];
       let filterAktif = "semua";
+      const CSRF_TOKEN = @json(csrf_token());
 
       const $filterChipsContainer = $("#filterChipsContainer");
       const $searchInput = $("#searchInput");
@@ -1245,6 +1246,53 @@
       // kotak error mentah dari YouTube kalau gagal).
       // ======================================================================
       let currentYtPlayer = null;
+      let progresTrackInterval = null;
+
+      // ======================================================================
+      // ►► PROGRES TONTON — dihitung dari posisi playhead player (bukan angka
+      // hardcode). Dikirim tiap 10 detik selama video diputar, plus tiap kali
+      // pause/selesai/modal ditutup, biar progres yang tersimpan gak ketinggalan
+      // jauh kalau mahasiswa nutup tab tanpa jeda dulu. Progres yang tersimpan
+      // di server cuma boleh naik (lihat StudentController::materiProgress).
+      // ======================================================================
+      function mulaiTrackingProgres(item) {
+        hentikanTrackingProgres();
+        progresTrackInterval = setInterval(function() {
+          kirimProgresDariPlayer(item);
+        }, 10000);
+      }
+
+      function hentikanTrackingProgres() {
+        if (progresTrackInterval) {
+          clearInterval(progresTrackInterval);
+          progresTrackInterval = null;
+        }
+      }
+
+      function kirimProgresDariPlayer(item) {
+        if (!currentYtPlayer || typeof currentYtPlayer.getDuration !== "function") return;
+        const durasi = currentYtPlayer.getDuration();
+        if (!durasi) return;
+        const persen = Math.round((currentYtPlayer.getCurrentTime() / durasi) * 100);
+        kirimProgresSekarang(item, persen);
+      }
+
+      function kirimProgresSekarang(item, persen) {
+        persen = Math.max(0, Math.min(100, persen));
+        if (persen <= (item.progress || 0)) return; // gak pernah turun
+
+        item.progress = persen;
+
+        fetch(`{{ url('mahasiswa/materi') }}/${item.topicId}/progress`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": CSRF_TOKEN,
+            "Accept": "application/json",
+          },
+          body: JSON.stringify({ percent: persen }),
+        }).catch(() => {}); // gagal kirim diam-diam aja, jangan ganggu nonton
+      }
 
       // PENTING: dulu sempat pakai window.onYouTubeIframeAPIReady doang, tapi
       // itu race condition -- skrip iframe_api kadang selesai load & manggil
@@ -1340,6 +1388,17 @@
                 // private/dihapus. Semua kasus itu -> tampilkan fallback yang rapi.
                 tampilkanFallbackVideo(item);
               },
+              onStateChange: function(e) {
+                if (e.data === YT.PlayerState.PLAYING) {
+                  mulaiTrackingProgres(item);
+                } else if (e.data === YT.PlayerState.PAUSED) {
+                  hentikanTrackingProgres();
+                  kirimProgresDariPlayer(item);
+                } else if (e.data === YT.PlayerState.ENDED) {
+                  hentikanTrackingProgres();
+                  kirimProgresSekarang(item, 100);
+                }
+              },
             },
           });
         });
@@ -1407,6 +1466,7 @@
       }
 
       function tutupVideoPlayer() {
+        hentikanTrackingProgres();
         $videoPlayerModal.removeClass("open");
         if (currentYtPlayer) {
           try {
@@ -1415,6 +1475,9 @@
           currentYtPlayer = null;
         }
         $("#videoPlayerFrameWrap").removeClass("is-document").html(""); // stop video-nya (hapus iframe biar suara berhenti)
+        // Refresh kartu & stat global biar progres yang baru kekirim langsung kelihatan.
+        handleSearchAndFilter();
+        initStats();
       }
 
       const $videoPlayerModal = $("#videoPlayerModal");

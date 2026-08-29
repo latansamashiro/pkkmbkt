@@ -418,6 +418,37 @@ class UserController extends Controller
      * (misal email/NPM sudah dipakai) dilewati, tidak menggagalkan baris lain,
      * lalu dilaporkan satu per satu di akhir.
      */
+    /**
+     * Cari nama Program Studi versi "resmi" (sesuai master data) yang paling
+     * cocok dengan teks bebas hasil Import Excel/CSV -- supaya data yang
+     * masuk konsisten dengan yang dipakai buat isi dropdown filter Prodi
+     * (kalau dibiarkan apa adanya, mis. "S1 AKUNTANSI" tanpa tanda hubung,
+     * nanti gak pernah ketemu waktu difilter pakai "S-1 AKUNTANSI").
+     * Kalau gak ketemu yang cocok, teks aslinya (yang sudah di-trim) dipakai
+     * apa adanya -- biar tetap kesimpen, cuma gak match sama filter.
+     */
+    protected function resolveProdiCanonical(?string $raw): ?string
+    {
+        $raw = trim((string) $raw);
+        if ($raw === '') {
+            return null;
+        }
+
+        $normalisasi = fn(string $s) => preg_replace('/[^A-Z0-9]/', '', strtoupper($s));
+        $targetNormal = $normalisasi($raw);
+
+        static $semuaProdi = null;
+        $semuaProdi ??= ProgramStudy::pluck('name');
+
+        foreach ($semuaProdi as $nama) {
+            if ($normalisasi($nama) === $targetNormal) {
+                return $nama;
+            }
+        }
+
+        return $raw;
+    }
+
     public function import(Request $request)
     {
         $role = $this->lockedRole($request);
@@ -486,7 +517,7 @@ class UserController extends Controller
             $genderRaw = strtolower((string) $kolom($row, 'kelamin'));
             $gender = str_contains($genderRaw, 'perempuan') ? 'perempuan' : (str_contains($genderRaw, 'laki') ? 'laki-laki' : null);
             $fakultas = $academic ? $kolom($row, 'fakultas') : null;
-            $prodi = $academic ? $kolom($row, 'program studi') : null;
+            $prodi = $academic ? $this->resolveProdiCanonical($kolom($row, 'program studi')) : null;
             $kodeKelompok = $groupField ? $kolom($row, 'kelompok') : null;
             $advisorTypeRaw = $advisorTypeField ? strtolower((string) $kolom($row, 'jenis')) : null;
             $advisorType = $advisorTypeField
