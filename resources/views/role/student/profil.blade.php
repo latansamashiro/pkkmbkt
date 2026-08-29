@@ -74,7 +74,7 @@
           class="w-full h-full object-contain" />
       </div>
       <div>
-        <strong class="block font-display text-[14.5px] text-white">PKKMB-KT</strong>
+        <strong class="block font-display text-[14.5px] text-white">SIMBA</strong>
         <span class="text-[10.5px] text-[#aeb6e0] tracking-[0.04em]">UNILAM 2026</span>
       </div>
     </a>

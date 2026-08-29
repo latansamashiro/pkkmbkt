@@ -775,7 +775,7 @@ background: rgba(20, 20, 20, 0.9);
           <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM" />
         </div>
         <div class="navbar-brand-text">
-          <strong>PKKMB-KT</strong>
+          <strong>SIMBA</strong>
           <span>UNILAM 2026</span>
         </div>
       </a>
@@ -847,32 +847,32 @@ background: rgba(20, 20, 20, 0.9);
            ►► TEKS UTAMA HERO
            Warna judul pakai gradasi brand: #004a8f → #00a79d → #a6ce39
       ====================================================================== -->
-      <div class="hero-panel text-center md:text-left max-w-2xl mx-auto md:mx-0">
+      <div class="hero-panel text-left max-w-2xl mx-0">
         <p class="font-display text-lg md:text-2xl text-white/90 tracking-wide leading-none mb-1">
           Selamat Datang di
         </p>
 
-        <h2 class="font-abril text-5xl md:text-8xl tracking-wide brand-gradient-text animate-gradient-text -mt-1 md:-mt-2 pb-1">
-          PKKMB-KT
+        <h2 class="font-abril text-4xl sm:text-5xl md:text-7xl tracking-wide brand-gradient-text animate-gradient-text -mt-1 md:-mt-2 pb-1 whitespace-nowrap">
+          SIMBA UNILAM
         </h2>
 
-        <p class="text-sm md:text-lg text-white/85 tracking-wide leading-snug mt-2 mb-5 max-w-lg mx-auto md:mx-0">
-          Pengenalan Kehidupan Kampus bagi Mahasiswa Baru Khutbatut Ta'aruf
+        <p class="text-sm md:text-lg text-white/85 tracking-wide leading-snug mt-2 mb-5 max-w-lg mx-0">
+          SISTEM INFORMASI MAHASISWA BARU UNIVERSITAS LA TANSA MASHIRO
         </p>
 
         <hr class="border-teal-800/50 my-4 max-w-xs mx-auto md:mx-0" />
 
         <h3 class="text-2xl md:text-4xl font-extrabold tracking-wide mt-4">
           <span class="font-abril text-3xl md:text-5xl brand-gradient-text animate-gradient-text">
-            UNILAM 2026
+            PKKMB-KT 2026
           </span>
         </h3>
 
-        <p class="font-display italic text-lg md:text-xl text-white/80 tracking-wide mt-2 mb-8">
-          Universitas La Tansa Mashiro
+        <p class="text-sm md:text-lg text-white/85 tracking-wide leading-snug mt-2 mb-8">
+          PENGENALAN KEHIDUPAN KAMPUS BAGI MAHASISWA BARU KHUTBATUT-TA'ARUF
         </p>
 
-        <div class="hero-actions">
+        <div class="hero-actions justify-start">
           <!-- ►► TOMBOL LOGIN — KHUSUS MENTOR, MBA & PANITIA (bukan peserta) -->
           <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="btn-primary">
             <i class="fa-solid fa-user-shield ic"></i>

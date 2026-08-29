@@ -646,7 +646,7 @@
 
         <div class="splash-text">
           <span class="ahlan">اَهْلًا وَسَهْلًا</span>
-          <strong>PKKMB-KT UNILAM 2026</strong>
+          <strong>SIMBA UNILAM 2026</strong>
           <span>Universitas La Tansa Mashiro</span>
         </div>
 

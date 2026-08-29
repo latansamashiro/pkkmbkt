@@ -453,7 +453,7 @@
           <img src="{{ asset('gambar/unilam.webp') }}" alt="Logo UNILAM" />
         </div>
         <div class="navbar-brand-text">
-          <strong>PKKMB-KT</strong>
+          <strong>SIMBA</strong>
           <span>UNILAM 2026</span>
         </div>
       </a>

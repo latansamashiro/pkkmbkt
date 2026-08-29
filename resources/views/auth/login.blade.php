@@ -34,7 +34,7 @@
                     </div>
                     <div class="login-info-brand">
                         <strong>UNILAM</strong>
-                        <span>Portal PKKMB-KT</span>
+                        <span>Portal SIMBA</span>
                     </div>
                 </div>
 
