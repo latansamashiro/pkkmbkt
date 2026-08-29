@@ -1,11 +1,57 @@
 {{-- resources/views/role/mentor/absensi.blade.php --}}
-@extends('layouts.mentor.main')
+<!doctype html>
+<html lang="id">
 
-@section('title', 'Kelola Presensi | PKKMB-KT UNILAM 2026')
-@section('page-title', 'Kelola Presensi')
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Kelola Presensi | PKKMB-KT UNILAM 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
 
-@push('styles')
   <style type="text/tailwindcss">
+    @theme {
+        --color-navy-900: #152159;
+        --color-navy-700: #1e3a8f;
+        --color-navy-600: #2a4bb0;
+        --color-teal-600: #0f8a8c;
+        --color-teal-500: #16a0a1;
+        --color-teal-tint: #e2f3f2;
+        --color-lime-500: #a9c73b;
+        --color-lime-tint: #f2f6e0;
+        --color-navy-tint: #e6e9f6;
+        --color-bg: #f2f4fa;
+        --color-surface: #ffffff;
+        --color-surface-muted: #e8ebf6;
+        --color-border: #e1e5f1;
+        --color-ink-900: #1b2238;
+        --color-ink-600: #5b6175;
+        --color-ink-400: #8d92a6;
+        --font-sans: "Plus Jakarta Sans", sans-serif;
+        --font-display: "Lora", serif;
+      }
+  </style>
+
+  <style type="text/tailwindcss">
+    /* ===== Wrapper konten (pola sama seperti halaman Mentor lain) ===== */
+    .content { @apply flex-1 w-full mx-auto; max-width: 1180px; padding: clamp(16px, 4vw, 40px) clamp(16px, 4vw, 40px) calc(74px + 28px); }
+    @media (min-width: 768px) { .content { padding-bottom: clamp(28px, 4vw, 48px); } }
+
+    /* ===== Hero & section header (dipindah dari layouts.mentor.main, dipakai apa adanya) ===== */
+    .hero { @apply relative overflow-hidden bg-surface-muted rounded-[28px]; padding: clamp(20px, 5vw, 38px) clamp(18px, 5vw, 38px) clamp(20px, 4vw, 32px); }
+    .hero-eyebrow { @apply text-[13px] font-semibold text-ink-600 mb-1 relative z-[1]; }
+    .hero-sub { @apply text-[14.5px] text-ink-600 mb-1.5 relative z-[1]; }
+    .hero-title { @apply font-display font-bold text-navy-900 leading-[1.18] m-0 relative z-[1]; font-size: clamp(22px, 3.6vw + 14px, 32px); max-width: min(420px, 80%); }
+
+    .section { @apply mt-[30px]; }
+    .section-head { @apply flex items-baseline justify-between mb-3.5; }
+    .section-title { @apply font-display text-[17px] font-bold text-navy-900 m-0; }
+
     .hero-stats-row { @apply grid gap-2.5 mt-5; grid-template-columns: repeat(3, 1fr); }
     .hero-stat-box { @apply bg-white/70 rounded-2xl text-center; padding: 12px 8px; }
     .hero-stat-box .val { @apply font-display text-xl font-bold text-navy-900 leading-none; }
@@ -58,7 +104,7 @@
 
     .mhs-list-scroll { max-height: 460px; overflow-y: auto; }
     .mhs-list-scroll::-webkit-scrollbar { width: 6px; }
-    .mhs-list-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    .mhs-list-scroll::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 10px; }
 
     .mhs-row { @apply flex items-center justify-between gap-3 border-t border-border flex-wrap first:border-t-0; padding: 13px 20px; }
     .mhs-info { @apply flex items-center gap-2.5 min-w-0; }
@@ -82,114 +128,120 @@
     .btn-save:hover:not(:disabled) { @apply -translate-y-0.5; filter: brightness(1.12); }
     .btn-save:disabled { @apply opacity-45 cursor-not-allowed; transform: none; filter: none; }
     .btn-save svg { @apply w-4 h-4; }
-    .btn-save.btn-submit { background: var(--navy-900); }
+    .btn-save.btn-submit { background: var(--color-navy-900); }
 
-    .save-toast { @apply fixed left-1/2 bg-navy-900 text-white text-[12.5px] font-bold rounded-full shadow-[0_10px_24px_rgba(21,33,89,0.16)] opacity-0 pointer-events-none z-[60] flex items-center gap-2; bottom: calc(var(--bottomnav-h) + 16px); transform: translateX(-50%) translateY(20px); padding: 12px 22px; transition: opacity .25s, transform .25s; }
+    .save-toast { @apply fixed left-1/2 bg-navy-900 text-white text-[12.5px] font-bold rounded-full shadow-[0_10px_24px_rgba(21,33,89,0.16)] opacity-0 pointer-events-none z-[60] flex items-center gap-2; bottom: calc(74px + 16px); transform: translateX(-50%) translateY(20px); padding: 12px 22px; transition: opacity .25s, transform .25s; }
     .save-toast.show { @apply opacity-100; transform: translateX(-50%) translateY(0); }
     .save-toast svg { @apply w-[15px] h-[15px] text-lime-500; }
     @media (min-width: 768px) { .save-toast { bottom: 16px; } }
   </style>
-@endpush
+</head>
 
-@section('content')
+<body class="font-sans text-ink-900 m-0 bg-bg antialiased min-h-screen flex flex-col">
+  @include('layouts.mentor.topnav', ['navActive' => 'absensi'])
 
-  <!-- ===== HERO ===== -->
-  <section class="hero">
-    <p class="hero-eyebrow">Kelola Presensi</p>
-    <p class="hero-sub">Presensi kelompok</p>
-    <h2 class="hero-title">
-      <span id="kelompokNama">{{ $group->name ?? 'Belum ada kelompok' }}</span>
-    </h2>
-    <p class="text-[13px] text-ink-600 mt-2 relative z-[1] max-w-[420px]">
-      Catat kehadiran anggota kelompokmu per hari &amp; per sesi. Tiap sesi
-      otomatis terbuka dan terkunci sesuai tanggal serta jam yang ditentukan.
-    </p>
+  <div class="content">
 
-    <div class="hero-stats-row relative z-[1]">
-      <div class="hero-stat-box">
-        <div class="val" id="statHeroHadir">0</div>
-        <div class="lbl">Hadir</div>
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <p class="hero-eyebrow">Kelola Presensi</p>
+      <p class="hero-sub">Presensi kelompok</p>
+      <h2 class="hero-title">
+        <span id="kelompokNama">{{ $group->name ?? 'Belum ada kelompok' }}</span>
+      </h2>
+      <p class="text-[13px] text-ink-600 mt-2 relative z-[1] max-w-[420px]">
+        Catat kehadiran anggota kelompokmu per hari &amp; per sesi. Tiap sesi
+        otomatis terbuka dan terkunci sesuai tanggal serta jam yang ditentukan.
+      </p>
+
+      <div class="hero-stats-row relative z-[1]">
+        <div class="hero-stat-box">
+          <div class="val" id="statHeroHadir">0</div>
+          <div class="lbl">Hadir</div>
+        </div>
+        <div class="hero-stat-box">
+          <div class="val" id="statHeroBelum">0</div>
+          <div class="lbl">Belum Diisi</div>
+        </div>
+        <div class="hero-stat-box">
+          <div class="val" id="statHeroTotal">0</div>
+          <div class="lbl">Anggota</div>
+        </div>
       </div>
-      <div class="hero-stat-box">
-        <div class="val" id="statHeroBelum">0</div>
-        <div class="lbl">Belum Diisi</div>
+    </section>
+
+    <!-- ===== PILIH HARI ===== -->
+    <section class="section">
+      <div class="section-head">
+        <h3 class="section-title">Pilih Hari</h3>
       </div>
-      <div class="hero-stat-box">
-        <div class="val" id="statHeroTotal">0</div>
-        <div class="lbl">Anggota</div>
+      <div class="hari-tabs" id="hariTabs"></div>
+    </section>
+
+    <!-- ===== REKAP SESI ===== -->
+    <section class="section">
+      <div class="section-head">
+        <h3 class="section-title">Rekap Sesi Ini</h3>
       </div>
-    </div>
-  </section>
+      <div class="status-stats" id="statusStats"></div>
+    </section>
 
-  <!-- ===== PILIH HARI ===== -->
-  <section class="section">
-    <div class="section-head">
-      <h3 class="section-title">Pilih Hari</h3>
-    </div>
-    <div class="hari-tabs" id="hariTabs"></div>
-  </section>
+    <!-- ===== PILIH SESI ===== -->
+    <section class="section">
+      <div class="section-head">
+        <h3 class="section-title">Pilih Sesi</h3>
+      </div>
+      <div class="sesi-tabs" id="sesiTabs"></div>
+      <div id="lockBannerWrap"></div>
 
-  <!-- ===== REKAP SESI ===== -->
-  <section class="section">
-    <div class="section-head">
-      <h3 class="section-title">Rekap Sesi Ini</h3>
-    </div>
-    <div class="status-stats" id="statusStats"></div>
-  </section>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" id="searchInput" placeholder="Cari nama atau NPM mahasiswa..." />
+      </div>
 
-  <!-- ===== PILIH SESI ===== -->
-  <section class="section">
-    <div class="section-head">
-      <h3 class="section-title">Pilih Sesi</h3>
-    </div>
-    <div class="sesi-tabs" id="sesiTabs"></div>
-    <div id="lockBannerWrap"></div>
+      <div class="absensi-card">
+        <div class="absensi-card-head">
+          <h3 id="cardTitle">Daftar Anggota</h3>
+          <span class="badge-count" id="cardCount">0 mahasiswa</span>
+        </div>
+        <div class="mhs-list-scroll">
+          <div id="mhsList"></div>
+        </div>
+      </div>
 
-    <div class="search-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      <div class="save-bar">
+        <button class="btn-save" id="btnSimpan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+            <path d="M17 21v-8H7v8M7 3v5h8" />
+          </svg>
+          Simpan Presensi
+        </button>
+        <button class="btn-save btn-submit" id="btnSubmit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          Submit &amp; Kunci
+        </button>
+      </div>
+    </section>
+
+    <div class="save-toast" id="saveToast">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6 9 17l-5-5" />
       </svg>
-      <input type="text" id="searchInput" placeholder="Cari nama atau NPM mahasiswa..." />
+      <span class="toast-text">Presensi tersimpan</span>
     </div>
 
-    <div class="absensi-card">
-      <div class="absensi-card-head">
-        <h3 id="cardTitle">Daftar Anggota</h3>
-        <span class="badge-count" id="cardCount">0 mahasiswa</span>
-      </div>
-      <div class="mhs-list-scroll">
-        <div id="mhsList"></div>
-      </div>
-    </div>
-
-    <div class="save-bar">
-      <button class="btn-save" id="btnSimpan">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
-          <path d="M17 21v-8H7v8M7 3v5h8" />
-        </svg>
-        Simpan Presensi
-      </button>
-      <button class="btn-save btn-submit" id="btnSubmit">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 6 9 17l-5-5" />
-        </svg>
-        Submit &amp; Kunci
-      </button>
-    </div>
-  </section>
-
-  <div class="save-toast" id="saveToast">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-    <span class="toast-text">Presensi tersimpan</span>
   </div>
 
-@endsection
+  @include('layouts.mentor.footer')
 
-@push('scripts')
+  @include('layouts.mentor.bottomnav', ['navActive' => 'absensi'])
+
   <script>
     $(function () {
       // ======================================================================
@@ -589,4 +641,6 @@
       init();
     });
   </script>
-@endpush
+</body>
+
+</html>

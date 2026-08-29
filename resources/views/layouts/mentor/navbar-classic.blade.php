@@ -1,4 +1,4 @@
-﻿{{-- resources/views/layouts/mentor/navbar-classic.blade.php
+{{-- resources/views/layouts/mentor/navbar-classic.blade.php
      Dipakai di halaman yang masih pakai CSS custom (.navbar, .navbar-links) — Jadwal, Profil.
      Cara pakai: @include('layouts.mentor.navbar-classic', ['navActive' => 'jadwal']) --}}
 <header class="navbar">

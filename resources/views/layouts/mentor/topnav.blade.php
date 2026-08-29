@@ -1,4 +1,4 @@
-﻿{{-- resources/views/layouts/mentor/topnav.blade.php
+{{-- resources/views/layouts/mentor/topnav.blade.php
      Dipakai di halaman yang masih pakai desain "hero foto" (Info, Leaderboard, Modul).
      Cara pakai: @include('layouts.mentor.topnav', ['navActive' => 'info']) --}}
 <header

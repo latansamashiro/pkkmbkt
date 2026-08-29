@@ -1,4 +1,4 @@
-﻿{{-- resources/views/layouts/mentor/sidebar.blade.php --}}
+{{-- resources/views/layouts/mentor/sidebar.blade.php --}}
 <aside class="sidebar">
   <span class="sidebar-brand">
     <img src="{{ asset('gambar/unilam-logo-full.webp') }}" alt="Logo UNILAM" />

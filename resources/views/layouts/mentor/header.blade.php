@@ -1,4 +1,4 @@
-﻿{{-- resources/views/layouts/mentor/header.blade.php --}}
+{{-- resources/views/layouts/mentor/header.blade.php --}}
 <header class="topbar !static">
   <a href="{{ route('dashboard') }}" class="topbar-brand">
     <img src="{{ asset('gambar/unilam.webp') }}" alt="Universitas La Tansa Mashiro" />
