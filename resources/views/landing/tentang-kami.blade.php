@@ -10,7 +10,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Tentang PKKMB-KT</title>
+    <title>Tentang SIMBA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
@@ -572,7 +572,7 @@
             .tujuan-grid .goal-card p{ display: block; }
         }
 
-        /* ►► GRID FITUR UTAMA — SELALU 4 di baris atas, 3 di baris bawah,
+        /* ►► GRID FITUR UTAMA — SELALU 4 di baris atas, sisanya menyusul,
            baik di HP maupun desktop. Tambah item baru: cukup tambah satu
            .feature-card lagi di HTML, grid ini otomatis menata ulang. */
         .fitur-grid{
@@ -632,6 +632,8 @@
         .fc-5 i{ background: var(--navy-tint); color: var(--navy-600); }
         .fc-6 i{ background: var(--lime-tint); color: var(--lime-500); }
         .fc-7 i{ background: var(--teal-tint); color: var(--teal-600); }
+        .fc-8 i{ background: var(--navy-tint); color: var(--navy-600); }
+        .fc-9 i{ background: var(--lime-tint); color: var(--lime-500); }
 
         .dev-accordion{
             display: flex;
@@ -816,6 +818,14 @@
             margin-top: 14px;
         }
         .dev-hint i{ color: var(--teal-600); margin-right: 4px; }
+
+        .dev-note{
+            text-align: center;
+            font-size: .85rem;
+            color: #6b7280;
+            max-width: 640px;
+            margin: 4px auto 0;
+        }
 
         /* ======================================================================
            ►► "INFORMASI APLIKASI" — DIROMBAK dari tabel polos jadi panel
@@ -1020,11 +1030,12 @@
         <div class="hero-slideshow" id="heroSlideshow"></div>
 
         <div class="hero-content">
-            <h1 class="hero-title">Tentang PKKMB-KT</h1>
+            <h1 class="hero-title">Tentang SIMBA</h1>
             <p class="lead">
-                Mengenal Portal PKKMB-KT satu pintu digital yang menuntun
-                perjalanan mahasiswa baru mengenal kehidupan kampus,
-                dari pengenalan awal hingga siap menjadi bagian dari kampus.
+                Mengenal SIMBA, platform digital yang dirancang untuk
+                mendampingi perjalanan mahasiswa baru Universitas La Tansa
+                Mashiro sejak awal memasuki dunia perkuliahan hingga
+                menjadi bagian dari kehidupan kampus.
             </p>
         </div>
     </div>
@@ -1037,25 +1048,30 @@
 
             <div class="col-lg-7 p-5">
 
-                <span class="section-eyebrow" style="text-align:left; display:block;">Apa itu</span>
+                <span class="section-eyebrow" style="text-align:left; display:block;">Apa itu SIMBA?</span>
                 <h3 class="fw-bold mb-3">
-                    Portal PKKMB-KT
+                    Sistem Informasi Mahasiswa Baru
                 </h3>
 
                 <p class="text-muted mb-0">
-                    Portal PKKMB-KT merupakan platform digital yang dirancang
-                    untuk mendukung seluruh rangkaian kegiatan
+                    <strong>SIMBA (Sistem Informasi Mahasiswa Baru)</strong>
+                    merupakan platform digital terintegrasi yang dirancang
+                    untuk membantu mahasiswa baru dalam memperoleh
+                    informasi, mengakses layanan, dan mengikuti berbagai
+                    rangkaian kegiatan awal perkuliahan.
+                </p>
+                <p class="text-muted mb-0">
+                    Di dalam SIMBA, mahasiswa baru dapat menemukan berbagai
+                    kebutuhan dalam satu tempat, termasuk informasi kampus,
+                    panduan mahasiswa baru, serta rangkaian kegiatan
                     <strong>Pengenalan Kehidupan Kampus Mahasiswa Baru
                     Khutbatut Ta'aruf (PKKMB-KT)</strong>.
-                    Melalui satu sistem terintegrasi, mahasiswa baru,
-                    mentor, panitia, dan administrator dapat mengakses
-                    seluruh layanan PKKMB-KT secara mudah, cepat,
-                    dan efisien.
                 </p>
 
                 <p class="about-quote">
-                    &ldquo;Satu portal, seluruh perjalanan orientasi kampus
-                    &mdash; dari absen pagi hingga pengumuman kelulusan.&rdquo;
+                    &ldquo;Satu sistem, satu perjalanan &mdash; dari menjadi
+                    mahasiswa baru hingga siap menjadi bagian dari
+                    kampus.&rdquo;
                 </p>
 
                 <div class="about-stats">
@@ -1065,7 +1081,7 @@
                     </div>
                     <div class="about-stat">
                         <span class="num">100<span class="accent">%</span></span>
-                        <span class="lbl">Proses Digital</span>
+                        <span class="lbl">Terintegrasi Digital</span>
                     </div>
                     <div class="about-stat">
                         <span class="num"><span class="accent">4</span></span>
@@ -1073,7 +1089,7 @@
                     </div>
                     <div class="about-stat">
                         <span class="num"><span class="accent">24</span>/7</span>
-                        <span class="lbl">Bisa Diakses</span>
+                        <span class="lbl">Akses Informasi</span>
                     </div>
                 </div>
 
@@ -1085,34 +1101,34 @@
     <div class="trail"><span class="node"></span></div>
 
     <div id="tujuan">
-        <span class="section-eyebrow">Kenapa portal ini ada</span>
-        <h3 class="section-title">Tujuan Portal</h3>
-        <p class="section-sub">Empat hal yang menjadi dasar dibangunnya sistem PKKMB-KT.</p>
+        <span class="section-eyebrow">Kenapa SIMBA hadir?</span>
+        <h3 class="section-title">Tujuan SIMBA</h3>
+        <p class="section-sub">SIMBA hadir untuk memberikan pengalaman mahasiswa baru yang lebih mudah, terarah, dan terintegrasi sejak pertama kali memasuki lingkungan Universitas La Tansa Mashiro.</p>
 
         <div class="tujuan-grid mb-5">
 
             <div class="card card-custom goal-card accent-teal">
                 <div class="icon-box"><i class="fa-solid fa-laptop"></i></div>
                 <h5>Digitalisasi</h5>
-                <p>Digitalisasi proses PKKMB-KT.</p>
+                <p>Menghadirkan layanan dan informasi mahasiswa baru dalam satu platform digital.</p>
             </div>
 
             <div class="card card-custom goal-card accent-lime">
-                <div class="icon-box"><i class="fa-solid fa-bolt"></i></div>
-                <h5>Efisiensi</h5>
-                <p>Mempermudah administrasi.</p>
+                <div class="icon-box"><i class="fa-solid fa-compass"></i></div>
+                <h5>Kemudahan Akses</h5>
+                <p>Memudahkan mahasiswa baru menemukan informasi, panduan, dan kebutuhan selama proses awal perkuliahan.</p>
             </div>
 
             <div class="card card-custom goal-card accent-navy">
-                <div class="icon-box"><i class="fa-solid fa-chart-line"></i></div>
-                <h5>Monitoring</h5>
-                <p>Monitoring secara real-time.</p>
+                <div class="icon-box"><i class="fa-solid fa-diagram-project"></i></div>
+                <h5>Integrasi</h5>
+                <p>Menghubungkan berbagai informasi dan aktivitas mahasiswa baru, termasuk pelaksanaan PKKMB-KT, dalam satu sistem.</p>
             </div>
 
             <div class="card card-custom goal-card accent-navy2">
-                <div class="icon-box"><i class="fa-solid fa-shield-halved"></i></div>
-                <h5>Keamanan</h5>
-                <p>Data aman dan terpusat.</p>
+                <div class="icon-box"><i class="fa-solid fa-database"></i></div>
+                <h5>Informasi Terpusat</h5>
+                <p>Menyediakan informasi resmi dan terstruktur agar mahasiswa baru mendapatkan informasi yang tepat dari satu sumber.</p>
             </div>
 
         </div>
@@ -1123,43 +1139,47 @@
     <div id="fitur">
         <span class="section-eyebrow">Yang bisa dilakukan di dalamnya</span>
         <h3 class="section-title">Fitur Utama</h3>
-        <p class="section-sub">Semua kebutuhan PKKMB-KT tersedia dalam satu portal.</p>
+        <p class="section-sub">Berbagai kebutuhan mahasiswa baru tersedia dalam satu platform, mulai dari informasi kampus hingga rangkaian kegiatan PKKMB-KT.</p>
 
         <div class="fitur-grid mb-5">
 
-            <div class="card card-custom feature-card fc-1">
+            <div class="card card-custom feature-card fc-1" title="Akses berbagai informasi penting yang dibutuhkan mahasiswa baru.">
+                <i class="fa-solid fa-circle-info"></i>
+                <h5>Informasi Mahasiswa Baru</h5>
+            </div>
+
+            <div class="card card-custom feature-card fc-2" title="Temukan panduan dan informasi untuk membantu mahasiswa beradaptasi dengan lingkungan kampus.">
+                <i class="fa-solid fa-map"></i>
+                <h5>Panduan PKKMB-KT</h5>
+            </div>
+            <div class="card card-custom feature-card fc-4" title="Melakukan dan memantau kehadiran dalam rangkaian kegiatan PKKMB-KT.">
                 <i class="fa-solid fa-calendar-check"></i>
                 <h5>Absensi</h5>
             </div>
 
-            <div class="card card-custom feature-card fc-2">
+            <div class="card card-custom feature-card fc-5" title="Mengakses materi pembekalan dan informasi pembelajaran yang tersedia.">
                 <i class="fa-solid fa-book-open"></i>
                 <h5>Materi</h5>
             </div>
 
-            <div class="card card-custom feature-card fc-3">
+            <div class="card card-custom feature-card fc-6" title="Mengikuti tugas maupun evaluasi sebagai bagian dari rangkaian kegiatan mahasiswa baru.">
                 <i class="fa-solid fa-pen-to-square"></i>
-                <h5>Tugas</h5>
+                <h5>Tugas &amp; Evaluasi</h5>
             </div>
 
-            <div class="card card-custom feature-card fc-4">
+            <div class="card card-custom feature-card fc-7" title="Mendapatkan informasi dan pengumuman resmi terkait kegiatan mahasiswa baru.">
                 <i class="fa-solid fa-bullhorn"></i>
-                <h5>Informasi</h5>
+                <h5>Informasi &amp; Pengumuman</h5>
             </div>
 
-            <div class="card card-custom feature-card fc-5">
+            <div class="card card-custom feature-card fc-8" title="Melihat perkembangan dan pencapaian selama rangkaian PKKMB-KT.">
                 <i class="fa-solid fa-trophy"></i>
                 <h5>Leaderboard</h5>
             </div>
 
-            <div class="card card-custom feature-card fc-6">
+            <div class="card card-custom feature-card fc-9" title="Membantu mahasiswa baru mengenali lokasi dan lingkungan Universitas La Tansa Mashiro.">
                 <i class="fa-solid fa-map-location-dot"></i>
                 <h5>Denah Kampus</h5>
-            </div>
-
-            <div class="card card-custom feature-card fc-7">
-                <i class="fa-solid fa-chart-simple"></i>
-                <h5>Monitoring</h5>
             </div>
 
         </div>
@@ -1168,9 +1188,9 @@
     <div class="trail"><span class="node"></span></div>
 
     <div id="tim">
-        <span class="section-eyebrow">Di balik layar</span>
+        <span class="section-eyebrow">Di balik SIMBA</span>
         <h3 class="section-title">Tim Pengembang</h3>
-        <p class="section-sub">HIMA Informatika yang membangun dan merawat portal ini.</p>
+        <p class="section-sub">SIMBA dikembangkan sebagai bagian dari upaya digitalisasi layanan mahasiswa baru dan mendukung pelaksanaan PKKMB-KT di Universitas La Tansa Mashiro.</p>
 
         <div class="dev-accordion mb-2" id="devAccordion">
 
@@ -1243,7 +1263,8 @@
             </div>
 
         </div>
-        <p class="dev-hint mb-5"><i class="fa-solid fa-hand-pointer"></i>Klik / tap salah satu foto untuk melihat detailnya.</p>
+        <p class="dev-hint mb-2"><i class="fa-solid fa-hand-pointer"></i>Klik / tap salah satu foto untuk melihat detailnya.</p>
+        <p class="dev-note mb-5">HIMA Informatika Universitas La Tansa Mashiro &mdash; tim pengembang berperan dalam merancang, membangun, mengembangkan, dan memelihara sistem agar dapat digunakan untuk mendukung kebutuhan mahasiswa baru.</p>
     </div>
 
     <!-- ============ INFORMASI APLIKASI — DIROMBAK JADI PANEL KARTU ============ -->
@@ -1254,7 +1275,7 @@
             </div>
             <div>
                 <h4 class="fw-bold mb-0">Informasi Aplikasi</h4>
-                <p class="app-info-sub">Portal PKKMB-KT <span class="whitespace-nowrap">Universitas La Tansa Mashiro</span></p>
+                <p class="app-info-sub">SIMBA &mdash; Sistem Informasi Mahasiswa Baru, <span class="whitespace-nowrap">Universitas La Tansa Mashiro</span></p>
             </div>
         </div>
 
@@ -1272,7 +1293,7 @@
                 <div class="app-info-icon accent-lime-i"><i class="fa-solid fa-users-gear"></i></div>
                 <div>
                     <span class="app-info-label">Pengembang</span>
-                    <span class="app-info-value">HIMA Informatika <span class="whitespace-nowrap">Universitas La Tansa Mashiro</span><br>Periode 2025&ndash;2026</span>
+                    <span class="app-info-value">HIMA Informatika <span class="whitespace-nowrap">Universitas La Tansa Mashiro</span></span>
                 </div>
             </div>
 

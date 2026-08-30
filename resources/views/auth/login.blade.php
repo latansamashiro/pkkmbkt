@@ -41,9 +41,10 @@
                 <div class="login-info-body">
                     <h2>Mulai Langkah <br />Akademik Anda di Sini.</h2>
                     <p>
-                        Selamat Datang di Portal PKKMB. Wujudkan pengalaman PKKMB yang lebih
-                        modern melalui platform digital terintegrasi. Akses informasi,
-                        layanan, dan seluruh aktivitas dalam satu sistem.
+                        Selamat Datang di SIMBA 
+                        Wujudkan pengalaman menjadi mahasiswa baru yang lebih modern dan mudah 
+                        melalui platform digital terintegrasi. Akses informasi, layanan, panduan, 
+                        dan berbagai aktivitas mahasiswa baru dalam satu sistem.
                     </p>
                 </div>
             </div>
