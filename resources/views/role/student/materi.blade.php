@@ -434,7 +434,7 @@
         height: 130px;
       }
       .ebook-thumb img {
-        @apply w-full h-full object-cover block;
+        @apply w-full h-full object-contain block;
       }
       .ebook-thumb-gradient {
         @apply w-full h-full flex items-center justify-center;
@@ -1047,7 +1047,7 @@
         { id: "semua", label: "Semua" },
         { id: "video", label: "Video Materi" },
         { id: "ebook", label: "E-Book" },
-        { id: "keunilaman", label: "Sejarah Unilam" },
+        { id: "keunilaman", label: "Unilam (Umum)" },
         { id: "akademik", label: "Akademik" },
         { id: "lkms", label: "LKMS" },
         { id: "perpustakaan", label: "Perpustakaan" },
@@ -1147,7 +1147,9 @@
           .map((v) => {
             const isDone = v.progress === 100;
             // Prioritas thumbnail: gambar manual (kalau ada) > auto dari YouTube/GDrive > gradasi warna.
-            const thumbSrc = v.thumbnailImg || dapatkanThumbnailOtomatis(v.youtube);
+            // Kalau URL Thumbnail manual kebetulan link YouTube/GDrive (bukan
+            // link gambar langsung), tetap dikenali & dikonversi otomatis.
+            const thumbSrc = dapatkanThumbnailOtomatis(v.thumbnailImg) || v.thumbnailImg || dapatkanThumbnailOtomatis(v.youtube);
             const gradientCss = getGradientStyle(v.gradientFallback);
             const thumbHtml = thumbSrc ?
               `<img src="${thumbSrc}" alt="${v.judul}" onerror="gantiKeGradasi(this, '${gradientCss.replace(/'/g, "\\'")}')" />` :
@@ -1459,10 +1461,30 @@
         const item = GABUNGAN.find((x) => x.id === id);
         if (!item || !item.pdf || item.pdf === "#") return;
 
+        // Prioritas: link unduh manual (kalau diisi Panitia/Admin) > endpoint
+        // force-download Google Drive > link file_link apa adanya (.pdf langsung).
+        if (item.downloadUrl) {
+          window.open(item.downloadUrl, "_blank");
+          return;
+        }
+
         const gdId = ekstrakGDriveId(item.pdf);
         // Google Drive punya endpoint khusus buat force-download (bukan preview).
         const url = gdId ? `https://drive.google.com/uc?export=download&id=${gdId}` : item.pdf;
         window.open(url, "_blank");
+      }
+
+      /**
+       * Cuma tampilkan tombol Unduh kalau memang ada cara pasti buat unduh
+       * file-nya -- link unduh manual, Google Drive, atau .pdf langsung.
+       * Selain itu (mis. link Google Slides/Canva view-only) tombolnya
+       * disembunyikan aja daripada nampilin tombol yang ujung-ujungnya cuma
+       * buka ulang halaman preview yang sama.
+       */
+      function bisaDiunduh(item) {
+        if (item.downloadUrl) return true;
+        if (ekstrakGDriveId(item.pdf)) return true;
+        return /\.pdf(\?|#|$)/i.test(item.pdf || "");
       }
 
       function tutupVideoPlayer() {
@@ -1499,7 +1521,9 @@
         const html = items
           .map((doc) => {
             // Prioritas thumbnail: gambar manual (kalau ada) > auto dari Google Drive > ikon dokumen.
-            const thumbSrc = doc.thumbnailImg || dapatkanThumbnailOtomatis(doc.pdf);
+            // Kalau URL Thumbnail manual kebetulan link YouTube/GDrive (bukan
+            // link gambar langsung), tetap dikenali & dikonversi otomatis.
+            const thumbSrc = dapatkanThumbnailOtomatis(doc.thumbnailImg) || doc.thumbnailImg || dapatkanThumbnailOtomatis(doc.pdf);
             const gradientCss = getGradientStyle(doc.gradientFallback);
             const iconFallback = `<div class="ebook-thumb-gradient" style="background:${gradientCss}">${ikonDokumen}</div>`;
             const thumbHtml = thumbSrc ?
@@ -1516,7 +1540,7 @@
                 <div class="ebook-meta">${doc.fileSize} · Diperbarui ${doc.updatedAt}</div>
                 <div class="ebook-btn-row">
                   <button class="btn-lihat" data-detail-id="${doc.id}">Lihat</button>
-                  <button class="btn-unduh" data-detail-id="${doc.id}">Unduh</button>
+                  ${bisaDiunduh(doc) ? `<button class="btn-unduh" data-detail-id="${doc.id}">Unduh</button>` : ""}
                 </div>
               </div>
             </div>`;

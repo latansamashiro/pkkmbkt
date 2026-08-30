@@ -190,9 +190,10 @@ class StudentController extends Controller
                 'pdf' => $t->category === 'ebook' ? ($t->file_link ?? '#') : null,
                 'fileSize' => '-',
                 'updatedAt' => $t->updated_at?->translatedFormat('d F Y'),
-                'thumbnailImg' => '',
+                'thumbnailImg' => $t->thumbnail_link ?? '',
                 'gradientFallback' => $gradients[$idx % count($gradients)],
                 'progress' => $t->category === 'video' ? (int) ($progressMap[$t->id] ?? 0) : 0,
+                'downloadUrl' => $t->download_link ?: null,
                 'tags' => array_values(array_filter([$t->category, $t->topic_type])),
             ];
         };

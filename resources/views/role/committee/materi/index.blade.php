@@ -247,7 +247,7 @@
                         ? `<span class="text-[10px] font-extrabold uppercase tracking-wider text-white bg-teal-600 px-2.5 py-1 rounded-full">Published</span>`
                         : `<span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700 bg-white px-2.5 py-1 rounded-full">Draft</span>`;
 
-                    const thumb = ambilThumbnailUrl(it.file_link);
+                    const thumb = it.thumbnail_link || ambilThumbnailUrl(it.file_link);
                     const thumbnailImgHtml = thumb
                         ? `<img src="${thumb}" alt="${it.title ?? ''}" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'" />`
                         : "";
@@ -328,7 +328,7 @@
                         <input type="checkbox" id="${id}" class="accent-teal-600 w-4 h-4" ${value ? "checked" : ""} /> ${f.label}
                         </label>`;
                 }
-                const upperCls = (f.type === "text" && f.name !== "file_link") ? " js-upper" : "";
+                const upperCls = (f.type === "text" && f.name !== "file_link" && f.name !== "thumbnail_link" && f.name !== "download_link") ? " js-upper" : "";
                 return `<input type="${f.type}" id="${id}" value="${val}" ${req}
                     class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600${upperCls}" />`;
             }
@@ -353,8 +353,8 @@
                     if (f.type === "checkbox") {
                         payload[f.name] = $el.is(":checked");
                     } else if (f.type === "text" || f.type === "textarea") {
-                        // file_link biarkan apa adanya (URL), sisanya upper-case
-                        payload[f.name] = f.name === "file_link" ? ($el.val() || "") : ($el.val() || "").toUpperCase();
+                        // file_link, thumbnail_link & download_link biarkan apa adanya (URL), sisanya upper-case
+                        payload[f.name] = (f.name === "file_link" || f.name === "thumbnail_link" || f.name === "download_link") ? ($el.val() || "") : ($el.val() || "").toUpperCase();
                     } else {
                         payload[f.name] = $el.val();
                     }

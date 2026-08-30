@@ -169,7 +169,7 @@ class DataMasterController extends Controller
                         'type' => 'select',
                         'required' => true,
                         'options' => [
-                            'keunilaman' => 'SEJARAH UNILAM',
+                            'keunilaman' => 'UNILAM (UMUM)',
                             'akademik' => 'AKADEMIK',
                             'lkms' => 'LKMS',
                             'perpustakaan' => 'PERPUSTAKAAN',
@@ -190,6 +190,18 @@ class DataMasterController extends Controller
                     ['key' => 'trainer', 'label' => 'Pemateri', 'type' => 'text', 'required' => false],
                     ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['published' => 'PUBLISHED', 'draft' => 'DRAFT']],
                     ['key' => 'file_link', 'label' => 'Link Video/File', 'type' => 'text', 'required' => false],
+                    [
+                        'key' => 'thumbnail_link',
+                        'label' => 'URL Thumbnail (khusus link selain YouTube/Google Drive)',
+                        'type' => 'text',
+                        'required' => false,
+                    ],
+                    [
+                        'key' => 'download_link',
+                        'label' => 'Link Unduh (opsional -- isi kalau Link Video/File di atas cuma bisa dilihat, mis. Slides/Canva)',
+                        'type' => 'text',
+                        'required' => false,
+                    ],
                 ],
             ],
 

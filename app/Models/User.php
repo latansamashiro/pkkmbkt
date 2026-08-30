@@ -7,7 +7,6 @@ use App\Actions\Audit\AuditTrail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -58,24 +57,18 @@ class User extends Authenticatable
         ];
     }
 
-    protected function name(): Attribute
+    public function setNameAttribute($value)
     {
-        return Attribute::make(
-            set: fn (?string $value) => $value !== null ? mb_strtoupper($value) : $value,
-        );
+        $this->attributes['name'] = $value !== null ? mb_strtoupper($value) : $value;
     }
 
-    protected function facultyName(): Attribute
+    public function setFacultyNameAttribute($value)
     {
-        return Attribute::make(
-            set: fn (?string $value) => $value !== null ? mb_strtoupper($value) : $value,
-        );
+        $this->attributes['faculty_name'] = $value !== null ? mb_strtoupper($value) : $value;
     }
 
-    protected function programStudyName(): Attribute
+    public function setProgramStudyNameAttribute($value)
     {
-        return Attribute::make(
-            set: fn (?string $value) => $value !== null ? mb_strtoupper($value) : $value,
-        );
+        $this->attributes['program_study_name'] = $value !== null ? mb_strtoupper($value) : $value;
     }
 }

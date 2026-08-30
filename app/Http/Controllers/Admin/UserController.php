@@ -540,7 +540,7 @@ class UserController extends Controller
             $group = null;
             $kodeBelumAda = null;
             if ($kodeKelompok) {
-                $group = \App\Models\Group::where('code', $kodeKelompok)->first();
+                $group = Group::where('code', $kodeKelompok)->first();
                 if (!$group) {
                     $kodeBelumAda = $kodeKelompok;
                     $gagal[] = "Baris {$baris} ({$email}): Kode Kelompok \"{$kodeKelompok}\" belum ada — akun dibuat tanpa kelompok dulu, nanti OTOMATIS masuk begitu kelompok dengan kode itu dibuat.";

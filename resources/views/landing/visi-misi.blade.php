@@ -750,8 +750,7 @@
     <footer
       class="bg-[#0d1638] text-slate-400 text-center py-10 px-5 text-xs sm:text-sm"
     >
-      <img src="{{ asset('gambar/unilam.webp') }}" class="h-14 w-auto mx-auto mb-4 opacity-90" />
-      <p>
+    
         &copy; Universitas La Tansa Mashiro. Visi, misi, dan tujuan disusun
         berdasarkan dokumen resmi universitas.
       </p>

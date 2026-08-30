@@ -955,7 +955,7 @@
         </div>
         <div class="photo-frame rounded-2xl shadow-xl">
           <img
-            src="{{ asset('gambar/unilam.webp') }}"
+            src="{{ asset('gambar/gedung.webp') }}"
             alt="Foto kampus Rangkasbitung"
             class="w-full object-cover aspect-[4/3]"
           />
