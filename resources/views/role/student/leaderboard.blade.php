@@ -302,7 +302,12 @@
     $(function() {
       // 1. DATA MASTER KESELURUHAN -- dari database (SEMUA mahasiswa, bukan cuma 1 kelompok),
       // diurutkan server-side berdasarkan total poin tertinggi.
-      const dataMahasiswa = @json($dataMahasiswa);
+      const _rawDataMahasiswa = @json($dataMahasiswa);
+      // Jaga-jaga: kalau data dari server ternyata bukan array (mis. cache
+      // yang korup/gagal kebaca), jangan sampai seluruh script di halaman
+      // ini berhenti gara-gara satu error -- fallback ke array kosong,
+      // tampilan tetap jalan (cuma kosong), bukan macet total.
+      const dataMahasiswa = Array.isArray(_rawDataMahasiswa) ? _rawDataMahasiswa : [];
       const CURRENT_STUDENT_ID = @json($currentStudentId);
 
       let kategoriAktif = "ALL";

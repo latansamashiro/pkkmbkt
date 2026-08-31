@@ -25,9 +25,36 @@ class Leaderboard
         // SETIAP request bakal ngitung ulang dari nol -- 30 detik itu cukup
         // singkat buat tetap kerasa "real-time", tapi udah jauh ngurangin
         // beban ke database kalau banyak yang buka bersamaan.
-        return \Illuminate\Support\Facades\Cache::remember('leaderboard_ranking', 30, function () {
+        //
+        // try-catch di sini PENTING: driver cache-nya "database", dan kalau
+        // BANYAK request bentrok pas detik cache-nya baru kadaluarsa (semua
+        // coba hitung ulang & nulis cache bersamaan), bisa kena race
+        // condition (duplicate key) yang bikin exception. Daripada seluruh
+        // halaman Leaderboard error/kosong gara-gara itu, fallback-nya
+        // langsung hitung tanpa cache -- tetap tampil benar buat mahasiswa
+        // itu, cuma kehilangan sedikit keuntungan performa cache di momen itu.
+        try {
+            $hasil = \Illuminate\Support\Facades\Cache::remember('leaderboard_ranking', 30, function () {
+                return self::hitungRankingTanpaCache();
+            });
+
+            // Kalau isi cache-nya ternyata korup/gagal ke-unserialize dengan
+            // benar (mis. baris cache di database kepotong/rusak), Laravel
+            // gak nge-throw exception -- dia cuma balikin apapun hasil
+            // unserialize-nya apa adanya (bisa jadi false/null/dst), bukan
+            // Collection/array seperti yang diharapkan. Kalau sampai lolos
+            // ke halaman, tampilannya JS error total (bukan cuma kosong).
+            // Makanya validasi tipe di sini, bukan cuma pasrah ke cache.
+            if (!is_iterable($hasil)) {
+                \Illuminate\Support\Facades\Cache::forget('leaderboard_ranking');
+                return self::hitungRankingTanpaCache();
+            }
+
+            return $hasil;
+        } catch (\Throwable $e) {
+            report($e);
             return self::hitungRankingTanpaCache();
-        });
+        }
     }
 
     protected static function hitungRankingTanpaCache()
