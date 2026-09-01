@@ -986,7 +986,7 @@
           d="M12 3l1.8 3.6L18 7.2l-3 2.9.7 4.1L12 12.3l-3.7 1.9.7-4.1-3-2.9 4.2-.6z" />
         <path d="M5 21v-5M12 21v-7M19 21v-4" />
       </svg>
-      <span>Papan</span>
+      <span>Leaderboard</span>
     </a>
     <a href="{{ route('dashboard') }}" class="home" aria-label="Beranda">
       <svg
