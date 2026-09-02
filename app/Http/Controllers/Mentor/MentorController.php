@@ -39,9 +39,18 @@ class MentorController extends Controller
             ->orderBy('schedule_begin_time')
             ->get();
 
+        // Carousel "Informasi Terbaru" di dashboard -- maksimal 5, murni
+        // terbaru dulu (BUKAN important_flag dulu seperti di info()), jadi
+        // begitu ada info baru, item ke-6 otomatis ke-cut dari carousel ini
+        // (tapi tetap tampil lengkap di halaman Info lewat method info()).
+        $informasiTerbaru = \App\Models\Information::where('status', 'published')
+            ->orderByDesc('created_at')
+            ->take(5)
+            ->get();
+
         $progres = $this->hitungProgresMentor(auth()->id());
 
-        return view('role.mentor.dashboard', compact('jadwalHariIni', 'progres'));
+        return view('role.mentor.dashboard', compact('jadwalHariIni', 'informasiTerbaru', 'progres'));
     }
 
     /**

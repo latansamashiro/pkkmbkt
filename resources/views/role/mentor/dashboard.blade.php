@@ -40,6 +40,9 @@
     </div>
   </section>
 
+  <!-- ===== INFORMASI TERBARU ===== -->
+  <x-informasi-carousel :items="$informasiTerbaru" :info-route="route('role.mentor.info')" />
+
   <!-- ===== MENU UTAMA ===== -->
   <section class="section">
     <div class="section-head">
