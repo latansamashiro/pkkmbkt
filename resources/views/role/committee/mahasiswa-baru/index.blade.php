@@ -608,24 +608,22 @@
 
             if ($modalImport.length) {
 
-                // Riwayat semua hasil import disimpan permanen di localStorage, per halaman (URL_BASE).
-                // Alasan: password cuma plaintext sesaat setelah generate, jadi harus disimpan
-                // di sisi client kalau mau bisa di-export kapan saja setelahnya.
-                const IMPORT_STORAGE_KEY = `hasil_import_${URL_BASE}`;
+                // Riwayat semua hasil import sekarang disimpan di SERVER (dulu di
+                // localStorage browser, makanya cuma keliatan di browser/akun yang
+                // ngimport doang). Dengan ini, semua admin/panitia bisa lihat riwayat
+                // yang sama, dari akun manapun.
+                let riwayatCache = [];
 
-                function ambilSemuaHasilImport() {
-                    try {
-                        const raw = localStorage.getItem(IMPORT_STORAGE_KEY);
-                        return raw ? JSON.parse(raw) : [];
-                    } catch (e) { return []; }
-                }
-
-                // Gabung hasil import baru ke riwayat lama. Kalau email sama (re-import), data lama ditimpa.
-                function tambahHasilImportKeRiwayat(list) {
-                    if (!list || !list.length) return;
-                    const map = new Map(ambilSemuaHasilImport().map((x) => [x.email, x]));
-                    list.forEach((x) => map.set(x.email, x));
-                    try { localStorage.setItem(IMPORT_STORAGE_KEY, JSON.stringify(Array.from(map.values()))); } catch (e) {}
+                function muatRiwayatDariServer(callback) {
+                    $.get("{{ route(\"{$importBase}.import-history\") }}")
+                        .done(function (result) {
+                            riwayatCache = result.riwayat || [];
+                            if (callback) callback();
+                        })
+                        .fail(function () {
+                            riwayatCache = [];
+                            if (callback) callback();
+                        });
                 }
                 // Cegah CSV/Formula Injection: kalau nilai diawali =, +, -, @, atau
                 // tab/CR, Excel/Sheets akan menganggapnya sebagai FORMULA saat file
@@ -699,7 +697,6 @@
                         headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
                     }).done(function (result) {
                         lastImportBerhasil = result.berhasil || [];
-                        tambahHasilImportKeRiwayat(lastImportBerhasil);
 
                         // masukkan akun baru ke tabel tanpa reload halaman
                         (result.berhasil || []).forEach((b) => {
@@ -736,11 +733,11 @@
                     unduhCSV(lastImportBerhasil, `hasil_import_{{ \Illuminate\Support\Str::slug($roleLabel) }}_${new Date().toISOString().slice(0, 10)}.csv`);
                 });
 
-                // ===== EXPORT DENGAN FILTER (riwayat semua sesi import, permanen di localStorage) =====
+                // ===== EXPORT DENGAN FILTER (riwayat semua sesi import, dari server) =====
                 const $modalExport = $("#modalExport");
                 if ($modalExport.length) {
                     function isiOpsiFilterExport() {
-                        const data = ambilSemuaHasilImport();
+                        const data = riwayatCache;
                         if (SHOW_ACADEMIC) {
                             const prodiSet = [...new Set(data.map((d) => d.prodi).filter(Boolean))].sort();
                             $("#exportFilterProdi").html(`<option value="">Semua Program Studi</option>` + prodiSet.map((p) => `<option value="${p}">${p}</option>`).join(""));
@@ -755,7 +752,7 @@
                     function dataTerfilterExport() {
                         const prodi = $("#exportFilterProdi").val() || "";
                         const kelompok = $("#exportFilterKelompok").val() || "";
-                        return ambilSemuaHasilImport().filter((d) =>
+                        return riwayatCache.filter((d) =>
                             (!prodi || normalisasiProdi(d.prodi) === normalisasiProdi(prodi)) && (!kelompok || d.kelompok === kelompok)
                         );
                     }
@@ -780,8 +777,10 @@
                     $("#exportFilterProdi, #exportFilterKelompok").on("change", perbaruiInfoExport);
 
                     $("#btnExportHasil").on("click", function () {
-                        isiOpsiFilterExport();
-                        $modalExport.removeClass("hidden").addClass("flex");
+                        muatRiwayatDariServer(function () {
+                            isiOpsiFilterExport();
+                            $modalExport.removeClass("hidden").addClass("flex");
+                        });
                     });
                     $("#btnCloseExport, #btnBatalExport").on("click", () => $modalExport.addClass("hidden").removeClass("flex"));
                     $modalExport.on("click", function (e) { if (e.target === this) $modalExport.addClass("hidden").removeClass("flex"); });
@@ -793,9 +792,14 @@
                     });
 
                     $("#btnHapusRiwayatExport").on("click", function () {
-                        if (!confirm("Hapus semua riwayat password hasil import yang tersimpan di browser ini?\n\nAkun yang sudah dibuat tidak akan terhapus, hanya salinan password lokal ini.")) return;
-                        try { localStorage.removeItem(IMPORT_STORAGE_KEY); } catch (e) {}
-                        isiOpsiFilterExport();
+                        if (!confirm("Hapus semua riwayat password hasil import ini untuk SEMUA admin/panitia?\n\nAkun yang sudah dibuat tidak akan terhapus, hanya catatan password ini.")) return;
+                        $.ajax({
+                            url: "{{ route(\"{$importBase}.import-history.clear\") }}",
+                            method: "DELETE",
+                            headers: { "X-CSRF-TOKEN": CSRF_TOKEN },
+                        }).always(function () {
+                            muatRiwayatDariServer(isiOpsiFilterExport);
+                        });
                     });
                 }
             }

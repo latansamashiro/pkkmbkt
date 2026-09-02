@@ -586,6 +586,20 @@ class UserController extends Controller
                 'prodi' => $prodi ?: null,
                 'advisor_type' => $advisorType,
             ];
+
+            // Simpan juga ke riwayat server (dulu cuma di localStorage browser
+            // yang ngimport -- sekarang semua akun admin/panitia bisa lihat).
+            \App\Models\ImportHistory::updateOrCreate(
+                ['role_name' => $role, 'email' => $user->email],
+                [
+                    'nama' => $user->name,
+                    'password' => $passwordAsli,
+                    'kelompok' => $group->name ?? null,
+                    'prodi' => $prodi ?: null,
+                    'advisor_type' => $advisorType,
+                    'imported_by_id' => $request->user()->id,
+                ]
+            );
         }
         fclose($handle);
 
@@ -594,5 +608,33 @@ class UserController extends Controller
             'berhasil' => $berhasil,
             'gagal' => $gagal,
         ]);
+    }
+
+    /**
+     * Daftar riwayat hasil Import Excel/CSV buat role ini -- dulu cuma
+     * kesimpen di localStorage (jadi cuma keliatan di browser/akun yang
+     * ngimport), sekarang dari database jadi keliatan semua admin/panitia.
+     */
+    public function importHistory(Request $request)
+    {
+        $role = $this->lockedRole($request);
+
+        $riwayat = \App\Models\ImportHistory::where('role_name', $role)
+            ->orderByDesc('updated_at')
+            ->get(['nama', 'email', 'password', 'kelompok', 'prodi', 'advisor_type']);
+
+        return response()->json(['riwayat' => $riwayat]);
+    }
+
+    /**
+     * Hapus semua riwayat import buat role ini. Ini cuma hapus catatan
+     * password-nya -- akun yang sudah dibuat TIDAK ikut terhapus.
+     */
+    public function clearImportHistory(Request $request)
+    {
+        $role = $this->lockedRole($request);
+        $jumlah = \App\Models\ImportHistory::where('role_name', $role)->delete();
+
+        return response()->json(['message' => "{$jumlah} riwayat dihapus."]);
     }
 }

@@ -52,6 +52,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/mahasiswa/{user}', 'destroy')->name('admin.mahasiswa.destroy')->defaults('roleKey', 'STUDENT');
             Route::get('/mahasiswa-import/template', 'importTemplate')->name('admin.mahasiswa.import-template')->defaults('roleKey', 'STUDENT');
             Route::post('/mahasiswa-import', 'import')->name('admin.mahasiswa.import')->defaults('roleKey', 'STUDENT');
+            Route::get('/mahasiswa-import-history', 'importHistory')->name('admin.mahasiswa.import-history')->defaults('roleKey', 'STUDENT');
+            Route::delete('/mahasiswa-import-history', 'clearImportHistory')->name('admin.mahasiswa.import-history.clear')->defaults('roleKey', 'STUDENT');
 
             // Kelola Mentor -> mentor
             Route::get('/mentor', 'index')->name('admin.mentor.index')->defaults('roleKey', 'MENTOR');
@@ -60,6 +62,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/mentor/{user}', 'destroy')->name('admin.mentor.destroy')->defaults('roleKey', 'MENTOR');
             Route::get('/mentor-import/template', 'importTemplate')->name('admin.mentor.import-template')->defaults('roleKey', 'MENTOR');
             Route::post('/mentor-import', 'import')->name('admin.mentor.import')->defaults('roleKey', 'MENTOR');
+            Route::get('/mentor-import-history', 'importHistory')->name('admin.mentor.import-history')->defaults('roleKey', 'MENTOR');
+            Route::delete('/mentor-import-history', 'clearImportHistory')->name('admin.mentor.import-history.clear')->defaults('roleKey', 'MENTOR');
 
             // Kelola Advisor (Pembimbing) -> advisor
             Route::get('/advisor', 'index')->name('admin.advisor.index')->defaults('roleKey', 'ADVISOR');
@@ -68,6 +72,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/advisor/{user}', 'destroy')->name('admin.advisor.destroy')->defaults('roleKey', 'ADVISOR');
             Route::get('/advisor-import/template', 'importTemplate')->name('admin.advisor.import-template')->defaults('roleKey', 'ADVISOR');
             Route::post('/advisor-import', 'import')->name('admin.advisor.import')->defaults('roleKey', 'ADVISOR');
+            Route::get('/advisor-import-history', 'importHistory')->name('admin.advisor.import-history')->defaults('roleKey', 'ADVISOR');
+            Route::delete('/advisor-import-history', 'clearImportHistory')->name('admin.advisor.import-history.clear')->defaults('roleKey', 'ADVISOR');
 
             // Kelola Panitia -> committee
             Route::get('/panitia', 'index')->name('admin.panitia.index')->defaults('roleKey', 'COMMITTEE');
@@ -233,6 +239,8 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mahasiswa.destroy'), $defaults);
             $withDefaults(Route::get('/import/template', 'importTemplate')->name('committee.mahasiswa.import-template'), $defaults);
             $withDefaults(Route::post('/import', 'import')->name('committee.mahasiswa.import'), $defaults);
+            $withDefaults(Route::get('/import-history', 'importHistory')->name('committee.mahasiswa.import-history'), $defaults);
+            $withDefaults(Route::delete('/import-history', 'clearImportHistory')->name('committee.mahasiswa.import-history.clear'), $defaults);
         });
 
         // ===== Kelola Mentor (reuse UserController, view komite) =====
@@ -244,6 +252,8 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.mentor.destroy'), $defaults);
             $withDefaults(Route::get('/import/template', 'importTemplate')->name('committee.mentor.import-template'), $defaults);
             $withDefaults(Route::post('/import', 'import')->name('committee.mentor.import'), $defaults);
+            $withDefaults(Route::get('/import-history', 'importHistory')->name('committee.mentor.import-history'), $defaults);
+            $withDefaults(Route::delete('/import-history', 'clearImportHistory')->name('committee.mentor.import-history.clear'), $defaults);
         });
 
         // ===== Assign Tugas ke mahasiswa/kelompok (checklist di modal "Assign") =====
@@ -261,6 +271,8 @@ Route::middleware(['auth'])->group(function () {
             $withDefaults(Route::delete('/{user}', 'destroy')->name('committee.advisor.destroy'), $defaults);
             $withDefaults(Route::get('/import/template', 'importTemplate')->name('committee.advisor.import-template'), $defaults);
             $withDefaults(Route::post('/import', 'import')->name('committee.advisor.import'), $defaults);
+            $withDefaults(Route::get('/import-history', 'importHistory')->name('committee.advisor.import-history'), $defaults);
+            $withDefaults(Route::delete('/import-history', 'clearImportHistory')->name('committee.advisor.import-history.clear'), $defaults);
         });
 
         // ===== Kelola Anggota per Kelompok (masih pakai GroupController, tapi
