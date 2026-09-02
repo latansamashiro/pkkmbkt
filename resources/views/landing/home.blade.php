@@ -876,7 +876,7 @@ background: rgba(20, 20, 20, 0.9);
           <!-- ►► TOMBOL LOGIN — KHUSUS MENTOR, MBA & PANITIA (bukan peserta) -->
           <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="btn-primary">
             <i class="fa-solid fa-user-shield ic"></i>
-            Login Peserta PKKMB-KT
+            Login Simba Unilam
             <svg
               class="ic"
               viewBox="0 0 24 24"
