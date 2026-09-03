@@ -504,6 +504,13 @@ class DataMasterController extends Controller
                 default => 'string',
             };
 
+            // Passing grade dapat diatur Panitia dari 0 sampai 100 dan nilai
+            // ini dipakai dinamis oleh logika kelulusan mahasiswa.
+            if ($f['key'] === 'passing_grade') {
+                $r[] = 'min:0';
+                $r[] = 'max:100';
+            }
+
             if ($f['type'] === 'select' && isset($f['options']) && !isset($f['options_key'])) {
                 $r[] = Rule::in(array_keys($f['options']));
             }

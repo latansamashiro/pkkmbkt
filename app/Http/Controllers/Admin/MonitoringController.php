@@ -489,8 +489,15 @@ public function evaluasiDetail(Request $request, $groupId)
 
     // Skor tiap paket = RATA-RATA semua percobaan yang sudah diselesaikan
     // mahasiswa (bukan lagi jawaban mentah percobaan terakhir doang).
-    $skorAttemptSemua = \App\Models\ExamAttemptScore::whereIn('student_id', $studentIds)
-        ->whereIn('exam_id', $categories->pluck('id'))
+    $skorAttemptSemua = \App\Models\ExamAttemptScore::query()
+        ->join('exam_attempts', function ($join) {
+            $join->on('exam_attempt_scores.exam_id', '=', 'exam_attempts.exam_id')
+                ->on('exam_attempt_scores.student_id', '=', 'exam_attempts.student_id')
+                ->on('exam_attempt_scores.cycle', '=', 'exam_attempts.cycle');
+        })
+        ->whereIn('exam_attempt_scores.student_id', $studentIds)
+        ->whereIn('exam_attempt_scores.exam_id', $categories->pluck('id'))
+        ->select('exam_attempt_scores.*')
         ->get()
         ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id)
         ->map(fn ($grup) => $grup->pluck('skor'));

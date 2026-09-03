@@ -8,9 +8,8 @@ namespace App\Support;
  * Sejak fitur "rata-rata semua percobaan" ditambahkan, skor yang dipakai di
  * Leaderboard/Monitoring/Laporan BUKAN skor 1 percobaan aja -- itu RATA-RATA
  * dari SEMUA percobaan (attempt) yang sudah diselesaikan mahasiswa untuk
- * paket evaluasi itu (maksimal 3x percobaan, tapi kalau baru sempat 1x atau
- * 2x, rata-ratanya dihitung dari yang sudah dikerjakan itu aja -- bukan
- * dipaksa dibagi 3).
+ * paket evaluasi pada SIKLUS AKTIF (maksimal 3x per siklus). Jika siklus
+ * gagal, siklus baru dimulai dan skor siklus lama tidak ikut dirata-ratakan.
  *
  * Sumber datanya tabel `exam_attempt_scores` (1 baris = 1 percobaan yang
  * SUDAH selesai & submit, skornya gak pernah ketimpa) -- BUKAN `student_exams`
@@ -56,7 +55,15 @@ class ExamScoring
      */
     public static function semuaSkorAttempt(): \Illuminate\Support\Collection
     {
-        return \App\Models\ExamAttemptScore::select('student_id', 'exam_id', 'skor')
+        // Hanya skor dari siklus AKTIF yang dihitung. Setelah 3 percobaan
+        // gagal, siklus lama otomatis tidak ikut ke leaderboard/monitoring.
+        return \App\Models\ExamAttemptScore::query()
+            ->join('exam_attempts', function ($join) {
+                $join->on('exam_attempt_scores.exam_id', '=', 'exam_attempts.exam_id')
+                    ->on('exam_attempt_scores.student_id', '=', 'exam_attempts.student_id')
+                    ->on('exam_attempt_scores.cycle', '=', 'exam_attempts.cycle');
+            })
+            ->select('exam_attempt_scores.student_id', 'exam_attempt_scores.exam_id', 'exam_attempt_scores.skor')
             ->get()
             ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id)
             ->map(fn ($grup) => $grup->pluck('skor'));

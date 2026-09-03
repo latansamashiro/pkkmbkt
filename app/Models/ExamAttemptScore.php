@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExamAttemptScore extends Model
 {
-    protected $fillable = ['exam_id', 'student_id', 'attempt_number', 'skor'];
+    protected $fillable = ['exam_id', 'student_id', 'attempt_number', 'skor', 'cycle'];
+
+    protected $casts = [
+        'attempt_number' => 'integer',
+        'skor' => 'integer',
+        'cycle' => 'integer',
+    ];
 
     public function exam()
     {

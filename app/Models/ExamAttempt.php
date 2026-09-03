@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExamAttempt extends Model
 {
-    protected $fillable = ['exam_id', 'student_id', 'attempts'];
+    protected $fillable = ['exam_id', 'student_id', 'attempts', 'cycle'];
+
+    protected $casts = [
+        'attempts' => 'integer',
+        'cycle' => 'integer',
+    ];
 
     public function exam()
     {

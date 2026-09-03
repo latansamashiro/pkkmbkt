@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="id">
 
 <head>
@@ -35,6 +35,29 @@
         --font-sans: "Plus Jakarta Sans", sans-serif;
         --font-display: "Lora", serif;
       }
+
+      /* ============ MODAL INFORMASI EVALUASI ============ */
+      .eval-alert-overlay { @apply fixed inset-0 z-[300] hidden items-center justify-center px-4; background:rgba(15,23,42,.50); backdrop-filter:blur(6px); }
+      .eval-alert-overlay.show { @apply flex; }
+      .eval-alert-card { @apply w-full max-w-[400px] bg-white rounded-[24px] text-center; padding:28px 24px 22px; box-shadow:0 20px 60px rgba(21,33,89,.22); animation:evalAlertIn .2s ease-out; }
+      @keyframes evalAlertIn { from{opacity:0;transform:translateY(8px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+      .eval-alert-icon { @apply w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center; background:#fff7df; color:#b7791f; }
+      .eval-alert-icon.success { background:#eef7dc; color:#5f7f17; }
+      .eval-alert-icon.error { background:#fef2f2; color:#b91c1c; }
+      .eval-alert-icon svg { @apply w-7 h-7; }
+      .eval-alert-title { @apply font-display text-xl font-bold text-ink-900 m-0; }
+      .eval-alert-message { @apply text-sm text-ink-600 leading-[1.65] m-0; margin-top:8px; }
+      .eval-alert-actions { @apply flex flex-col gap-2.5 mt-6; }
+      .eval-alert-btn { @apply w-full rounded-[13px] text-sm font-bold cursor-pointer border-none transition-all; min-height:45px; }
+      .eval-alert-primary { @apply bg-navy-900 text-white; }
+      .eval-alert-primary:hover { @apply bg-navy-700; }
+      .eval-alert-secondary { @apply bg-navy-tint text-navy-900; }
+      .eval-alert-secondary:hover { @apply bg-gray-200; }
+      .history-list { margin-top:10px; border:1px solid #edf0f6; border-radius:13px; overflow:hidden; text-align:left; }
+      .history-head,.history-row { display:flex; justify-content:space-between; align-items:center; padding:9px 12px; }
+      .history-head { background:#f7f9fc; font-size:11px; font-weight:700; color:#667085; }
+      .history-row { font-size:13px; color:#475467; border-top:1px solid #edf0f6; }
+      .history-row strong { color:#151f55; font-size:15px; }
     </style>
   <style type="text/tailwindcss">
     :root {
@@ -830,6 +853,19 @@
     </div>
   </section>
 
+  <!-- ============ MODAL INFORMASI EVALUASI ============ -->
+  <div class="eval-alert-overlay" id="evalAlertModal" role="dialog" aria-modal="true" aria-labelledby="evalAlertTitle">
+    <div class="eval-alert-card">
+      <div class="eval-alert-icon" id="evalAlertIcon" aria-hidden="true"></div>
+      <h2 class="eval-alert-title" id="evalAlertTitle">Informasi</h2>
+      <div class="eval-alert-message" id="evalAlertMessage"></div>
+      <div class="eval-alert-actions">
+        <button type="button" class="eval-alert-btn eval-alert-primary" id="evalAlertPrimary">Mengerti</button>
+        <button type="button" class="eval-alert-btn eval-alert-secondary" id="evalAlertSecondary" style="display:none">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ FOOTER ============ -->
   <footer class="footer">
     <p>© 2026 PKKMB-KT UNILAM. Semua hak dilindungi.</p>
@@ -955,6 +991,46 @@
       const $runner = $("#quizRunner");
       const $runnerBody = $("#runnerBody");
       const $runnerResult = $("#runnerResult");
+      const $evalAlertModal = $("#evalAlertModal");
+      let evalAlertPrimaryAction = null;
+      let evalAlertSecondaryAction = null;
+
+      function tampilkanAlertEvaluasi({ type = "warning", title = "Informasi", message = "", primaryText = "Mengerti", secondaryText = null, onPrimary = null, onSecondary = null }) {
+        const icons = {
+          warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.7 2.9 17a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+          success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg>',
+          error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>'
+        };
+        $("#evalAlertIcon").attr("class", `eval-alert-icon ${type}`).html(icons[type] || icons.warning);
+        $("#evalAlertTitle").text(title);
+        $("#evalAlertMessage").html(message);
+        $("#evalAlertPrimary").text(primaryText);
+        if (secondaryText) $("#evalAlertSecondary").text(secondaryText).show(); else $("#evalAlertSecondary").hide();
+        evalAlertPrimaryAction = typeof onPrimary === "function" ? onPrimary : null;
+        evalAlertSecondaryAction = typeof onSecondary === "function" ? onSecondary : null;
+        $evalAlertModal.addClass("show");
+        $("#evalAlertPrimary").trigger("focus");
+      }
+
+      function tutupAlertEvaluasi() { $evalAlertModal.removeClass("show"); evalAlertPrimaryAction = null; evalAlertSecondaryAction = null; }
+      $("#evalAlertPrimary").on("click", function(){ const a=evalAlertPrimaryAction; tutupAlertEvaluasi(); if(a) a(); });
+      $("#evalAlertSecondary").on("click", function(){ const a=evalAlertSecondaryAction; tutupAlertEvaluasi(); if(a) a(); });
+      $evalAlertModal.on("click", function(e){ if(e.target===this) tutupAlertEvaluasi(); });
+
+      function tampilkanRiwayatHasil(id) {
+        const kuis = DAFTAR_KUIS.find((k) => String(k.id) === String(id));
+        const riwayat = kuis?.riwayatSiklus || [];
+        if (!riwayat.length) {
+          tampilkanAlertEvaluasi({ title:"Belum Ada Hasil", message:"Belum ada hasil percobaan yang tersimpan untuk kuis ini." });
+          return;
+        }
+        const rows = riwayat.slice().reverse().map((r) => `
+          <div style="margin-top:12px;font-weight:700;color:#151f55;">Siklus ${r.cycle} · Rata-rata ${r.rataRata}</div>
+          <div class="history-list"><div class="history-head"><span>Percobaan</span><span>Skor</span></div>
+          ${(r.skor||[]).map((x)=>`<div class="history-row"><span>Percobaan ${x.attempt}</span><strong>${x.skor}</strong></div>`).join("")}
+          </div>`).join("");
+        tampilkanAlertEvaluasi({ type:"success", title:"Riwayat Hasil", message:`<div style="text-align:left"><div style="font-weight:700;color:#151f55">${kuis.judul}</div>${rows}</div>`, primaryText:"Tutup" });
+      }
 
       /* ---------- RENDER KARTU KUIS DI HALAMAN DEPAN ---------- */
       function renderKartuKuis() {
@@ -993,6 +1069,7 @@
                 </div>
                 ${statusHtml}
                 <button class="btn-mulai" data-kuis-id="${k.id}">Mulai Kuis</button>
+                ${k.riwayatSiklus && k.riwayatSiklus.length ? `<button class="btn-lihat-hasil" data-hasil-id="${k.id}" style="display:block;width:100%;margin-top:8px;border:0;background:transparent;color:#667085;font-size:12px;font-weight:700;cursor:pointer;">Lihat hasil sebelumnya</button>` : ""}
               </div>
             </div>
           `;
@@ -1001,6 +1078,9 @@
         $quizGrid.html(html);
         $quizGrid.find(".btn-mulai").on("click", function() {
           mulaiKuis($(this).data("kuis-id"));
+        });
+        $quizGrid.find(".btn-lihat-hasil").on("click", function() {
+          tampilkanRiwayatHasil($(this).data("hasil-id"));
         });
 
         $("#kuisCount").text(DAFTAR_KUIS.length);
@@ -1039,7 +1119,7 @@
           .fail(function(xhr) {
             const res = xhr.responseJSON || {};
             if (res.attemptsUsed !== undefined) kuis.attemptsUsed = res.attemptsUsed;
-            alert(res.message || "Gagal memulai kuis. Coba lagi.");
+            tampilkanAlertEvaluasi({ type:"warning", title:"Kuis Belum Bisa Dimulai", message:res.message || "Kuis belum dapat dimulai. Silakan coba lagi." });
           });
       }
 
@@ -1162,67 +1242,23 @@
       function tampilkanHasil() {
         clearInterval(timerInterval);
         const total = kuisAktif.soal.length;
-
         let jumlahBenar = 0;
-        kuisAktif.soal.forEach((soal, i) => {
-          if (jawabanUser[i] === soal.correctAnswer) jumlahBenar++;
-        });
-
-        const skor = Math.round((jumlahBenar / total) * 100);
+        kuisAktif.soal.forEach((soal,i)=>{ if(jawabanUser[i]===soal.correctAnswer) jumlahBenar++; });
+        const skor = Math.round((jumlahBenar/total)*100);
         const lulus = skor >= kuisAktif.passingGrade;
-        const percobaanHabis = (kuisAktif.attemptsUsed || 0) >= MAX_PERCOBAAN;
-
-        // Catatan: skor final yang beneran kepakai (buat status Lulus/Belum
-        // & Leaderboard) itu RATA-RATA semua percobaan, dihitung di server
-        // pas submit (lihat selesaiKuis()) -- bukan skor 1x percobaan ini aja.
-
-        $("#runnerProgressFill").css("width", "100%");
-
+        $("#runnerProgressFill").css("width","100%");
         $("#resultScoreVal").text(skor);
-        $("#resultScoreArc").attr("stroke-dasharray", `${skor}, 100`);
-        $("#resultHeading").text(lulus ? "Selamat, Kamu Lulus! 🎉" : "Belum Lulus 😔");
+        $("#resultScoreArc").attr("stroke-dasharray",`${skor}, 100`);
+        $("#resultHeading").text(lulus ? "Selamat, Kamu Lulus! 🎉" : "Hasil Percobaan");
         $("#resultSub").html(`Jawaban benar <b>${jumlahBenar}</b> dari <b>${total}</b> soal.`);
-
-        $("#resultStatusWrap").html(
-          lulus ?
-          `<span class="result-status-pill lulus">✓ Lulus (minimal ${kuisAktif.passingGrade})</span>` :
-          `<span class="result-status-pill gagal">✕ Belum Lulus (minimal ${kuisAktif.passingGrade})</span>`,
-        );
-
-        const $btnSelesai = $("#btnSelesai");
-        const $btnUlang = $("#btnUlangKuis");
-        const $note = $("#resultNote");
-        $btnSelesai.prop("disabled", !lulus);
-
-        // Percobaan "Ulangi Kuis" dibatasi maksimal MAX_PERCOBAAN kali (dicatat
-        // di server, gak bisa diakalin refresh) -- begitu abis, tombolnya
-        // dimatiin, mahasiswa cuma bisa lanjut kirim skor yang ada sekarang.
-        $btnUlang.prop("disabled", percobaanHabis);
-
-        if (percobaanHabis) {
-          $note.attr("class", lulus ? "result-note" : "result-note gagal");
-          $note.text(
-            `Sudah mencapai batas ${MAX_PERCOBAAN}x percobaan untuk kuis ini` +
-            (lulus ? ". Silakan kirim hasil ini." : " — dan skor belum memenuhi minimal. Hubungi panitia kalau ada kendala."),
-          );
-        } else if (lulus) {
-          $note.attr("class", "result-note");
-          $note.text(
-            `Skormu sudah memenuhi syarat. Kamu tetap boleh mengulang (sisa ${MAX_PERCOBAAN - kuisAktif.attemptsUsed}x percobaan) untuk skor lebih tinggi sebelum mengirim.`,
-          );
-        } else {
-          $note.attr("class", "result-note gagal");
-          $note.text(
-            `Skormu masih di bawah ${kuisAktif.passingGrade}. Tombol "Kirim Hasil" terkunci — silakan ulangi kuis (sisa ${MAX_PERCOBAAN - kuisAktif.attemptsUsed}x percobaan).`,
-          );
-        }
-
-        $runnerBody.css("display", "none");
+        $("#resultStatusWrap").html(lulus ? `<span class="result-status-pill lulus">✓ Lulus (minimal ${kuisAktif.passingGrade})</span>` : `<span class="result-status-pill gagal">✕ Belum Lulus (minimal ${kuisAktif.passingGrade})</span>`);
+        const $btnSelesai=$("#btnSelesai"), $btnUlang=$("#btnUlangKuis"), $note=$("#resultNote");
+        $btnSelesai.prop("disabled",false).text("Simpan Hasil");
+        $btnUlang.prop("disabled",true);
+        $note.attr("class",lulus?"result-note":"result-note gagal").text(lulus ? `Nilaimu sudah memenuhi batas ${kuisAktif.passingGrade}. Simpan hasil untuk menyelesaikan evaluasi.` : `Nilaimu akan dihitung bersama percobaan sebelumnya. Simpan hasil untuk melanjutkan.`);
+        $runnerBody.css("display","none");
         $runnerResult.addClass("show");
-        $runner[0].scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
+        $runner[0].scrollTo({top:0,behavior:"smooth"});
       }
 
       /* ---------- ULANGI KUIS DARI AWAL ----------
@@ -1249,35 +1285,46 @@
           })
           .fail(function(xhr) {
             const res = xhr.responseJSON || {};
-            alert(res.message || "Gagal mengulang kuis. Coba lagi.");
+            tampilkanAlertEvaluasi({ type:"warning", title:"Belum Bisa Mengulang", message:res.message || "Kuis belum dapat diulang. Silakan coba lagi." });
           });
       }
 
       /* ---------- KIRIM HASIL (hanya bila lulus) ---------- */
       function selesaiKuis() {
-        const $btn = $("#btnSelesai");
-        $btn.prop("disabled", true);
-
+        if(!kuisAktif) return;
+        const $btn=$("#btnSelesai"); $btn.prop("disabled",true);
         $.ajax({
-          url: `{{ url('mahasiswa/evaluasi') }}/${kuisAktif.id}/submit`,
-          method: "POST",
-          contentType: "application/json",
-          headers: { "X-CSRF-TOKEN": CSRF_TOKEN_EVAL, "Accept": "application/json" },
-          data: JSON.stringify({ jawaban: jawabanUser }),
-        }).done(function (result) {
-          statusKuis[kuisAktif.id].sudahKirim = true;
-          // skorRataRata dari server = rata-rata SEMUA percobaan yang udah
-          // diselesaikan (bukan cuma percobaan barusan) -- ini yang beneran
-          // kepakai buat status Lulus/Belum & yang dikirim ke Leaderboard.
-          statusKuis[kuisAktif.id].skorTerbaik = result.skorRataRata;
-          const pesanRata = result.skorRataRata !== result.skor
-            ? ` Rata-rata dari semua percobaanmu: ${result.skorRataRata}.`
-            : "";
-          alert(`Hasil kuis "${kuisAktif.judul}" berhasil dikirim! Skor percobaan ini: ${result.skor}.${pesanRata}`);
+          url:`{{ url('mahasiswa/evaluasi') }}/${kuisAktif.id}/submit`,method:"POST",contentType:"application/json",
+          headers:{"X-CSRF-TOKEN":CSRF_TOKEN_EVAL,"Accept":"application/json"},data:JSON.stringify({jawaban:jawabanUser})
+        }).done(function(result){
+          const status=statusKuis[kuisAktif.id];
+          const kuisAsli=DAFTAR_KUIS.find((k)=>String(k.id)===String(kuisAktif.id));
+          if(result.lulus){
+            status.sudahKirim=true; status.skorTerbaik=result.skorRataRata;
+            if(kuisAsli) kuisAsli.attemptsUsed=result.attemptsUsed ?? kuisAktif.attemptsUsed;
+            keluarKuis();
+            tampilkanAlertEvaluasi({type:"success",title:"Evaluasi Selesai 🎉",message:`Nilai percobaan ini <b>${result.skor}</b> dan rata-rata evaluasimu <b>${result.skorRataRata}</b>. Nilai minimum <b>${result.passingGrade}</b>.`,primaryText:"Kembali ke Evaluasi"});
+            return;
+          }
+          if(result.resetDilakukan){
+            if(kuisAsli){
+              kuisAsli.riwayatSiklus=kuisAsli.riwayatSiklus||[];
+              kuisAsli.riwayatSiklus.push({cycle:result.cycleSelesai,skor:result.riwayatSiklus||[],rataRata:result.skorRataRata});
+              kuisAsli.attemptsUsed=0; kuisAsli.cycle=result.cycle;
+            }
+            status.sudahKirim=false; status.skorTerbaik=null;
+            keluarKuis();
+            tampilkanAlertEvaluasi({type:"warning",title:"Siklus Baru Siap",message:`Rata-rata Siklus ${result.cycleSelesai} adalah <b>${result.skorRataRata}</b>, belum mencapai nilai minimum <b>${result.passingGrade}</b>.<br><br>Kamu bisa langsung mengerjakan kuis lagi.`,primaryText:"Mulai Kuis Lagi",secondaryText:"Lihat Hasil",onPrimary:function(){mulaiKuis(kuisAktif.id);},onSecondary:function(){tampilkanRiwayatHasil(kuisAktif.id);}});
+            return;
+          }
+          status.sudahKirim=false; status.skorTerbaik=result.skorRataRata;
+          if(kuisAsli) kuisAsli.attemptsUsed=result.attemptsUsed;
           keluarKuis();
-        }).fail(function () {
-          alert("Gagal mengirim hasil kuis. Coba lagi.");
-          $btn.prop("disabled", false);
+          tampilkanAlertEvaluasi({type:"warning",title:"Belum Lulus",message:`Rata-rata saat ini <b>${result.skorRataRata}</b>, sedangkan nilai minimum <b>${result.passingGrade}</b>.<br><br>Hasil sudah tersimpan. Kamu masih bisa mengerjakan percobaan berikutnya.`,primaryText:"Ulangi Kuis",secondaryText:"Nanti",onPrimary:function(){mulaiKuis(kuisAktif.id);}});
+        }).fail(function(xhr){
+          const res=xhr.responseJSON||{};
+          tampilkanAlertEvaluasi({type:"error",title:"Gagal Menyimpan Hasil",message:res.message||"Hasil kuis belum berhasil disimpan. Silakan coba lagi."});
+          $btn.prop("disabled",false);
         });
       }
 

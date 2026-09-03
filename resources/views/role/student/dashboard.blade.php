@@ -792,9 +792,6 @@
             </div>
           </section>
 
-          <!-- ===== INFORMASI TERBARU ===== -->
-          <x-informasi-carousel :items="$informasiTerbaru" :info-route="route('role.student.info')" />
-
           <!-- ===== MENU UTAMA ===== -->
           <section class="section">
             <div class="section-head">

@@ -619,22 +619,24 @@
             @if ($showImport)
             // ================== IMPORT EXCEL/CSV ==================
             const $modalImport = $("#modalImport");
-            // Riwayat semua hasil import sekarang disimpan di SERVER (dulu di
-            // localStorage browser, makanya cuma keliatan di browser/akun yang
-            // ngimport doang). Dengan ini, semua admin/panitia bisa lihat riwayat
-            // yang sama, dari akun manapun.
-            let riwayatCache = [];
+            // Riwayat semua hasil import disimpan permanen di localStorage, per halaman (URL berbeda = riwayat beda).
+            // Alasan: password cuma plaintext sesaat setelah generate, jadi harus disimpan
+            // di sisi client kalau mau bisa di-export kapan saja setelahnya.
+            const IMPORT_STORAGE_KEY = `hasil_import_${window.location.pathname}`;
 
-            function muatRiwayatDariServer(callback) {
-                $.get("{{ route("{$importBase}.import-history") }}")
-                    .done(function (result) {
-                        riwayatCache = result.riwayat || [];
-                        if (callback) callback();
-                    })
-                    .fail(function () {
-                        riwayatCache = [];
-                        if (callback) callback();
-                    });
+            function ambilSemuaHasilImport() {
+                try {
+                    const raw = localStorage.getItem(IMPORT_STORAGE_KEY);
+                    return raw ? JSON.parse(raw) : [];
+                } catch (e) { return []; }
+            }
+
+            // Gabung hasil import baru ke riwayat lama. Kalau email sama (re-import), data lama ditimpa.
+            function tambahHasilImportKeRiwayat(list) {
+                if (!list || !list.length) return;
+                const map = new Map(ambilSemuaHasilImport().map((x) => [x.email, x]));
+                list.forEach((x) => map.set(x.email, x));
+                try { localStorage.setItem(IMPORT_STORAGE_KEY, JSON.stringify(Array.from(map.values()))); } catch (e) {}
             }
 
             // Cegah CSV/Formula Injection: kalau nilai diawali =, +, -, @, atau
@@ -704,6 +706,7 @@
                         headers: { "X-CSRF-TOKEN": CSRF_TOKEN, "Accept": "application/json" },
                     }).done(function (result) {
                         lastImportBerhasil = result.berhasil || [];
+                        tambahHasilImportKeRiwayat(lastImportBerhasil);
 
                         (result.berhasil || []).forEach((b) => {
                             penggunaList.push({
@@ -740,12 +743,12 @@
                 });
             }
 
-            // ===== RIWAYAT IMPORT (dengan filter, dari server) =====
+            // ===== RIWAYAT IMPORT (dengan filter, permanen di localStorage) =====
             const $modalExport = $("#modalExport");
             if ($modalExport.length) {
                 function dataTerfilterExport() {
                     const jenis = $("#exportFilterJenis").val() || "";
-                    return riwayatCache.filter((d) => !jenis || d.advisor_type === jenis);
+                    return ambilSemuaHasilImport().filter((d) => !jenis || d.advisor_type === jenis);
                 }
 
                 function perbaruiInfoExport() {
@@ -765,10 +768,8 @@
                 $("#exportFilterJenis").on("change", perbaruiInfoExport);
 
                 $("#btnExportHasil").on("click", function () {
-                    muatRiwayatDariServer(function () {
-                        perbaruiInfoExport();
-                        $modalExport.removeClass("hidden").addClass("flex");
-                    });
+                    perbaruiInfoExport();
+                    $modalExport.removeClass("hidden").addClass("flex");
                 });
                 $("#btnCloseExport, #btnBatalExport").on("click", () => $modalExport.addClass("hidden").removeClass("flex"));
                 $modalExport.on("click", function (e) { if (e.target === this) $modalExport.addClass("hidden").removeClass("flex"); });
@@ -780,14 +781,9 @@
                 });
 
                 $("#btnHapusRiwayatExport").on("click", function () {
-                    if (!confirm("Hapus semua riwayat password hasil import ini untuk SEMUA admin/panitia?\n\nAkun yang sudah dibuat tidak akan terhapus, hanya catatan password ini.")) return;
-                    $.ajax({
-                        url: "{{ route("{$importBase}.import-history.clear") }}",
-                        method: "DELETE",
-                        headers: { "X-CSRF-TOKEN": CSRF_TOKEN },
-                    }).always(function () {
-                        muatRiwayatDariServer(perbaruiInfoExport);
-                    });
+                    if (!confirm("Hapus semua riwayat password hasil import yang tersimpan di browser ini?\n\nAkun yang sudah dibuat tidak akan terhapus, hanya salinan password lokal ini.")) return;
+                    try { localStorage.removeItem(IMPORT_STORAGE_KEY); } catch (e) {}
+                    perbaruiInfoExport();
                 });
             }
             @endif
