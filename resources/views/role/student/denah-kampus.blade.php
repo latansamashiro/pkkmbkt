@@ -634,7 +634,7 @@
         leftMobile: 75.7,
         icon: "fa-motorcycle",
         mapsUrl: "https://maps.app.goo.gl/ZhKLZPcFxYDbWMpV6",
-        desc: "Area parkir kendaraan roda empat.",
+        desc: "Area parkir kendaraan roda dua.",
         fotos: ["{{ asset('gambar/Peta/ParkirMotor.webp') }}"]
       },
     ];
