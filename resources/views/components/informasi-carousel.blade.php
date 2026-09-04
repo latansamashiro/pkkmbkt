@@ -108,23 +108,7 @@
       });
     });
 
-    // Auto-geser tiap 5 detik, balik ke awal setelah card terakhir
-    if ($track.children().length > 1) {
-      setInterval(function () {
-        const $cards = $track.children();
-        const maxScroll = $track[0].scrollWidth - $track[0].clientWidth;
-        const nearEnd = $track.scrollLeft() >= maxScroll - 10;
-        if (nearEnd) {
-          $track.animate({ scrollLeft: 0 }, 300);
-        } else {
-          const next = $dots.filter('.active').data('index') + 1;
-          const $card = $cards.eq(next);
-          if ($card.length) {
-            $track.animate({ scrollLeft: $card.position().left + $track.scrollLeft() - $track.position().left }, 300);
-          }
-        }
-      }, 5000);
-    }
+    // Auto-slide sengaja dimatikan — carousel hanya digeser manual (swipe/klik dot)
   });
 </script>
 @endif
