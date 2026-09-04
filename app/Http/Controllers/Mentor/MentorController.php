@@ -39,9 +39,18 @@ class MentorController extends Controller
             ->orderBy('schedule_begin_time')
             ->get();
 
+        // Carousel "Informasi Terbaru" di dashboard -- maksimal 5, murni
+        // terbaru dulu (BUKAN important_flag dulu seperti di info()), jadi
+        // begitu ada info baru, item ke-6 otomatis ke-cut dari carousel ini
+        // (tapi tetap tampil lengkap di halaman Info lewat method info()).
+        $informasiTerbaru = \App\Models\Information::where('status', 'published')
+            ->orderByDesc('created_at')
+            ->take(5)
+            ->get();
+
         $progres = $this->hitungProgresMentor(auth()->id());
 
-        return view('role.mentor.dashboard', compact('jadwalHariIni', 'progres'));
+        return view('role.mentor.dashboard', compact('jadwalHariIni', 'informasiTerbaru', 'progres'));
     }
 
     /**
@@ -318,15 +327,8 @@ class MentorController extends Controller
         if ($group) {
             $studentIds = \App\Models\Member::where('group_id', $group->id)->pluck('student_id');
 
-            $skorAttemptSemua = \App\Models\ExamAttemptScore::query()
-                ->join('exam_attempts', function ($join) {
-                    $join->on('exam_attempt_scores.exam_id', '=', 'exam_attempts.exam_id')
-                        ->on('exam_attempt_scores.student_id', '=', 'exam_attempts.student_id')
-                        ->on('exam_attempt_scores.cycle', '=', 'exam_attempts.cycle');
-                })
-                ->whereIn('exam_attempt_scores.student_id', $studentIds)
-                ->whereIn('exam_attempt_scores.exam_id', $exams->pluck('id'))
-                ->select('exam_attempt_scores.*')
+            $skorAttemptSemua = \App\Models\ExamAttemptScore::whereIn('student_id', $studentIds)
+                ->whereIn('exam_id', $exams->pluck('id'))
                 ->get()
                 ->groupBy(fn($r) => $r->student_id . '-' . $r->exam_id);
 
