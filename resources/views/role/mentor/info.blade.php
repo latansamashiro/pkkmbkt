@@ -167,14 +167,13 @@
       renderAnnouncements();
 
       // ======================================================================
-      // ►► SLIDESHOW LATAR HERO
+      // ►► BACKGROUND HERO — SATU GAMBAR STATIS (AUTO-SLIDE DIMATIKAN)
       // ======================================================================
       const heroSlideImages = [
         "{{ asset('gambar/gedungutama.webp') }}",
         "{{ asset('gambar/rektor.webp') }}",
         "{{ asset('gambar/gedung.webp') }}",
       ];
-      const HERO_SLIDE_INTERVAL_MS = 6000;
       const $heroSlideshow = $("#heroSlideshow");
       const SLIDE_CLASS =
         "hero-slide absolute inset-0 bg-cover bg-center transition-opacity duration-[1800ms] ease-in-out";
@@ -187,16 +186,7 @@
             .css("background-image", `url("${src}")`)
             .appendTo($heroSlideshow);
         });
-
-        if (heroSlideImages.length > 1) {
-          let currentSlide = 0;
-          const $slides = $heroSlideshow.find(".hero-slide");
-          setInterval(() => {
-            $slides.eq(currentSlide).removeClass("opacity-100").addClass("opacity-0");
-            currentSlide = (currentSlide + 1) % $slides.length;
-            $slides.eq(currentSlide).removeClass("opacity-0").addClass("opacity-100");
-          }, HERO_SLIDE_INTERVAL_MS);
-        }
+        // Auto-slide (setInterval) sengaja dihapus — hanya menampilkan gambar pertama
       }
     });
   </script>
