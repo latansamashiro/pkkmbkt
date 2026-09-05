@@ -26,11 +26,13 @@ class StudentController extends Controller
 
     public function dashboard()
     {
-        $jadwalHariIni = \App\Models\Schedule::where('status', 'published')
-            ->whereDate('schedule_date', today())
-            ->orderBy('schedule_begin_time')
-            ->get();
+        $hariIni = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
 
+        $jadwalHariIni = \App\Models\Schedule::where('status', 'published')
+            ->whereDate('schedule_date', $hariIni)
+            ->orderBy('schedule_begin_time')
+            ->limit(3)
+            ->get();
         // Carousel "Informasi Terbaru" di dashboard -- maksimal 5, murni
         // terbaru dulu (BUKAN important_flag dulu seperti di info()), jadi
         // begitu ada info baru, item ke-6 otomatis ke-cut dari carousel ini
@@ -154,7 +156,7 @@ class StudentController extends Controller
         $riwayatPoin = \App\Models\Activity::where('student_id', $user->id)
             ->orderByDesc('created_at')
             ->get()
-            ->map(fn ($a) => [
+            ->map(fn($a) => [
                 'tipe' => $a->activity_value >= 0 ? 'keaktifan' : 'pelanggaran',
                 'judul' => $a->description ?: $a->category,
                 'poin' => abs((int) $a->activity_value),
@@ -182,8 +184,12 @@ class StudentController extends Controller
             ->pluck('percent', 'topic_id');
 
         $gradients = [
-            'from-teal-600 to-blue-800', 'from-purple-600 to-indigo-800', 'from-amber-500 to-orange-700',
-            'from-cyan-600 to-blue-800', 'from-purple-600 to-pink-700', 'from-indigo-600 to-purple-800',
+            'from-teal-600 to-blue-800',
+            'from-purple-600 to-indigo-800',
+            'from-amber-500 to-orange-700',
+            'from-cyan-600 to-blue-800',
+            'from-purple-600 to-pink-700',
+            'from-indigo-600 to-purple-800',
         ];
 
         $mapItem = function ($t, $idx) use ($gradients, $progressMap) {
@@ -247,7 +253,7 @@ class StudentController extends Controller
             ->whereIn('exam_id', $exams->pluck('id'))
             ->get()
             ->groupBy('exam_id')
-            ->map(fn ($grup) => $grup->pluck('skor'));
+            ->map(fn($grup) => $grup->pluck('skor'));
 
         // Berapa kali mahasiswa ini udah "Mulai/Ulangi Kuis" per paket evaluasi
         // -- dipakai buat batasin maksimal 3x percobaan (lihat evaluasiMulaiAttempt()).
@@ -258,9 +264,12 @@ class StudentController extends Controller
 
         $hurufKeIndex = ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3];
         $warnaPalet = [
-            'linear-gradient(135deg,#f59e0b,#c2410c)', 'linear-gradient(135deg,#0d9488,#1e40af)',
-            'linear-gradient(135deg,#9333ea,#3730a3)', 'linear-gradient(135deg,#dc2626,#7c2d12)',
-            'linear-gradient(135deg,#2563eb,#1e3a8f)', 'linear-gradient(135deg,#16a34a,#14532d)',
+            'linear-gradient(135deg,#f59e0b,#c2410c)',
+            'linear-gradient(135deg,#0d9488,#1e40af)',
+            'linear-gradient(135deg,#9333ea,#3730a3)',
+            'linear-gradient(135deg,#dc2626,#7c2d12)',
+            'linear-gradient(135deg,#2563eb,#1e3a8f)',
+            'linear-gradient(135deg,#16a34a,#14532d)',
         ];
 
         $daftarKuis = $exams->values()->map(function ($exam, $idx) use ($hurufKeIndex, $warnaPalet, $attemptMap) {
