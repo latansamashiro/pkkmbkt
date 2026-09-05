@@ -24,15 +24,20 @@ class StudentController extends Controller
         return view('role.student.leaderboard', compact('dataMahasiswa', 'currentStudentId'));
     }
 
-    public function dashboard()
-    {
-        $hariIni = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+   public function dashboard()
+{
+    $now = \Carbon\Carbon::now('Asia/Jakarta');
+    $hariIni = $now->toDateString();
 
-        $jadwalHariIni = \App\Models\Schedule::where('status', 'published')
-            ->whereDate('schedule_date', $hariIni)
-            ->orderBy('schedule_begin_time')
-            ->limit(3)
-            ->get();
+    // Hanya sesi yang jam SELESAI-nya belum lewat (masih berlangsung
+    // atau belum mulai). Begitu sebuah sesi lewat jam selesainya,
+    // otomatis hilang dari sini dan digantikan sesi berikutnya.
+    $jadwalHariIni = \App\Models\Schedule::where('status', 'published')
+        ->whereDate('schedule_date', $hariIni)
+        ->where('schedule_end_time', '>=', $now->format('H:i:s'))
+        ->orderBy('schedule_begin_time')
+        ->limit(3)
+        ->get();
         // Carousel "Informasi Terbaru" di dashboard -- maksimal 5, murni
         // terbaru dulu (BUKAN important_flag dulu seperti di info()), jadi
         // begitu ada info baru, item ke-6 otomatis ke-cut dari carousel ini
