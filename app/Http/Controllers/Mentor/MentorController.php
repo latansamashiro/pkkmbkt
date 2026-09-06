@@ -327,8 +327,20 @@ class MentorController extends Controller
         if ($group) {
             $studentIds = \App\Models\Member::where('group_id', $group->id)->pluck('student_id');
 
-            $skorAttemptSemua = \App\Models\ExamAttemptScore::whereIn('student_id', $studentIds)
-                ->whereIn('exam_id', $exams->pluck('id'))
+            // Skor cuma diambil dari SIKLUS AKTIF mahasiswa (join ke exam_attempts
+            // by cycle) -- kalau siklus lama sudah gagal & direset, skor lama itu
+            // tidak boleh ikut kehitung lagi di sini. Disamakan persis dengan
+            // MonitoringController::evaluasiDetail() punya panitia, supaya
+            // mentor dan panitia selalu lihat angka yang sama.
+            $skorAttemptSemua = \App\Models\ExamAttemptScore::query()
+                ->join('exam_attempts', function ($join) {
+                    $join->on('exam_attempt_scores.exam_id', '=', 'exam_attempts.exam_id')
+                        ->on('exam_attempt_scores.student_id', '=', 'exam_attempts.student_id')
+                        ->on('exam_attempt_scores.cycle', '=', 'exam_attempts.cycle');
+                })
+                ->whereIn('exam_attempt_scores.student_id', $studentIds)
+                ->whereIn('exam_attempt_scores.exam_id', $exams->pluck('id'))
+                ->select('exam_attempt_scores.*')
                 ->get()
                 ->groupBy(fn($r) => $r->student_id . '-' . $r->exam_id);
 
