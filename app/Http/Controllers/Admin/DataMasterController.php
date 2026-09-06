@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceTemplate;
+use App\Models\Certificate;
 use App\Models\Exam;
 use App\Models\Group;
 use App\Models\Information;
@@ -296,6 +297,24 @@ class DataMasterController extends Controller
                     ['key' => 'option_c', 'label' => 'Opsi C', 'type' => 'text', 'required' => true],
                     ['key' => 'option_d', 'label' => 'Opsi D', 'type' => 'text', 'required' => true],
                     ['key' => 'key', 'label' => 'Kunci Jawaban', 'type' => 'select', 'required' => true, 'options' => ['A' => 'A', 'B' => 'B', 'C' => 'C', 'D' => 'D']],
+                ],
+            ],
+
+            // ===== E-Sertifikat — CRUD generik biasa, PERSIS pola Informasi/
+            // Materi: cukup diisi SEKALI (biasanya cuma 1 baris "published"),
+            // dan link Google Drive-nya itu yang bisa dibuka SEMUA mahasiswa
+            // lewat halaman E-Sertifikat mereka (bukan link per-mahasiswa). =====
+            'sertifikat' => [
+                'model' => Certificate::class,
+                'label' => 'E-Sertifikat',
+                'display' => 'title',
+                'icon' => 'award',
+                'chip' => 'bg-amber-50 text-amber-600',
+                'list_cols' => ['title' => 'Judul', 'link_gdrive' => 'Link Google Drive', 'status' => 'Status'],
+                'fields' => [
+                    ['key' => 'title', 'label' => 'Judul', 'type' => 'text', 'required' => true],
+                    ['key' => 'link_gdrive', 'label' => 'Link Google Drive Sertifikat', 'type' => 'text', 'required' => true],
+                    ['key' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'options' => ['published' => 'PUBLISHED', 'draft' => 'DRAFT']],
                 ],
             ],
 

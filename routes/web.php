@@ -92,6 +92,11 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/soal/import', 'soalImport')->name('admin.data-master.soal.import');
             Route::delete('/soal/{id}', 'soalDestroy')->whereNumber('id')->name('admin.data-master.soal.destroy');
 
+            // E-Sertifikat sengaja TIDAK punya rute khusus di sini -- dia
+            // CRUD generik biasa (persis pola Informasi/Materi), jadi cukup
+            // lewat rute wildcard {type} generik di bawah (key type-nya:
+            // "sertifikat", lihat DataMasterController::types()).
+
             Route::get('/', 'index')->name('admin.data-master.index');
             Route::get('/{type}/items', 'items')->name('admin.data-master.items');
             Route::post('/{type}', 'store')->name('admin.data-master.store');
@@ -215,6 +220,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/evaluasi/{exam}/submit', 'evaluasiSubmit')->name('role.student.evaluasi.submit');
             Route::post('/evaluasi/{exam}/mulai', 'evaluasiMulaiAttempt')->name('role.student.evaluasi.mulai');
             Route::get('/absensi', 'absensi')->name('role.student.absensi');
+            Route::get('/e-sertifikat', 'sertifikat')->name('role.student.sertifikat');
         });
     });
 
@@ -291,7 +297,7 @@ Route::middleware(['auth'])->group(function () {
             ['title' => 'Kelola Kelompok', 'view' => 'role.committee.kelompok.index']
         );
 
-        // ===== Jadwal, Informasi, Modul PKKMB, Materi, Evaluasi, Kelompok (reuse DataMasterController, dibatasi per tipe) =====
+        // ===== Jadwal, Informasi, Modul PKKMB, Materi, Evaluasi, Kelompok, E-Sertifikat (reuse DataMasterController, dibatasi per tipe) =====
         Route::controller(\App\Http\Controllers\Admin\DataMasterController::class)->group(function () use ($withDefaults) {
             // Import Bank Soal — WAJIB didaftarkan SEBELUM loop $sections di bawah,
             // karena loop itu bikin rute generik POST /evaluasi/{type} yang, kalau
@@ -312,6 +318,9 @@ Route::middleware(['auth'])->group(function () {
                 'tugas'       => ['path' => 'tugas',       'types' => ['tugas'],                            'title' => 'Kelola Tugas',       'view' => 'role.committee.tugas.index'],
                 'absensi'     => ['path' => 'absensi',     'types' => ['jadwal_absensi'],                  'title' => 'Kelola Jadwal Absensi', 'view' => 'role.committee.absensi.index'],
                 'master'      => ['path' => 'kelompok',    'types' => ['kelompok'],                        'title' => 'Kelola Kelompok',    'view' => 'role.committee.kelompok.index'],
+                // E-Sertifikat -- cukup diisi SEKALI (1 baris "published"),
+                // link Google Drive-nya berlaku untuk SEMUA mahasiswa.
+                'sertifikat'  => ['path' => 'sertifikat',  'types' => ['sertifikat'],                      'title' => 'Kelola Sertifikat',  'view' => 'role.committee.sertifikat.index'],
             ];
 
             foreach ($sections as $key => $sec) {

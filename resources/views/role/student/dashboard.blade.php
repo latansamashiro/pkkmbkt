@@ -984,7 +984,25 @@
                 <span class="menu-label">Keaktifan & Pelanggaran</span>
                 <span class="menu-desc">Monitoring Keaktifan & Pelanggaran</span>
               </a>
-            </div>
+          
+           <a class="menu-card" href="{{ route('role.student.sertifikat') }}">
+                <span class="menu-chip chip-lime">
+                   <svg
+                    class="ic"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="8.5" r="4.3" />
+                    <path d="M9.3 12.1 7.3 20l4.7-2.6 4.7 2.6-2-7.9" />
+                  </svg>
+                </span>
+                <span class="menu-label">E-Sertifikat</span>
+                <span class="menu-desc">Lihat &amp; unduh sertifikat keikutsertaanmu</span>
+              </a>
+               </div>
           </section>
 
           <!-- ===== JADWAL ===== -->

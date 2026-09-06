@@ -237,9 +237,9 @@
                                                     <input type="checkbox" id="${id}" class="accent-teal-600 w-4 h-4" ${value ? "checked" : ""} /> ${f.label}
                                                 </label>`;
                 }
-                // text, number, date, time -- kecuali field URL (file_link/thumbnail_link/download_link),
+                // text, number, date, time -- kecuali field URL (file_link/thumbnail_link/download_link/link_gdrive),
                 // yang harus dibiarkan apa adanya karena huruf besar/kecil di URL itu penting.
-                const upperCls = (f.type === "text" && f.name !== "file_link" && f.name !== "thumbnail_link" && f.name !== "download_link") ? " js-upper" : "";
+                const upperCls = (f.type === "text" && f.name !== "file_link" && f.name !== "thumbnail_link" && f.name !== "download_link" && f.name !== "link_gdrive") ? " js-upper" : "";
                 return `<input type="${f.type}" id="${id}" value="${val}" ${req}
                     class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-600${upperCls}" />`;
             }
@@ -291,8 +291,8 @@
                     if (f.type === "checkbox") {
                         payload[f.name] = $el.is(":checked");
                     } else if (f.type === "text" || f.type === "textarea") {
-                        // file_link, thumbnail_link & download_link biarkan apa adanya (URL), sisanya upper-case
-                        payload[f.name] = (f.name === "file_link" || f.name === "thumbnail_link" || f.name === "download_link") ? ($el.val() || "") : ($el.val() || "").toUpperCase();
+                        // file_link, thumbnail_link, download_link & link_gdrive biarkan apa adanya (URL), sisanya upper-case
+                        payload[f.name] = (f.name === "file_link" || f.name === "thumbnail_link" || f.name === "download_link" || f.name === "link_gdrive") ? ($el.val() || "") : ($el.val() || "").toUpperCase();
                     } else {
                         payload[f.name] = $el.val();
                     }

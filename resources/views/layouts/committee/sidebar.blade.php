@@ -60,6 +60,10 @@
                 <span class="ic"><i data-lucide="clipboard-list"></i></span>
                 <span class="label">Evaluasi</span>
             </a>
+            <a href="{{ route('committee.sertifikat.index') }}" class="{{ request()->routeIs('committee.sertifikat.*') ? 'active' : '' }}">
+                <span class="ic"><i data-lucide="award"></i></span>
+                <span class="label">E-Sertifikat</span>
+            </a>
         </div>
 
         <button type="button" class="sidebar-group-toggle" data-group="monitoring">
