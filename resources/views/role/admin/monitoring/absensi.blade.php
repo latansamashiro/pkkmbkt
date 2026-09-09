@@ -16,10 +16,28 @@
         <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Monitoring</p>
         <h2 class="text-2xl font-extrabold text-slate-800 m-0">Monitoring Absensi</h2>
     </div>
+    <div class="flex items-center gap-2">
+        <a href="{{ route($monBase.'.absensi.export-pdf-global', request()->only(['tanggal', 'sesi', 'cari'])) }}"
+            target="_blank"
+            class="inline-flex items-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+            <i data-lucide="file-text" class="w-4 h-4"></i>Export PDF
+        </a>
+        <a href="{{ route($monBase.'.absensi.export-excel-global', request()->only(['tanggal', 'sesi', 'cari'])) }}"
+            class="inline-flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>Export Excel
+        </a>
+    </div>
 </div>
 
 <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
     <form id="formFilter" method="GET" class="flex items-center gap-2.5 p-4 border-b border-slate-200 flex-wrap">
+      <select name="sesi" onchange="document.getElementById('formFilter').submit()"class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600" />
+        <div class="flex-1 min-w-[200px] flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5"></div>
+        <option value="" {{ empty($filters['sesi']) ? 'selected' : '' }}>Semua Sesi</option>
+        @foreach (['Sesi 1', 'Sesi 2', 'Sesi 3'] as $opsiSesi)
+            <option value="{{ $opsiSesi }}" {{ $filters['sesi'] === $opsiSesi ? 'selected' : '' }}>{{ $opsiSesi }}</option>
+        @endforeach
+        </select>
         <input type="date" name="tanggal" value="{{ $filters['tanggal'] }}" onchange="document.getElementById('formFilter').submit()" class="text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer focus:outline-none focus:border-teal-600" />
         <div class="flex-1 min-w-[200px] flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5">
             <i data-lucide="search" class="w-4 h-4 text-slate-400 shrink-0"></i>

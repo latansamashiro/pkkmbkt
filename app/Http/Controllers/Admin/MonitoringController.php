@@ -181,28 +181,65 @@ class MonitoringController extends Controller
 }
 public function absensi(Request $request)
 {
+    ['laporan' => $laporan, 'tanggal' => $tanggal, 'cari' => $cari, 'sesi' => $sesi]
+        = $this->siapkanLaporanAbsensiGlobal($request);
+
+    return view($request->route('view') ?? 'role.admin.monitoring.absensi', [
+        'data'    => ['title' => $request->route('title') ?? 'Monitoring Absensi'],
+        'laporan' => $laporan,
+        'filters' => compact('tanggal', 'cari', 'sesi'),
+    ]);
+}
+
+/**
+ * Data rekap absensi semua kelompok, difilter per sesi (Sesi 1/2/3) + tanggal + pencarian.
+ * Dipakai bareng oleh absensi() (buat tampilan tabel) dan export Excel/PDF global,
+ * biar query & mapping-nya gak dobel.
+ */
+protected function siapkanLaporanAbsensiGlobal(Request $request): array
+{
     $tanggal = $request->input('tanggal');
     $cari    = $request->input('cari');
+    // Kosong/null = "Semua Sesi" -> jangan paksa default ke 'Sesi 1', biar bisa gabungkan semua sesi.
+    $sesi    = $request->input('sesi') ?: null;
 
-    $query = Attendance::selectRaw('group_id, attendance_date, COUNT(*) as jumlah_tercatat')
-        ->groupBy('group_id', 'attendance_date')
-        ->orderByDesc('attendance_date');
+    $records = Attendance::with(['template', 'group.mentor'])
+        ->when($sesi, fn ($q) => $q->whereHas('template', fn ($t) => $t->where('session_name', $sesi)))
+        ->when($tanggal, fn ($q) => $q->where('attendance_date', $tanggal))
+        ->get();
 
-    if ($tanggal) {
-        $query->where('attendance_date', $tanggal);
+    if ($sesi) {
+        // Sesi tertentu dipilih -> 1 baris = 1 catatan absensi (1 kelompok, 1 tanggal, 1 sesi itu).
+        $laporan = $records->map(function ($a) {
+            $hadir = $a->details()->where('status_presence', 'hadir')->count();
+
+            return [
+                'group_id'   => $a->group_id,
+                'oleh_label' => ($a->group->mentor->name ?? '-') . ' — ' . ($a->group->name ?? '-'),
+                'tanggal'    => $a->attendance_date,
+                'status'     => "{$hadir} Hadir",
+            ];
+        });
+    } else {
+        // Tidak pilih sesi -> gabungkan per kelompok + tanggal, lalu hitung berapa dari total sesi
+        // yang sudah tercatat absensinya. Ini yang menghasilkan status "3/3 sesi tercatat".
+        $totalSesi = AttendanceTemplate::distinct()->count('session_name') ?: 3;
+
+        $laporan = $records
+            ->groupBy(fn ($a) => $a->group_id . '|' . $a->attendance_date)
+            ->map(function ($grup) use ($totalSesi) {
+                $a = $grup->first();
+                $sesiTercatat = $grup->pluck('template.session_name')->filter()->unique()->count();
+
+                return [
+                    'group_id'   => $a->group_id,
+                    'oleh_label' => ($a->group->mentor->name ?? '-') . ' — ' . ($a->group->name ?? '-'),
+                    'tanggal'    => $a->attendance_date,
+                    'status'     => "{$sesiTercatat}/{$totalSesi} sesi tercatat",
+                ];
+            })
+            ->values();
     }
-
-    $laporan = $query->get()->map(function ($row) {
-        $group = Group::with('mentor')->find($row->group_id);
-        $totalSesi = AttendanceTemplate::where('attendance_date', $row->attendance_date)->count();
-
-        return [
-            'group_id'   => $row->group_id,
-            'oleh_label' => ($group->mentor->name ?? '-') . ' — ' . ($group->name ?? '-'),
-            'tanggal'    => $row->attendance_date,
-            'status'     => "{$row->jumlah_tercatat}/{$totalSesi} sesi tercatat",
-        ];
-    });
 
     if ($cari) {
         $laporan = $laporan->filter(
@@ -210,11 +247,56 @@ public function absensi(Request $request)
         )->values();
     }
 
-    return view($request->route('view') ?? 'role.admin.monitoring.absensi', [
-        'data'    => ['title' => $request->route('title') ?? 'Monitoring Absensi'],
-        'laporan' => $laporan,
-        'filters' => compact('tanggal', 'cari'),
+    $laporan = $laporan->sortByDesc('tanggal')->values();
+
+    return compact('laporan', 'tanggal', 'cari', 'sesi');
+}
+
+/**
+ * Export Excel (CSV) rekapitulasi absensi SEMUA kelompok sekaligus,
+ * sesuai sesi/tanggal/pencarian yang lagi aktif di tabel — bukan per kelompok.
+ */
+public function absensiExportExcelGlobal(Request $request)
+{
+    ['laporan' => $laporan, 'tanggal' => $tanggal, 'sesi' => $sesi]
+        = $this->siapkanLaporanAbsensiGlobal($request);
+
+    $namaFile = 'rekap_absensi_' . \Illuminate\Support\Str::slug($sesi ?: 'semua-sesi')
+        . ($tanggal ? "_{$tanggal}" : '_semua-tanggal') . '.csv';
+
+    $callback = function () use ($laporan) {
+        $out = fopen('php://output', 'w');
+        fwrite($out, "\xEF\xBB\xBF"); // BOM biar Excel baca UTF-8 dengan benar
+
+        fputcsv($out, ['No', 'Dibuat Oleh', 'Tanggal', 'Status']);
+
+        foreach ($laporan as $idx => $l) {
+            fputcsv($out, $this->netralkanBarisCsv([
+                $idx + 1,
+                $l['oleh_label'],
+                \Carbon\Carbon::parse($l['tanggal'])->format('d-m-Y'),
+                $l['status'],
+            ]));
+        }
+        fclose($out);
+    };
+
+    return response()->stream($callback, 200, [
+        'Content-Type' => 'text/csv; charset=UTF-8',
+        'Content-Disposition' => "attachment; filename=\"{$namaFile}\"",
     ]);
+}
+
+/**
+ * Halaman cetak (letterhead) rekapitulasi absensi SEMUA kelompok —
+ * dibuka di tab baru, tinggal Ctrl+P / tombol Print buat simpan sebagai PDF.
+ */
+public function absensiExportPdfGlobal(Request $request)
+{
+    ['laporan' => $laporan, 'tanggal' => $tanggal, 'sesi' => $sesi]
+        = $this->siapkanLaporanAbsensiGlobal($request);
+
+    return view('role.admin.monitoring.absensi-print-global', compact('laporan', 'tanggal', 'sesi'));
 }
 
 public function absensiDetail(Request $request, $groupId, $tanggal)

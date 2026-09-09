@@ -125,6 +125,10 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.monitoring.absensi.export-pdf');
         Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-excel', [MonitoringController::class, 'absensiExportExcel'])
             ->name('admin.monitoring.absensi.export-excel');
+         Route::get('monitoring/absensi/export-pdf-global', [MonitoringController::class, 'absensiExportPdfGlobal'])
+            ->name('admin.monitoring.absensi.export-pdf-global');
+        Route::get('monitoring/absensi/export-excel-global', [MonitoringController::class, 'absensiExportExcelGlobal'])
+            ->name('admin.monitoring.absensi.export-excel-global');
 
         Route::get('/monitoring/keaktifan', [MonitoringController::class, 'keaktifan'])
             ->name('admin.monitoring.keaktifan');
@@ -140,6 +144,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.monitoring.evaluasi');
         Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'evaluasiDetail'])
             ->name('admin.monitoring.evaluasi.detail');
+            
 
         Route::get('/monitoring/tugas', [MonitoringController::class, 'tugas'])
             ->name('admin.monitoring.tugas');
@@ -352,6 +357,11 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/absensi', 'absensi')->name('committee.monitoring.absensi');            Route::get('/absensi/{groupId}/{tanggal}', 'absensiDetail')->name('committee.monitoring.absensi.detail');
             Route::get('/absensi/{groupId}/{tanggal}/export-pdf', 'absensiExportPdf')->name('committee.monitoring.absensi.export-pdf');
             Route::get('/absensi/{groupId}/{tanggal}/export-excel', 'absensiExportExcel')->name('committee.monitoring.absensi.export-excel');
+
+            Route::get('/absensi/export-pdf-global', 'absensiExportPdfGlobal')
+                ->name('committee.monitoring.absensi.export-pdf-global');
+            Route::get('/absensi/export-excel-global', 'absensiExportExcelGlobal')
+                ->name('committee.monitoring.absensi.export-excel-global');
 
             Route::get('/keaktifan', 'keaktifan')->name('committee.monitoring.keaktifan');
             Route::get('/keaktifan/{groupId}', 'keaktifanDetail')->name('committee.monitoring.keaktifan.detail');
