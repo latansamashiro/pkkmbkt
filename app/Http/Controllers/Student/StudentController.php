@@ -267,20 +267,24 @@ class StudentController extends Controller
     {
         $exams = \App\Models\Exam::with('details')->orderBy('title')->get();
 
-        // Skor RATA-RATA semua percobaan yang sudah diselesaikan (bukan lagi
-        // ngitung ulang dari jawaban mentah percobaan terakhir).
-        $skorAttemptSaya = \App\Models\ExamAttemptScore::where('student_id', auth()->id())
-            ->whereIn('exam_id', $exams->pluck('id'))
-            ->get()
-            ->groupBy('exam_id')
-            ->map(fn($grup) => $grup->pluck('skor'));
-
         // Berapa kali mahasiswa ini udah "Mulai/Ulangi Kuis" per paket evaluasi
-        // -- dipakai buat batasin maksimal 3x percobaan (lihat evaluasiMulaiAttempt()).
+        // pada SIKLUS AKTIFNYA -- dipakai buat batasin maksimal 3x percobaan
+        // (lihat evaluasiMulaiAttempt()). Kolom `cycle` di sini adalah siklus
+        // yang sedang berjalan buat mahasiswa tsb (default 1).
         $attemptMap = \App\Models\ExamAttempt::where('student_id', auth()->id())
             ->whereIn('exam_id', $exams->pluck('id'))
             ->get()
             ->keyBy('exam_id');
+
+        // SEMUA skor percobaan milik mahasiswa ini (semua siklus, lama & baru)
+        // -- dipecah per exam lalu per cycle supaya siklus lama tidak pernah
+        // ikut campur ke perhitungan rata-rata siklus aktif.
+        $skorSemuaSiklus = \App\Models\ExamAttemptScore::where('student_id', auth()->id())
+            ->whereIn('exam_id', $exams->pluck('id'))
+            ->orderBy('attempt_number')
+            ->get()
+            ->groupBy('exam_id')
+            ->map(fn($grup) => $grup->groupBy('cycle'));
 
         $hurufKeIndex = ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3];
         $warnaPalet = [
@@ -292,7 +296,27 @@ class StudentController extends Controller
             'linear-gradient(135deg,#16a34a,#14532d)',
         ];
 
-        $daftarKuis = $exams->values()->map(function ($exam, $idx) use ($hurufKeIndex, $warnaPalet, $attemptMap) {
+        $daftarKuis = $exams->values()->map(function ($exam, $idx) use ($hurufKeIndex, $warnaPalet, $attemptMap, $skorSemuaSiklus) {
+            $cycleAktif = (int) ($attemptMap->get($exam->id)->cycle ?? 1);
+            $skorPerCycle = $skorSemuaSiklus->get($exam->id, collect());
+
+            // Riwayat siklus LAMA (< cycle aktif) -- ditampilkan lewat tombol
+            // "Lihat hasil sebelumnya", tidak pernah ikut hitung rata-rata aktif.
+            $riwayatSiklus = $skorPerCycle
+                ->filter(fn($grup, $cycle) => (int) $cycle < $cycleAktif)
+                ->map(function ($grup, $cycle) {
+                    return [
+                        'cycle' => (int) $cycle,
+                        'rataRata' => \App\Support\ExamScoring::rataRata($grup->pluck('skor')),
+                        'skor' => $grup->map(fn($s) => [
+                            'attempt' => (int) $s->attempt_number,
+                            'skor' => (int) $s->skor,
+                        ])->values(),
+                    ];
+                })
+                ->sortBy('cycle')
+                ->values();
+
             return [
                 'id' => (string) $exam->id,
                 'judul' => $exam->title,
@@ -300,6 +324,8 @@ class StudentController extends Controller
                 'warna' => $warnaPalet[$idx % count($warnaPalet)],
                 'passingGrade' => (int) $exam->passing_grade,
                 'attemptsUsed' => (int) ($attemptMap->get($exam->id)->attempts ?? 0),
+                'cycle' => $cycleAktif,
+                'riwayatSiklus' => $riwayatSiklus,
                 'soal' => $exam->details->map(function ($d) use ($hurufKeIndex) {
                     $options = array_values(array_filter([$d->option_a, $d->option_b, $d->option_c, $d->option_d], fn($o) => $o !== null && $o !== ''));
                     return [
@@ -312,11 +338,15 @@ class StudentController extends Controller
         })->filter(fn($k) => count($k['soal']) > 0)->values();
 
         // status pengerjaan siswa yang SUDAH tersimpan sebelumnya (kalau ada)
+        // -- HANYA dari skor pada SIKLUS AKTIF, siklus lama tidak ikut dihitung.
         $statusAwal = [];
-        foreach ($exams as $exam) {
-            $skorList = $skorAttemptSaya->get($exam->id);
+        foreach ($daftarKuis as $kuis) {
+            $cycleAktif = $kuis['cycle'];
+            $skorCycleAktif = $skorSemuaSiklus->get((int) $kuis['id'], collect())->get($cycleAktif);
+            $skorList = $skorCycleAktif ? $skorCycleAktif->pluck('skor') : null;
+
             if (\App\Support\ExamScoring::sudahDikerjakan($skorList)) {
-                $statusAwal[(string) $exam->id] = [
+                $statusAwal[$kuis['id']] = [
                     'skorTerbaik' => \App\Support\ExamScoring::rataRata($skorList),
                     'sudahKirim' => true,
                 ];
@@ -335,26 +365,93 @@ class StudentController extends Controller
     public function evaluasiMulaiAttempt(\Illuminate\Http\Request $request, \App\Models\Exam $exam)
     {
         $maxAttempts = 3;
+        $studentId = auth()->id();
 
-        $attempt = \App\Models\ExamAttempt::firstOrCreate(
-            ['exam_id' => $exam->id, 'student_id' => auth()->id()],
-            ['attempts' => 0]
-        );
+        [$allowed, $attempt] = \Illuminate\Support\Facades\DB::transaction(function () use ($exam, $studentId, $maxAttempts) {
+            \App\Models\ExamAttempt::firstOrCreate(
+                ['exam_id' => $exam->id, 'student_id' => $studentId],
+                ['attempts' => 0, 'cycle' => 1]
+            );
 
-        if ($attempt->attempts >= $maxAttempts) {
+            // lockForUpdate supaya dua request "Mulai Kuis" yang nyaris
+            // bersamaan (double click / retry jaringan) gak bisa dua-duanya
+            // lolos ngelewatin batas maksimal percobaan.
+            $attempt = \App\Models\ExamAttempt::where('exam_id', $exam->id)
+                ->where('student_id', $studentId)
+                ->lockForUpdate()
+                ->first();
+
+            // Skor yang BENERAN sudah kesubmit di siklus aktif -- dipakai
+            // buat dua hal:
+            // (a) bedain attempt yang cuma "dimulai" (attempts naik di
+            //     method ini) tapi gak pernah kesubmit skornya (mis.
+            //     mahasiswa nutup tab / koneksi putus pas ngerjain attempt
+            //     terakhir) -- attempt ngambang begini TIDAK BOLEH dihitung
+            //     kepake, karena kalau dihitung, mahasiswa akan terkunci
+            //     permanen: attempts sudah maksimal tapi evaluasiSubmit()
+            //     (satu-satunya tempat logic ganti cycle) tidak pernah lagi
+            //     terpanggil buat exam ini.
+            // (b) jaring pengaman buat baris ExamAttempt lama yang sudah
+            //     kepentok attempts=3 & semuanya sudah kesubmit, tapi
+            //     cycle-nya belum sempat ke-reset (mis. data dari sebelum
+            //     logic reset cycle ditambahkan di evaluasiSubmit()).
+            $skorCycleAktif = \App\Models\ExamAttemptScore::where('exam_id', $exam->id)
+                ->where('student_id', $studentId)
+                ->where('cycle', $attempt->cycle)
+                ->pluck('skor');
+
+            // Kasus (a): ada attempt yang "dipakai" (attempts sudah dinaikkan)
+            // tapi belum ada skor kesubmit untuk attempt itu -> jangan
+            // dihitung kepake sama sekali, biarkan mahasiswa membuka lagi
+            // attempt yang sama tanpa menaikkan hitungan lebih lanjut.
+            if ($attempt->attempts > $skorCycleAktif->count()) {
+                return [true, $attempt];
+            }
+
+            // Kasus (b): attempts sudah maksimal DAN semuanya sudah kesubmit,
+            // tapi rata-ratanya masih di bawah passing grade dan cycle belum
+            // ke-reset -> reset cycle di sini juga, karena kalau tidak,
+            // mahasiswa ini tidak akan pernah lagi bisa mencapai
+            // evaluasiSubmit() untuk memicu reset itu sendiri.
+            if ($attempt->attempts >= $maxAttempts && $skorCycleAktif->count() >= $maxAttempts) {
+                $rataRata = \App\Support\ExamScoring::rataRata($skorCycleAktif);
+                $lulus = $rataRata !== null && $rataRata >= (int) $exam->passing_grade;
+
+                if (!$lulus) {
+                    $attempt->cycle += 1;
+                    $attempt->attempts = 0;
+                    $attempt->save();
+                }
+            }
+
+            // `attempts` selalu dihitung terhadap SIKLUS AKTIF (`cycle`) saja.
+            // Begitu siklus baru dibuat (di sini atau lewat evaluasiSubmit()),
+            // `attempts` di-reset ke 0 sehingga mahasiswa otomatis bisa
+            // langsung mulai attempt 1 di siklus baru tanpa perlakuan khusus
+            // di method ini.
+            if ($attempt->attempts >= $maxAttempts) {
+                return [false, $attempt];
+            }
+
+            $attempt->increment('attempts');
+
+            return [true, $attempt];
+        });
+
+        if (!$allowed) {
             return response()->json([
-                'message' => "Sudah mencapai batas maksimal {$maxAttempts}x percobaan untuk kuis ini.",
+                'message' => "Sudah mencapai batas maksimal {$maxAttempts}x percobaan untuk siklus ini.",
                 'attemptsUsed' => $attempt->attempts,
                 'maxAttempts' => $maxAttempts,
+                'cycle' => $attempt->cycle,
                 'allowed' => false,
             ], 422);
         }
 
-        $attempt->increment('attempts');
-
         return response()->json([
             'attemptsUsed' => $attempt->attempts,
             'maxAttempts' => $maxAttempts,
+            'cycle' => $attempt->cycle,
             'allowed' => true,
         ]);
     }
@@ -370,6 +467,9 @@ class StudentController extends Controller
             'jawaban.*' => ['nullable', 'integer', 'min:0', 'max:5'],
         ]);
 
+        $maxAttempts = 3;
+        $studentId = auth()->id();
+
         $details = $exam->details()->orderBy('id')->get();
         $hurufAbjad = ['a', 'b', 'c', 'd', 'e', 'f'];
         $benar = 0;
@@ -379,12 +479,12 @@ class StudentController extends Controller
             $pilihHuruf = $pilihIndex !== null ? ($hurufAbjad[$pilihIndex] ?? null) : null;
 
             \App\Models\StudentExam::updateOrCreate(
-                ['exam_id' => $exam->id, 'exam_detail_id' => $detail->id, 'student_id' => auth()->id()],
+                ['exam_id' => $exam->id, 'exam_detail_id' => $detail->id, 'student_id' => $studentId],
                 [
                     'question' => $detail->question,
                     'value' => $pilihHuruf,
-                    'created_by_id' => auth()->id(),
-                    'updated_by_id' => auth()->id(),
+                    'created_by_id' => $studentId,
+                    'updated_by_id' => $studentId,
                 ]
             );
 
@@ -394,33 +494,99 @@ class StudentController extends Controller
         }
 
         $skor = $details->count() ? (int) round($benar / $details->count() * 100) : 0;
+        $passingGrade = (int) $exam->passing_grade;
 
-        // Simpan skor PERCOBAAN INI SAJA (bukan ketimpa) -- attempt_number
-        // diambil dari counter exam_attempts yang sudah ke-increment duluan
-        // pas mahasiswa klik "Mulai" (evaluasiMulaiAttempt). updateOrCreate
-        // biar aman kalau submit-nya kepencet 2x / retry jaringan buat
-        // attempt yang sama, gak dobel baris.
-        $attemptSaatIni = \App\Models\ExamAttempt::where('exam_id', $exam->id)
-            ->where('student_id', auth()->id())
-            ->value('attempts') ?? 1;
+        // Semua penyimpanan skor + kemungkinan pergantian cycle harus atomik:
+        // kalau salah satu gagal, semuanya di-rollback biar attempts/cycle
+        // gak pernah "kepotong di tengah" (misal skor kesimpen tapi cycle
+        // gagal ke-reset, atau sebaliknya).
+        $hasil = \Illuminate\Support\Facades\DB::transaction(function () use ($exam, $studentId, $skor, $passingGrade, $maxAttempts) {
+            // Lock baris exam_attempts punya mahasiswa ini supaya gak ada
+            // request submit lain (double klik/retry) yang balapan baca
+            // attempts/cycle yang sama.
+            $attempt = \App\Models\ExamAttempt::where('exam_id', $exam->id)
+                ->where('student_id', $studentId)
+                ->lockForUpdate()
+                ->first();
 
-        \App\Models\ExamAttemptScore::updateOrCreate(
-            ['exam_id' => $exam->id, 'student_id' => auth()->id(), 'attempt_number' => $attemptSaatIni],
-            ['skor' => $skor]
-        );
+            // Jaga-jaga kalau submit dipanggil tanpa lewat evaluasiMulaiAttempt
+            // dulu (mis. request langsung) -- tetap catat sebagai attempt 1
+            // di cycle 1, bukan bikin error.
+            if (!$attempt) {
+                $attempt = \App\Models\ExamAttempt::create([
+                    'exam_id' => $exam->id,
+                    'student_id' => $studentId,
+                    'attempts' => 1,
+                    'cycle' => 1,
+                ]);
+            }
 
-        // Skor RATA-RATA dari semua percobaan yang sudah diselesaikan -- ini
-        // yang beneran dikirim ke Leaderboard & Monitoring/Laporan, BUKAN
-        // skor percobaan ini doang.
-        $skorRataRata = \App\Support\ExamScoring::rataRata(
-            \App\Models\ExamAttemptScore::where('exam_id', $exam->id)->where('student_id', auth()->id())->pluck('skor')
-        );
+            $cycleAktif = $attempt->cycle;
+            $attemptNumber = $attempt->attempts ?: 1;
 
-        return response()->json([
+            // Simpan skor PERCOBAAN INI SAJA (bukan ketimpa), terikat ke
+            // SIKLUS AKTIF -- attempt_number cuma unik di dalam 1 cycle.
+            // updateOrCreate biar aman kalau submit-nya kepencet 2x / retry
+            // jaringan buat attempt yang sama, gak dobel baris.
+            \App\Models\ExamAttemptScore::updateOrCreate(
+                [
+                    'exam_id' => $exam->id,
+                    'student_id' => $studentId,
+                    'cycle' => $cycleAktif,
+                    'attempt_number' => $attemptNumber,
+                ],
+                ['skor' => $skor]
+            );
+
+            // Skor RATA-RATA HANYA dari attempt-attempt di SIKLUS AKTIF -- ini
+            // yang beneran dikirim ke Leaderboard & Monitoring/Laporan, BUKAN
+            // skor percobaan ini doang, dan BUKAN dicampur sama siklus lama.
+            $skorCycleAktif = \App\Models\ExamAttemptScore::where('exam_id', $exam->id)
+                ->where('student_id', $studentId)
+                ->where('cycle', $cycleAktif)
+                ->orderBy('attempt_number')
+                ->get();
+
+            $skorRataRata = \App\Support\ExamScoring::rataRata($skorCycleAktif->pluck('skor'));
+            $lulus = $skorRataRata !== null && $skorRataRata >= $passingGrade;
+
+            $resetDilakukan = false;
+            $cycleSelesai = null;
+            $riwayatSiklus = [];
+
+            // Sudah 3x attempt di siklus ini dan masih belum lulus -> otomatis
+            // buka siklus baru: cycle+1, attempts di-reset ke 0 sehingga
+            // mahasiswa bisa langsung mengerjakan attempt 1 di cycle baru.
+            // Kalau SUDAH lulus, siklus baru TIDAK PERNAH dibuat.
+            if (!$lulus && $attemptNumber >= $maxAttempts) {
+                $resetDilakukan = true;
+                $cycleSelesai = $cycleAktif;
+                $riwayatSiklus = $skorCycleAktif->map(fn($s) => [
+                    'attempt' => (int) $s->attempt_number,
+                    'skor' => (int) $s->skor,
+                ])->values()->all();
+
+                $attempt->cycle = $cycleAktif + 1;
+                $attempt->attempts = 0;
+                $attempt->save();
+            }
+
+            return [
+                'skor' => $skor,
+                'skorRataRata' => $skorRataRata,
+                'lulus' => $lulus,
+                'attemptsUsed' => $attempt->attempts,
+                'cycle' => $attempt->cycle,
+                'resetDilakukan' => $resetDilakukan,
+                'cycleSelesai' => $cycleSelesai,
+                'riwayatSiklus' => $riwayatSiklus,
+            ];
+        });
+
+        return response()->json(array_merge($hasil, [
             'message' => 'Hasil kuis berhasil dikirim.',
-            'skor' => $skor,
-            'skorRataRata' => $skorRataRata,
-        ]);
+            'passingGrade' => $passingGrade,
+        ]));
     }
 
     public function absensi()
