@@ -7,6 +7,7 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>PKKMB-KT UNILAM 2026</title>
+    <link rel="canonical" href="https://simba-unilam.my.id/" />
     <style>
       :root {
         --navy-950: #0a0f2c;
