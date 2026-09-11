@@ -22,7 +22,13 @@ class DashboardController extends Controller
         // Ganti logic ini kalau nanti ada kolom kategori pelanggaran yang jelas.
         $totalPelanggaran = Activity::where('activity_value', '<', 0)->count();
 
-        $jadwalTerdekat = Schedule::where('schedule_date', '>=', today())
+       $jadwalTerdekat = Schedule::where(function ($q) {
+        $q->where('schedule_date', '>', today())
+            ->orWhere(function ($q2) {
+                $q2->where('schedule_date', today())
+                    ->where('schedule_begin_time', '>=', now('Asia/Jakarta')->format('H:i:s'));
+            });
+            })
             ->orderBy('schedule_date')
             ->orderBy('schedule_begin_time')
             ->take(5)

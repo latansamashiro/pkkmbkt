@@ -592,7 +592,7 @@
         ====================================================================== -->
         <div class="flex flex-col gap-5 justify-center">
           <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSf-wc7fjXqf6o9MEI5qUjylqjrB7hDrNbzIjY0uWQBu8b6GdA/viewform"
+            href="https://docs.google.com/forms/d/e/1FAIpQLScjRVFvjx0Mcc7xXX0GSy6FzaGgsHJ5PRsyK2fMQyaa9dBohA/viewform"
             target="_blank"
             rel="noopener noreferrer"
             class="contact-link-card group flex items-start gap-4 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-[#11235a]/30 rounded-xl p-6 transition"
