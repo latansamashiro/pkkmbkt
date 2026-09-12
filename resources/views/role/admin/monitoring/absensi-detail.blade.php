@@ -71,12 +71,12 @@
             </thead>
             <tbody>
                 @forelse ($matrix as $idx => $m)
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-slate-50" data-row-student="{{ $m['student_id'] }}">
                         <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">{{ $idx + 1 }}</td>
                         <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">{{ $m['nama'] }}</td>
-                        @foreach ($m['sesi'] as $i => $status)
+                        @foreach ($m['sesi'] as $i => $s)
                             @php
-                                $badge = match($status) {
+                                $badge = match($s['status_presence']) {
                                     'hadir' => ['H', 'bg-teal-50 text-teal-600'],
                                     'izin'  => ['I', 'bg-sky-50 text-sky-600'],
                                     'sakit' => ['S', 'bg-amber-100 text-amber-700'],
@@ -84,11 +84,18 @@
                                     default => ['-', 'bg-slate-100 text-slate-400'],
                                 };
                             @endphp
-                            <td class="px-3.5 py-3 text-center border-b border-slate-200 {{ (($sesiList[$i]->status ?? null) !== 'submitted') ? 'bg-amber-50/50' : '' }}">
-                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg text-[11px] font-extrabold {{ $badge[1] }}">{{ $badge[0] }}</span>
+                            <td class="px-3.5 py-3 text-center border-b border-slate-200 {{ (($sesiList[$i]->status ?? null) !== 'submitted') ? 'bg-amber-50/50' : '' }}" data-cell-sesi="{{ $i }}">
+                                <button type="button" data-aksi="edit-sesi"
+                                    data-student-id="{{ $m['student_id'] }}"
+                                    data-nama="{{ $m['nama'] }}"
+                                    data-sesi-index="{{ $i }}"
+                                    data-attendance-id="{{ $s['attendance_id'] }}"
+                                    data-status="{{ $s['status_presence'] }}"
+                                    aria-label="Edit kehadiran {{ $m['nama'] }} sesi {{ $i + 1 }}"
+                                    class="inline-flex items-center justify-center w-6 h-6 rounded-lg text-[11px] font-extrabold {{ $badge[1] }} hover:ring-2 hover:ring-offset-1 hover:ring-teal-400 transition cursor-pointer">{{ $badge[0] }}</button>
                             </td>
                         @endforeach
-                        <td class="px-3.5 py-3 text-center text-sm font-extrabold border-b border-slate-200 {{ $m['persen'] >= 75 ? 'text-teal-600' : ($m['persen'] >= 40 ? 'text-amber-600' : 'text-rose-600') }}">
+                        <td class="px-3.5 py-3 text-center text-sm font-extrabold border-b border-slate-200 {{ $m['persen'] >= 75 ? 'text-teal-600' : ($m['persen'] >= 40 ? 'text-amber-600' : 'text-rose-600') }}" data-cell-persen>
                             {{ $m['persen'] }}%
                         </td>
                     </tr>
@@ -110,10 +117,131 @@
         @endif
     </div>
 </div>
+
+<!-- ===== MODAL EDIT KEHADIRAN (satu sesi saja -- admin/panitia bisa ubah walau sesi sudah disubmit) ===== -->
+<div id="modalEditKehadiran" class="hidden fixed inset-0 bg-black/50 items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-6">
+        <div class="flex items-start justify-between gap-4 mb-1">
+            <h3 class="text-lg font-extrabold text-slate-800 m-0">Edit Kehadiran</h3>
+            <button type="button" id="btnCloseEditKehadiran" aria-label="Tutup" class="text-slate-400 hover:text-slate-700 shrink-0">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <p id="editKehadiranNama" class="text-sm text-slate-500 mb-4"></p>
+        <p class="text-[11px] text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-4">
+            Perubahan hanya berlaku untuk sesi ini dan langsung tersimpan, termasuk kalau sesinya sudah disubmit mentor.
+        </p>
+        <p id="editKehadiranError" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2 mb-3"></p>
+        <form id="formEditKehadiran">
+            <label for="fieldStatusSesi" class="block text-xs font-bold text-slate-500 mb-1.5">Status Kehadiran</label>
+            <select id="fieldStatusSesi"
+                class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 cursor-pointer focus:outline-none focus:border-teal-600">
+                <option value="hadir">Hadir</option>
+                <option value="izin">Izin</option>
+                <option value="sakit">Sakit</option>
+                <option value="alfa">Alfa</option>
+            </select>
+            <div class="flex items-center justify-end gap-3 mt-6">
+                <button type="button" id="btnBatalEditKehadiran"
+                    class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-sm px-4 py-2.5 rounded-xl transition">Batal</button>
+                <button type="submit" id="btnSimpanEditKehadiran"
+                    class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition disabled:opacity-60">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
     if (window.lucide) lucide.createIcons();
+
+    (function () {
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
+        const URL_UPDATE_BASE = "{{ route($monBase.'.absensi.update-mahasiswa', ['groupId' => $group->id, 'tanggal' => $tanggal, 'studentId' => '__ID__']) }}";
+        const BADGE = {
+            hadir: ['H', 'bg-teal-50 text-teal-600'],
+            izin:  ['I', 'bg-sky-50 text-sky-600'],
+            sakit: ['S', 'bg-amber-100 text-amber-700'],
+            alfa:  ['A', 'bg-rose-50 text-rose-600'],
+        };
+
+        const $modal = $('#modalEditKehadiran');
+        const $error = $('#editKehadiranError');
+        let current = null; // { studentId, sesiIndex, attendanceId }
+
+        function bukaModal(btn) {
+            const $btn = $(btn);
+            current = {
+                studentId: $btn.data('student-id'),
+                sesiIndex: $btn.data('sesi-index'),
+                attendanceId: $btn.data('attendance-id'),
+            };
+            const status = $btn.data('status');
+
+            $error.addClass('hidden');
+            $('#editKehadiranNama').text(`${$btn.data('nama')} — Sesi ${current.sesiIndex + 1}`);
+            $('#fieldStatusSesi').val(['hadir', 'izin', 'sakit', 'alfa'].includes(status) ? status : 'hadir');
+
+            $modal.removeClass('hidden').addClass('flex');
+        }
+
+        function tutupModal() {
+            $modal.addClass('hidden').removeClass('flex');
+            current = null;
+        }
+
+        $(document).on('click', '[data-aksi="edit-sesi"]', function () { bukaModal(this); });
+        $('#btnCloseEditKehadiran, #btnBatalEditKehadiran').on('click', tutupModal);
+        $modal.on('click', function (e) { if (e.target === this) tutupModal(); });
+
+        $('#formEditKehadiran').on('submit', function (e) {
+            e.preventDefault();
+            if (!current) return;
+            $error.addClass('hidden');
+
+            const statusBaru = $('#fieldStatusSesi').val();
+            const $btn = $('#btnSimpanEditKehadiran');
+            $btn.prop('disabled', true);
+
+            $.ajax({
+                url: URL_UPDATE_BASE.replace('__ID__', current.studentId),
+                method: 'PUT',
+                contentType: 'application/json',
+                headers: { 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
+                // cuma kirim sesi yang diklik, bukan semua sesi hari itu.
+                data: JSON.stringify({
+                    sesi: [{ attendance_id: current.attendanceId, status_presence: statusBaru }],
+                }),
+            }).done(function (result) {
+                // update sel yang diklik + persentase baris, tanpa reload halaman.
+                const $row = $(`tr[data-row-student="${current.studentId}"]`);
+                const $tombolSel = $row.find(`td[data-cell-sesi="${current.sesiIndex}"] [data-aksi="edit-sesi"]`);
+                const badge = BADGE[statusBaru] || ['-', 'bg-slate-100 text-slate-400'];
+
+                $tombolSel
+                    .attr('class', `inline-flex items-center justify-center w-6 h-6 rounded-lg text-[11px] font-extrabold ${badge[1]} hover:ring-2 hover:ring-offset-1 hover:ring-teal-400 transition cursor-pointer`)
+                    .attr('data-status', statusBaru)
+                    .text(badge[0]);
+
+                if (result.data && typeof result.data.persen !== 'undefined') {
+                    $row.find('td[data-cell-persen]').text(`${result.data.persen}%`);
+                }
+
+                tutupModal();
+                if (typeof tampilkanToast === 'function') {
+                    tampilkanToast(result.message);
+                } else {
+                    alert(result.message);
+                }
+            }).fail(function (xhr) {
+                const result = xhr.responseJSON || {};
+                $error.text(result.message || 'Terjadi kesalahan, silakan coba lagi.').removeClass('hidden');
+            }).always(function () {
+                $btn.prop('disabled', false);
+            });
+        });
+    })();
 </script>
 @endpush

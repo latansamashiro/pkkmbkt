@@ -322,20 +322,77 @@ public function absensiDetail(Request $request, $groupId, $tanggal)
                 $d = AttendanceDetail::where('attendance_id', $sesi->id)
                     ->where('student_id', $m->student_id)
                     ->first();
-                return $d->status_presence ?? '-';
+                return [
+                    'attendance_id'   => $sesi->id,
+                    'status_presence' => $d->status_presence ?? '-',
+                ];
             });
 
-            $hadir  = $sesiStatus->filter(fn ($s) => $s === 'hadir')->count();
+            $hadir  = $sesiStatus->filter(fn ($s) => $s['status_presence'] === 'hadir')->count();
             $persen = $sesiList->count() ? round($hadir / $sesiList->count() * 100) : 0;
 
             return [
-                'nama'   => $m->student->name ?? '-',
-                'sesi'   => $sesiStatus,
-                'persen' => $persen,
+                'student_id' => $m->student_id,
+                'nama'       => $m->student->name ?? '-',
+                'sesi'       => $sesiStatus,
+                'persen'     => $persen,
             ];
         });
 
     return view('role.admin.monitoring.absensi-detail', compact('group', 'tanggal', 'sesiList', 'matrix', 'adaSubmitted'));
+}
+
+/**
+ * Edit manual status kehadiran satu mahasiswa (bisa lebih dari satu sesi sekaligus)
+ * untuk kelompok & tanggal tertentu. Dipakai admin & panitia lewat tombol "Aksi"
+ * di halaman Detail Absensi, supaya kalau ada kesalahan input dari mentor
+ * (termasuk sesi yang sudah disubmit) tidak perlu diubah langsung di database.
+ */
+public function absensiUpdateMahasiswa(Request $request, $groupId, $tanggal, $studentId)
+{
+    $validated = $request->validate([
+        'sesi'                     => 'required|array|min:1',
+        'sesi.*.attendance_id'     => 'required|integer|exists:attendances,id',
+        'sesi.*.status_presence'   => 'required|in:hadir,izin,sakit,alfa',
+    ]);
+
+    // Pastikan mahasiswa memang anggota kelompok ini.
+    $anggota = Member::where('group_id', $groupId)->where('student_id', $studentId)->first();
+    if (!$anggota) {
+        return response()->json(['message' => 'Mahasiswa tidak ditemukan di kelompok ini.'], 404);
+    }
+
+    foreach ($validated['sesi'] as $s) {
+        // Cocokkan sesi milik kelompok & tanggal yang sama, biar tidak salah kelompok/tanggal.
+        $attendance = Attendance::where('id', $s['attendance_id'])
+            ->where('group_id', $groupId)
+            ->where('attendance_date', $tanggal)
+            ->first();
+
+        if (!$attendance) {
+            continue;
+        }
+
+        AttendanceDetail::updateOrCreate(
+            ['attendance_id' => $attendance->id, 'student_id' => $studentId],
+            ['status_presence' => $s['status_presence']]
+        );
+    }
+
+    // Hitung ulang persentase kehadiran mahasiswa ini biar tabel bisa langsung
+    // diperbarui di frontend tanpa reload halaman.
+    $sesiList = Attendance::where('group_id', $groupId)->where('attendance_date', $tanggal)->get();
+    $sesiStatus = $sesiList->map(function ($sesi) use ($studentId) {
+        $d = AttendanceDetail::where('attendance_id', $sesi->id)->where('student_id', $studentId)->first();
+        return ['attendance_id' => $sesi->id, 'status_presence' => $d->status_presence ?? '-'];
+    });
+    $hadir  = $sesiStatus->filter(fn ($s) => $s['status_presence'] === 'hadir')->count();
+    $persen = $sesiList->count() ? round($hadir / $sesiList->count() * 100) : 0;
+
+    return response()->json([
+        'message' => 'Status kehadiran berhasil diperbarui.',
+        'data'    => ['sesi' => $sesiStatus->values(), 'persen' => $persen],
+    ]);
 }
 
 /**

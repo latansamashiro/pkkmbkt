@@ -121,6 +121,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.monitoring.absensi');
         Route::get('/monitoring/absensi/{groupId}/{tanggal}', [MonitoringController::class, 'absensiDetail'])
             ->name('admin.monitoring.absensi.detail');
+        Route::put('/monitoring/absensi/{groupId}/{tanggal}/mahasiswa/{studentId}', [MonitoringController::class, 'absensiUpdateMahasiswa'])
+            ->name('admin.monitoring.absensi.update-mahasiswa');
         Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-pdf', [MonitoringController::class, 'absensiExportPdf'])
             ->name('admin.monitoring.absensi.export-pdf');
         Route::get('/monitoring/absensi/{groupId}/{tanggal}/export-excel', [MonitoringController::class, 'absensiExportExcel'])
@@ -355,9 +357,11 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/laporan', 'laporan')->name('committee.monitoring.laporan');
 
             Route::get('/absensi', 'absensi')->name('committee.monitoring.absensi');            Route::get('/absensi/{groupId}/{tanggal}', 'absensiDetail')->name('committee.monitoring.absensi.detail');
+            Route::put('/absensi/{groupId}/{tanggal}/mahasiswa/{studentId}', 'absensiUpdateMahasiswa')->name('committee.monitoring.absensi.update-mahasiswa');
             Route::get('/absensi/{groupId}/{tanggal}/export-pdf', 'absensiExportPdf')->name('committee.monitoring.absensi.export-pdf');
             Route::get('/absensi/{groupId}/{tanggal}/export-excel', 'absensiExportExcel')->name('committee.monitoring.absensi.export-excel');
 
+            
             Route::get('/absensi/export-pdf-global', 'absensiExportPdfGlobal')
                 ->name('committee.monitoring.absensi.export-pdf-global');
             Route::get('/absensi/export-excel-global', 'absensiExportExcelGlobal')
