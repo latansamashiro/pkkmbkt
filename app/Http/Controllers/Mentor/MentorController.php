@@ -32,10 +32,13 @@ class MentorController extends Controller
         return \App\Support\Leaderboard::hitungRanking();
     }
 
-    public function dashboard()
+        public function dashboard()
     {
+        $now = \Carbon\Carbon::now('Asia/Jakarta');
+
         $jadwalHariIni = \App\Models\Schedule::where('status', 'published')
-            ->whereDate('schedule_date', today())
+            ->whereDate('schedule_date', $now->toDateString())
+            ->where('schedule_begin_time', '>=', $now->format('H:i:s'))
             ->orderBy('schedule_begin_time')
             ->get();
 
@@ -61,14 +64,16 @@ class MentorController extends Controller
      * buat dia adalah tugas rutin dia sendiri (submit presensi), bukan
      * evaluasi/tugas yang justru dia sendiri yang menilai/memantau.
      */
-    protected function hitungProgresMentor(int $mentorId): int
+        protected function hitungProgresMentor(int $mentorId): int
     {
         $group = \App\Models\Group::where('mentor_id', $mentorId)->first();
         if (!$group) {
             return 0;
         }
 
-        $templateIdsLewat = \App\Models\AttendanceTemplate::where('attendance_date', '<=', today())->pluck('id');
+        $hariIni = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+
+        $templateIdsLewat = \App\Models\AttendanceTemplate::where('attendance_date', '<=', $hariIni)->pluck('id');
         $totalSesi = $templateIdsLewat->count();
         if ($totalSesi === 0) {
             return 0;

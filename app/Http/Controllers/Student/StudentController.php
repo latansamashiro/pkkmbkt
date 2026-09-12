@@ -24,15 +24,17 @@ class StudentController extends Controller
         return view('role.student.leaderboard', compact('dataMahasiswa', 'currentStudentId'));
     }
 
-    public function dashboard()
+       public function dashboard()
     {
-        $hariIni = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+        $now = \Carbon\Carbon::now('Asia/Jakarta');
 
         $jadwalHariIni = \App\Models\Schedule::where('status', 'published')
-            ->whereDate('schedule_date', $hariIni)
+            ->whereDate('schedule_date', $now->toDateString())
+            ->where('schedule_begin_time', '>=', $now->format('H:i:s'))
             ->orderBy('schedule_begin_time')
             ->limit(3)
             ->get();
+
         // Carousel "Informasi Terbaru" di dashboard -- maksimal 5, murni
         // terbaru dulu (BUKAN important_flag dulu seperti di info()), jadi
         // begitu ada info baru, item ke-6 otomatis ke-cut dari carousel ini
@@ -46,7 +48,6 @@ class StudentController extends Controller
 
         return view('role.student.dashboard', compact('jadwalHariIni', 'informasiTerbaru', 'progres'));
     }
-
     /**
      * Progres PKKMB-KT mahasiswa = rata-rata dari 3 komponen (kalau datanya
      * ada): % kehadiran (dari sesi yang sudah lewat), % paket evaluasi yang
@@ -55,7 +56,7 @@ class StudentController extends Controller
      * penyebutnya masih 0 (belum ada data sama sekali) dilewati, bukan
      * dianggap 0%, biar gak menyesatkan sebelum kegiatan benar-benar mulai.
      */
-    protected function hitungProgresMahasiswa(int $studentId): int
+        protected function hitungProgresMahasiswa(int $studentId): int
     {
         $groupId = \App\Models\Member::where('student_id', $studentId)->value('group_id');
 
@@ -64,7 +65,8 @@ class StudentController extends Controller
         // Attendance kelompoknya yang SUDAH disubmit mentor.
         $persenAbsensi = null;
         if ($groupId) {
-            $templateIdsLewat = \App\Models\AttendanceTemplate::where('attendance_date', '<=', today())->pluck('id');
+            $hariIni = \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+            $templateIdsLewat = \App\Models\AttendanceTemplate::where('attendance_date', '<=', $hariIni)->pluck('id');
             $totalSesi = $templateIdsLewat->count();
             if ($totalSesi > 0) {
                 $attendanceIdsSubmitted = \App\Models\Attendance::where('group_id', $groupId)
@@ -108,6 +110,7 @@ class StudentController extends Controller
 
         return count($komponen) > 0 ? (int) round(array_sum($komponen) / count($komponen)) : 0;
     }
+        
 
     public function info()
     {
