@@ -2,6 +2,12 @@
 @php
     // dipakai buat bikin nama route dinamis (admin.monitoring.* atau committee.monitoring.*)
     $monBase = \Illuminate\Support\Str::before(request()->route()->getName(), '.monitoring') . '.monitoring';
+
+    // Sesi mana saja yang statusnya belum 'submitted' (masih draft) -- dipakai untuk
+    // kasih tanda per kolom + catatan di bawah tombol Export, bukan buat nyembunyikan
+    // tombolnya. Bisa saja sebagian sesi sudah submit dan sebagian belum
+    // (mis. sesi 1 & 2 submitted, sesi 3 masih draft).
+    $sesiBelumSubmit = collect($sesiList)->filter(fn ($s) => $s->status !== 'submitted')->values();
 @endphp
 @section('content')
 <script src="https://cdn.tailwindcss.com"></script>
@@ -24,7 +30,7 @@
         <p class="text-sm text-slate-500 m-0">{{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d M Y') }}</p>
     </div>
 
-    @if ($adaSubmitted)
+    <div class="flex flex-col items-end gap-1.5">
         <div class="flex items-center gap-2">
             <a href="{{ route($monBase.'.absensi.export-pdf', ['groupId' => $group->id, 'tanggal' => $tanggal]) }}"
                 target="_blank"
@@ -36,11 +42,13 @@
                 <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>Export Excel
             </a>
         </div>
-    @else
-        <p class="text-xs text-slate-400 italic max-w-[220px] text-right">
-            Export tersedia setelah minimal satu sesi di tanggal ini disubmit mentor.
-        </p>
-    @endif
+        @if ($sesiBelumSubmit->isNotEmpty())
+            <p class="text-[11px] font-semibold text-amber-600 max-w-[260px] text-right m-0">
+                ⚠ Sesi {{ $sesiBelumSubmit->map(fn ($s) => collect($sesiList)->search($s) + 1)->implode(', ') }}
+                belum disubmit mentor — hasil export masih ditandai draft.
+            </p>
+        @endif
+    </div>
 </div>
 
 <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
@@ -51,8 +59,11 @@
                     <th class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">No</th>
                     <th class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">Mahasiswa</th>
                     @foreach ($sesiList as $i => $sesi)
-                        <th class="text-center text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">
+                        <th class="text-center text-[11px] font-extrabold uppercase tracking-wider px-3.5 py-3 whitespace-nowrap {{ $sesi->status !== 'submitted' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-400' }}">
                             Sesi {{ $i + 1 }}
+                            @if ($sesi->status !== 'submitted')
+                                <br><span class="normal-case font-semibold text-[9px]">(draft)</span>
+                            @endif
                         </th>
                     @endforeach
                     <th class="text-center text-[11px] font-extrabold uppercase tracking-wider text-slate-400 px-3.5 py-3 bg-slate-100 whitespace-nowrap">Kehadiran</th>
@@ -63,7 +74,7 @@
                     <tr class="hover:bg-slate-50">
                         <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">{{ $idx + 1 }}</td>
                         <td class="px-3.5 py-3 text-sm text-slate-800 border-b border-slate-200">{{ $m['nama'] }}</td>
-                        @foreach ($m['sesi'] as $status)
+                        @foreach ($m['sesi'] as $i => $status)
                             @php
                                 $badge = match($status) {
                                     'hadir' => ['H', 'bg-teal-50 text-teal-600'],
@@ -73,7 +84,7 @@
                                     default => ['-', 'bg-slate-100 text-slate-400'],
                                 };
                             @endphp
-                            <td class="px-3.5 py-3 text-center border-b border-slate-200">
+                            <td class="px-3.5 py-3 text-center border-b border-slate-200 {{ (($sesiList[$i]->status ?? null) !== 'submitted') ? 'bg-amber-50/50' : '' }}">
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg text-[11px] font-extrabold {{ $badge[1] }}">{{ $badge[0] }}</span>
                             </td>
                         @endforeach
@@ -94,6 +105,9 @@
         <span class="text-[11px] font-semibold text-slate-400"><span class="text-sky-600 font-extrabold">I</span> Izin</span>
         <span class="text-[11px] font-semibold text-slate-400"><span class="text-amber-600 font-extrabold">S</span> Sakit</span>
         <span class="text-[11px] font-semibold text-slate-400"><span class="text-rose-600 font-extrabold">A</span> Alfa</span>
+        @if ($sesiBelumSubmit->isNotEmpty())
+            <span class="text-[11px] font-semibold text-amber-600 ml-auto">Kolom kuning = sesi belum disubmit mentor (draft)</span>
+        @endif
     </div>
 </div>
 @endsection
