@@ -35,19 +35,28 @@
             text-align: center; text-decoration: underline; font-size: 15px;
             margin: 0 0 4px; text-transform: uppercase;
         }
-        .subjudul { text-align: center; font-size: 12.5px; margin: 0 0 24px; }
+        .subjudul { text-align: center; font-size: 12.5px; margin: 0 0 12px; }
+
+        /* ============ PERINGATAN BELUM SUBMIT ============ */
+        .peringatan-draft {
+            border: 1.5px solid #b91c1c; background: #fef2f2; color: #b91c1c;
+            font-size: 11.5px; font-weight: bold; text-align: center;
+            padding: 8px 10px; margin: 0 0 18px; border-radius: 4px;
+        }
 
         .meta { width: 100%; font-size: 12.5px; margin-bottom: 18px; }
         .meta td { padding: 2px 6px 2px 0; vertical-align: top; }
         .meta td.label { width: 130px; }
 
-        table.data { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 24px; }
+        table.data { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 8px; }
         table.data th, table.data td { border: 1px solid #333; padding: 6px 8px; }
         table.data th { background: #eef0f6; text-align: center; font-weight: bold; }
         table.data td.nama { text-align: left; }
         table.data td.center { text-align: center; }
+        table.data th.sesi-draft { background: #fde8e8; color: #b91c1c; }
 
         .keterangan { font-size: 11px; margin-bottom: 40px; }
+        .keterangan .draft-note { color: #b91c1c; font-weight: bold; }
 
         .ttd { display: flex; justify-content: flex-end; font-size: 12.5px; margin-top: 40px; }
         .ttd-box { text-align: center; width: 240px; }
@@ -82,6 +91,22 @@
     <h3 class="judul">Laporan Absensi Kelompok</h3>
     <p class="subjudul">Dicetak sebagai arsip resmi hasil presensi yang telah disubmit</p>
 
+    @php
+        // Sesi mana saja yang statusnya belum 'submitted' (masih draft) --
+        // dipakai untuk kasih tanda per kolom, bukan cuma flag global,
+        // karena bisa saja sebagian sesi sudah submit dan sebagian belum
+        // (mis. sesi 1 & 2 submitted, sesi 3 masih draft).
+        $sesiBelumSubmit = $sesiList->filter(fn ($s) => $s->status !== 'submitted')->values();
+    @endphp
+
+    @if ($sesiBelumSubmit->isNotEmpty())
+        <p class="peringatan-draft">
+            ⚠ PERHATIAN: {{ $sesiBelumSubmit->count() }} dari {{ $sesiList->count() }} sesi
+            (Sesi {{ $sesiBelumSubmit->map(fn ($s) => $sesiList->search($s) + 1)->implode(', ') }})
+            belum disubmit mentor — data pada sesi tersebut masih berstatus draft dan bisa berubah.
+        </p>
+    @endif
+
     <table class="meta">
         <tr><td class="label">Kelompok</td><td>: {{ $group->name ?? '-' }}</td></tr>
         <tr><td class="label">Mentor</td><td>: {{ $group->mentor->name ?? '-' }}</td></tr>
@@ -95,7 +120,13 @@
                 <th style="width:28px">No</th>
                 <th style="text-align:left">Nama Mahasiswa</th>
                 @foreach ($sesiList as $i => $sesi)
-                    <th style="width:60px">Sesi {{ $i + 1 }}<br><span style="font-weight:normal">{{ $sesi->template->session_name ?? '-' }}</span></th>
+                    <th style="width:60px" class="{{ $sesi->status !== 'submitted' ? 'sesi-draft' : '' }}">
+                        Sesi {{ $i + 1 }}<br>
+                        <span style="font-weight:normal">{{ $sesi->template->session_name ?? '-' }}</span>
+                        @if ($sesi->status !== 'submitted')
+                            <br><span style="font-size:9px">(draft)</span>
+                        @endif
+                    </th>
                 @endforeach
                 <th style="width:70px">Kehadiran</th>
             </tr>
@@ -105,13 +136,13 @@
                 <tr>
                     <td class="center">{{ $idx + 1 }}</td>
                     <td class="nama">{{ $m['nama'] }}</td>
-                    @foreach ($m['sesi'] as $status)
+                    @foreach ($m['sesi'] as $i => $status)
                         @php
                             $huruf = match($status) {
                                 'hadir' => 'H', 'izin' => 'I', 'sakit' => 'S', 'alfa' => 'A', default => '-',
                             };
                         @endphp
-                        <td class="center">{{ $huruf }}</td>
+                        <td class="center {{ ($sesiList[$i]->status ?? null) !== 'submitted' ? 'sesi-draft' : '' }}">{{ $huruf }}</td>
                     @endforeach
                     <td class="center">{{ $m['persen'] }}%</td>
                 </tr>
@@ -121,7 +152,12 @@
         </tbody>
     </table>
 
-    <p class="keterangan">Keterangan: H = Hadir &nbsp; I = Izin &nbsp; S = Sakit &nbsp; A = Alfa</p>
+    <p class="keterangan">
+        Keterangan: H = Hadir &nbsp; I = Izin &nbsp; S = Sakit &nbsp; A = Alfa
+        @if ($sesiBelumSubmit->isNotEmpty())
+            <br><span class="draft-note">Kolom bertanda merah (draft) belum dikunci/disubmit mentor, sehingga data masih bisa berubah sewaktu-waktu.</span>
+        @endif
+    </p>
 
     <div class="ttd">
         <div class="ttd-box">

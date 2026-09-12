@@ -347,26 +347,33 @@ public function absensiExportPdf($groupId, $tanggal)
     [$group, $tanggal, $sesiList, $matrix, $adaSubmitted] = array_values(
         $this->siapkanDataAbsensiDetail($groupId, $tanggal)
     );
-    abort_unless($adaSubmitted, 403, 'Belum ada sesi yang disubmit untuk tanggal ini.');
+    // Export tetap boleh jalan meski belum disubmit mentor -- $adaSubmitted
+    // dikirim ke view supaya halaman cetak menampilkan keterangan "belum final".
 
-    return view('role.admin.monitoring.absensi-print', compact('group', 'tanggal', 'sesiList', 'matrix'));
+    return view('role.admin.monitoring.absensi-print', compact('group', 'tanggal', 'sesiList', 'matrix', 'adaSubmitted'));
 }
 
 /**
  * Export Excel (CSV) — dibuka Excel/Sheets langsung karena formatnya .csv.
+ * Tetap bisa export walau sesi belum disubmit mentor; kalau belum, nama file
+ * ditandai _BELUM_SUBMIT dan baris pertama CSV berisi keterangan draft.
  */
 public function absensiExportExcel($groupId, $tanggal)
 {
     [$group, $tanggal, $sesiList, $matrix, $adaSubmitted] = array_values(
         $this->siapkanDataAbsensiDetail($groupId, $tanggal)
     );
-    abort_unless($adaSubmitted, 403, 'Belum ada sesi yang disubmit untuk tanggal ini.');
 
-    $namaFile = 'absensi_' . \Illuminate\Support\Str::slug($group->name) . '_' . $tanggal . '.csv';
+    $namaFile = 'absensi_' . \Illuminate\Support\Str::slug($group->name) . '_' . $tanggal
+        . ($adaSubmitted ? '' : '_BELUM_SUBMIT') . '.csv';
 
-    $callback = function () use ($sesiList, $matrix) {
+    $callback = function () use ($sesiList, $matrix, $adaSubmitted) {
         $out = fopen('php://output', 'w');
         fwrite($out, "\xEF\xBB\xBF"); // BOM biar Excel baca UTF-8 dengan benar
+
+        if (!$adaSubmitted) {
+            fputcsv($out, ['CATATAN: Data belum disubmit mentor, masih berstatus draft']);
+        }
 
         $header = ['No', 'Mahasiswa'];
         foreach ($sesiList as $i => $sesi) {
@@ -572,8 +579,14 @@ public function evaluasiDetail(Request $request, $groupId)
     // Skor tiap paket = RATA-RATA semua percobaan yang sudah diselesaikan
     // mahasiswa (bukan lagi jawaban mentah percobaan terakhir doang).
     $skorAttemptSemua = \App\Models\ExamAttemptScore::query()
-        ->whereIn('student_id', $studentIds)
-        ->whereIn('exam_id', $categories->pluck('id'))
+        ->join('exam_attempts', function ($join) {
+            $join->on('exam_attempt_scores.exam_id', '=', 'exam_attempts.exam_id')
+                ->on('exam_attempt_scores.student_id', '=', 'exam_attempts.student_id')
+                ->on('exam_attempt_scores.cycle', '=', 'exam_attempts.cycle');
+        })
+        ->whereIn('exam_attempt_scores.student_id', $studentIds)
+        ->whereIn('exam_attempt_scores.exam_id', $categories->pluck('id'))
+        ->select('exam_attempt_scores.*')
         ->get()
         ->groupBy(fn ($r) => $r->student_id . '-' . $r->exam_id)
         ->map(fn ($grup) => $grup->pluck('skor'));
