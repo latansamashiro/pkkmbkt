@@ -377,7 +377,9 @@ public function absensiExportExcel($groupId, $tanggal)
 
         $header = ['No', 'Mahasiswa'];
         foreach ($sesiList as $i => $sesi) {
-            $header[] = 'Sesi ' . ($i + 1) . ' (' . ($sesi->template->session_name ?? '-') . ')';
+            // session_name sudah berisi "Sesi 1"/"Sesi 2"/dst, jadi tinggal dipakai
+            // langsung -- sebelumnya dibungkus lagi "Sesi X (...)" jadi dobel.
+            $header[] = $sesi->template->session_name ?: ('Sesi ' . ($i + 1));
         }
         $header[] = 'Kehadiran (%)';
         fputcsv($out, $header);
