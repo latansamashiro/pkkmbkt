@@ -11,15 +11,28 @@
     }
 </script>
 
-<div class="mb-5">
-    <a href="{{ route($monBase.'.pelanggaran') }}" class="text-sm font-semibold text-teal-600 inline-flex items-center gap-1 mb-3">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
-    </a>
-    <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Detail Pelanggaran</p>
-    <h2 class="text-2xl font-extrabold text-slate-800 m-0">
-        {{ $group->mentor->name ?? '-' }}
-        <span class="text-slate-400 font-semibold">— {{ $group->name ?? '-' }}</span>
-    </h2>
+<div class="mb-5 flex items-start justify-between flex-wrap gap-3">
+    <div>
+        <a href="{{ route($monBase.'.pelanggaran') }}" class="text-sm font-semibold text-teal-600 inline-flex items-center gap-1 mb-3">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali
+        </a>
+        <p class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 m-0">Detail Pelanggaran</p>
+        <h2 class="text-2xl font-extrabold text-slate-800 m-0">
+            {{ $group->mentor->name ?? '-' }}
+            <span class="text-slate-400 font-semibold">— {{ $group->name ?? '-' }}</span>
+        </h2>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <a href="{{ route($monBase.'.pelanggaran.export-pdf', ['groupId' => $group->id]) }}" target="_blank"
+            class="inline-flex items-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+            <i data-lucide="printer" class="w-4 h-4"></i>Export PDF
+        </a>
+        <a href="{{ route($monBase.'.pelanggaran.export-excel', ['groupId' => $group->id]) }}"
+            class="inline-flex items-center gap-2 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>Export Excel
+        </a>
+    </div>
 </div>
 
 <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">

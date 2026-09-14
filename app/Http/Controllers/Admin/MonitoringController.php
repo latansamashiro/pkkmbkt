@@ -515,6 +515,26 @@ public function pelanggaranDetail(Request $request, $groupId)
     return $this->poinDetail($request, $groupId, 'pelanggaran');
 }
 
+public function keaktifanExportExcel($groupId)
+{
+    return $this->poinExportExcel($groupId, 'keaktifan');
+}
+
+public function pelanggaranExportExcel($groupId)
+{
+    return $this->poinExportExcel($groupId, 'pelanggaran');
+}
+
+public function keaktifanExportPdf($groupId)
+{
+    return $this->poinExportPdf($groupId, 'keaktifan');
+}
+
+public function pelanggaranExportPdf($groupId)
+{
+    return $this->poinExportPdf($groupId, 'pelanggaran');
+}
+
 protected function poinListing(Request $request, string $tipe)
 {
     $cari = $request->input('cari');
@@ -548,7 +568,7 @@ protected function poinListing(Request $request, string $tipe)
     ]);
 }
 
-protected function poinDetail(Request $request, $groupId, string $tipe)
+protected function siapkanDataPoinDetail($groupId, string $tipe): array
 {
     $group = Group::with('mentor')->findOrFail($groupId);
     $isKeaktifan = $tipe === 'keaktifan';
@@ -573,7 +593,62 @@ protected function poinDetail(Request $request, $groupId, string $tipe)
         ->filter(fn ($r) => $r['update'] !== null)
         ->values();
 
+    return compact('group', 'rows', 'tipe');
+}
+
+protected function poinDetail(Request $request, $groupId, string $tipe)
+{
+    ['group' => $group, 'rows' => $rows] = $this->siapkanDataPoinDetail($groupId, $tipe);
+
     return view($request->route('view') ?? "role.admin.monitoring.{$tipe}-detail", compact('group', 'rows', 'tipe'));
+}
+
+/**
+ * Export Excel (CSV) buat rekap Keaktifan/Pelanggaran 1 kelompok.
+ * Dipanggil oleh keaktifanExportExcel() & pelanggaranExportExcel() -- cuma
+ * beda $tipe, query & format CSV-nya sama persis.
+ */
+protected function poinExportExcel($groupId, string $tipe)
+{
+    ['group' => $group, 'rows' => $rows] = $this->siapkanDataPoinDetail($groupId, $tipe);
+    $label = $tipe === 'keaktifan' ? 'Keaktifan' : 'Pelanggaran';
+
+    $namaFile = $tipe . '_' . \Illuminate\Support\Str::slug($group->name) . '.csv';
+
+    $callback = function () use ($rows, $label) {
+        $out = fopen('php://output', 'w');
+        fwrite($out, "\xEF\xBB\xBF"); // BOM biar Excel baca UTF-8 dengan benar
+
+        fputcsv($out, ['No', 'Mahasiswa', "Poin {$label}", 'Update Terakhir', 'Keterangan']);
+
+        foreach ($rows as $idx => $r) {
+            fputcsv($out, $this->netralkanBarisCsv([
+                $idx + 1,
+                $r['nama'],
+                $r['poin'],
+                $r['update'] ? \Carbon\Carbon::parse($r['update'])->format('d-m-Y') : '-',
+                $r['keterangan'],
+            ]));
+        }
+        fclose($out);
+    };
+
+    return response()->stream($callback, 200, [
+        'Content-Type' => 'text/csv; charset=UTF-8',
+        'Content-Disposition' => "attachment; filename=\"{$namaFile}\"",
+    ]);
+}
+
+/**
+ * Halaman cetak (letterhead) buat Export PDF Keaktifan/Pelanggaran --
+ * dipanggil oleh keaktifanExportPdf() & pelanggaranExportPdf().
+ */
+protected function poinExportPdf($groupId, string $tipe)
+{
+    $data = $this->siapkanDataPoinDetail($groupId, $tipe);
+    $data['label'] = $tipe === 'keaktifan' ? 'Keaktifan' : 'Pelanggaran';
+
+    return view('role.admin.monitoring.poin-print', $data);
 }
 
 public function evaluasi(Request $request)
@@ -627,16 +702,73 @@ public function evaluasi(Request $request)
 
 public function evaluasiDetail(Request $request, $groupId)
 {
+    [$group, $categories, $rows] = array_values($this->siapkanDataEvaluasiDetail($groupId));
+
+    return view($request->route('view') ?? 'role.admin.monitoring.evaluasi-detail', compact('group', 'categories', 'rows'));
+}
+
+/**
+ * Halaman cetak (letterhead) untuk Export PDF Evaluasi — dibuka di tab baru,
+ * tinggal Ctrl+P / tombol Print di halaman itu untuk simpan sebagai PDF.
+ */
+public function evaluasiExportPdf($groupId)
+{
+    [$group, $categories, $rows] = array_values($this->siapkanDataEvaluasiDetail($groupId));
+
+    return view('role.admin.monitoring.evaluasi-print', compact('group', 'categories', 'rows'));
+}
+
+/**
+ * Export Excel (CSV) buat rekap evaluasi 1 kelompok.
+ */
+public function evaluasiExportExcel($groupId)
+{
+    [$group, $categories, $rows] = array_values($this->siapkanDataEvaluasiDetail($groupId));
+
+    $namaFile = 'evaluasi_' . \Illuminate\Support\Str::slug($group->name) . '.csv';
+
+    $callback = function () use ($categories, $rows) {
+        $out = fopen('php://output', 'w');
+        fwrite($out, "\xEF\xBB\xBF"); // BOM biar Excel baca UTF-8 dengan benar
+
+        $header = ['No', 'Nama Anggota'];
+        foreach ($categories as $cat) {
+            $header[] = $cat->title;
+        }
+        $header[] = 'Rata-rata';
+        $header[] = 'Status';
+        fputcsv($out, $header);
+
+        foreach ($rows as $idx => $r) {
+            $row = [$idx + 1, $r['nama']];
+            foreach ($categories as $cat) {
+                $row[] = $r['nilai'][$cat->id] ?? '-';
+            }
+            $row[] = $r['rata'] ?? '-';
+            $row[] = $r['status'];
+            fputcsv($out, $this->netralkanBarisCsv($row));
+        }
+        fclose($out);
+    };
+
+    return response()->stream($callback, 200, [
+        'Content-Type' => 'text/csv; charset=UTF-8',
+        'Content-Disposition' => "attachment; filename=\"{$namaFile}\"",
+    ]);
+}
+
+/**
+ * Helper bareng buat evaluasiDetail() & evaluasiExportExcel() supaya tidak
+ * duplikasi query.
+ */
+protected function siapkanDataEvaluasiDetail($groupId): array
+{
     $group = Group::with('mentor')->findOrFail($groupId);
 
-    // "categories" di view generik ini sekarang isinya daftar Paket Evaluasi
-    // (Exam) -- tiap paket jadi 1 kolom, sama kayak kategori rubrik dulu.
     $categories = Exam::with('details')->orderBy('title')->get();
 
     $studentIds = Member::where('group_id', $groupId)->pluck('student_id');
 
-    // Skor tiap paket = RATA-RATA semua percobaan yang sudah diselesaikan
-    // mahasiswa (bukan lagi jawaban mentah percobaan terakhir doang).
     $skorAttemptSemua = \App\Models\ExamAttemptScore::query()
         ->join('exam_attempts', function ($join) {
             $join->on('exam_attempt_scores.exam_id', '=', 'exam_attempts.exam_id')
@@ -686,7 +818,7 @@ public function evaluasiDetail(Request $request, $groupId)
             ];
         });
 
-    return view($request->route('view') ?? 'role.admin.monitoring.evaluasi-detail', compact('group', 'categories', 'rows'));
+    return compact('group', 'categories', 'rows');
 }
 
 // ===== Monitoring Pengumpulan Tugas =====

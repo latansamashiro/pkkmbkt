@@ -136,16 +136,28 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.monitoring.keaktifan');
         Route::get('/monitoring/keaktifan/{groupId}', [MonitoringController::class, 'keaktifanDetail'])
             ->name('admin.monitoring.keaktifan.detail');
+        Route::get('/monitoring/keaktifan/{groupId}/export-pdf', [MonitoringController::class, 'keaktifanExportPdf'])
+            ->name('admin.monitoring.keaktifan.export-pdf');
+        Route::get('/monitoring/keaktifan/{groupId}/export-excel', [MonitoringController::class, 'keaktifanExportExcel'])
+            ->name('admin.monitoring.keaktifan.export-excel');
 
         Route::get('/monitoring/pelanggaran', [MonitoringController::class, 'pelanggaran'])
             ->name('admin.monitoring.pelanggaran');
         Route::get('/monitoring/pelanggaran/{groupId}', [MonitoringController::class, 'pelanggaranDetail'])
             ->name('admin.monitoring.pelanggaran.detail');
+        Route::get('/monitoring/pelanggaran/{groupId}/export-pdf', [MonitoringController::class, 'pelanggaranExportPdf'])
+            ->name('admin.monitoring.pelanggaran.export-pdf');
+        Route::get('/monitoring/pelanggaran/{groupId}/export-excel', [MonitoringController::class, 'pelanggaranExportExcel'])
+            ->name('admin.monitoring.pelanggaran.export-excel');
 
         Route::get('/monitoring/evaluasi', [MonitoringController::class, 'evaluasi'])
             ->name('admin.monitoring.evaluasi');
         Route::get('/monitoring/evaluasi/{groupId}', [MonitoringController::class, 'evaluasiDetail'])
             ->name('admin.monitoring.evaluasi.detail');
+        Route::get('/monitoring/evaluasi/{groupId}/export-pdf', [MonitoringController::class, 'evaluasiExportPdf'])
+            ->name('admin.monitoring.evaluasi.export-pdf');
+        Route::get('/monitoring/evaluasi/{groupId}/export-excel', [MonitoringController::class, 'evaluasiExportExcel'])
+            ->name('admin.monitoring.evaluasi.export-excel');
             
 
         Route::get('/monitoring/tugas', [MonitoringController::class, 'tugas'])
@@ -369,12 +381,18 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/keaktifan', 'keaktifan')->name('committee.monitoring.keaktifan');
             Route::get('/keaktifan/{groupId}', 'keaktifanDetail')->name('committee.monitoring.keaktifan.detail');
+            Route::get('/keaktifan/{groupId}/export-pdf', 'keaktifanExportPdf')->name('committee.monitoring.keaktifan.export-pdf');
+            Route::get('/keaktifan/{groupId}/export-excel', 'keaktifanExportExcel')->name('committee.monitoring.keaktifan.export-excel');
 
             Route::get('/pelanggaran', 'pelanggaran')->name('committee.monitoring.pelanggaran');
             Route::get('/pelanggaran/{groupId}', 'pelanggaranDetail')->name('committee.monitoring.pelanggaran.detail');
+            Route::get('/pelanggaran/{groupId}/export-pdf', 'pelanggaranExportPdf')->name('committee.monitoring.pelanggaran.export-pdf');
+            Route::get('/pelanggaran/{groupId}/export-excel', 'pelanggaranExportExcel')->name('committee.monitoring.pelanggaran.export-excel');
 
             Route::get('/evaluasi', 'evaluasi')->name('committee.monitoring.evaluasi');
             Route::get('/evaluasi/{groupId}', 'evaluasiDetail')->name('committee.monitoring.evaluasi.detail');
+            Route::get('/evaluasi/{groupId}/export-pdf', 'evaluasiExportPdf')->name('committee.monitoring.evaluasi.export-pdf');
+            Route::get('/evaluasi/{groupId}/export-excel', 'evaluasiExportExcel')->name('committee.monitoring.evaluasi.export-excel');
 
             Route::get('/tugas', 'tugas')->name('committee.monitoring.tugas');
             Route::get('/tugas/{groupId}', 'tugasDetail')->name('committee.monitoring.tugas.detail');
